@@ -634,7 +634,13 @@ function initHero3D() {
 
   /* ── Load GLB (v8 — re-sized model) ── */
   if (THREE.GLTFLoader) {
-    new THREE.GLTFLoader().load(
+    /* Model is Draco-compressed — wire the WASM decoder */
+    const dracoLoader = new THREE.DRACOLoader();
+    dracoLoader.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/draco/gltf/");
+    dracoLoader.preload();
+    const gltfLoader = new THREE.GLTFLoader();
+    gltfLoader.setDRACOLoader(dracoLoader);
+    gltfLoader.load(
       "assets/3dimage.glb?v=8",
       (gltf) => {
         const model = gltf.scene;
@@ -681,10 +687,12 @@ function initHero3D() {
       (err) => {
         console.warn("3D model failed:", err);
         if (loaderEl) loaderEl.classList.add("d-none");
+        showHeroFallback(section);
       }
     );
   } else {
     if (loaderEl) loaderEl.classList.add("d-none");
+    showHeroFallback(section);
   }
 
   /* ── Orbiting ring — glowing lime halo ── */
