@@ -128,7 +128,7 @@ function renderProducts() {
     return;
   }
   grid.innerHTML = list.map(p => `
-    <div class="col-sm-6 col-lg-4 col-xl-3">
+    <div class="col-6 col-lg-4 col-xl-3">
       <article class="product-card">
         <div class="prod-img" data-id="${p.id}" role="button" tabindex="0" aria-label="View ${esc(p.name)}">
           <span class="prod-badge${p.id === settings.highlightProductId ? " lime" : ""}">${esc(p.badge)}</span>

@@ -768,7 +768,7 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   border-color: rgba(0,0,0,0.12);
 }
 .prod-img {
-  height: 340px;
+  aspect-ratio: 3 / 4;  /* matches source photos — full product, no crop */
   background: #f0f1ed;
   position: relative;
   display: grid;
@@ -827,6 +827,17 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   line-height: 1.25;
 }
 .prod-body p { font-size: 0.8rem; color: #6e7872; line-height: 1.55; margin-bottom: 1rem; flex: 1; }
+@media (max-width: 575px) {
+  /* compact two-up product grid on phones */
+  .prod-body { padding: 0.8rem 0.85rem 0.95rem; }
+  .prod-body p { display: none; }
+  .prod-body h3 { font-size: 0.88rem; margin-bottom: 0.5rem; }
+  .prod-kicker { font-size: 0.52rem; margin-bottom: 0.25rem; }
+  .prod-price { font-size: 0.92rem; }
+  .add-btn { width: 32px; height: 32px; }
+  .prod-badge { left: 8px; top: 8px; padding: 0.22rem 0.4rem; font-size: 0.5rem; }
+  .prod-quick { right: 8px; top: 8px; width: 30px; height: 30px; font-size: 0.8rem; }
+}
 .prod-foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
 .prod-price { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 1.05rem; }
 .add-btn {
@@ -1364,7 +1375,7 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   box-shadow: var(--elev-1);
 }
 .modal-x:hover { background: #111; color: #fff; }
-.modal-prod-img { height: 520px; background: #eeefec; }
+.modal-prod-img { aspect-ratio: 3 / 4; max-height: 80vh; background: #eeefec; }
 .modal-prod-img img { width: 100%; height: 100%; object-fit: cover; }
 .modal-prod-copy { padding: 2.5rem; }
 .modal-prod-copy h2 { font-size: 2.8rem; letter-spacing: -0.04em; line-height: 1; margin: 0.5rem 0 1rem; }
