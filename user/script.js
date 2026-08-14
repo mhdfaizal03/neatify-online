@@ -596,98 +596,142 @@ function initHero3D() {
   if (typeof THREE.sRGBEncoding !== "undefined") renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.shadowMap.enabled = false;
 
-  /* Scene */
+  /* ── Scene & Camera ── */
   const scene  = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+  camera.position.set(0, 0, 7);
 
-  /* Lighting */
-  scene.add(new THREE.AmbientLight(0xffffff, 0.65));
-  const keyLight = new THREE.PointLight(0xc8f53c, 1.8, 55);  // lime key
-  keyLight.position.set(5, 4, 6);
+  /* ── Lighting — warm key + cool fill + white rim ── */
+  scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
+  keyLight.position.set(3, 5, 5);
   scene.add(keyLight);
-  const fillLight = new THREE.PointLight(0x2878ff, 1.2, 55); // blue fill
-  fillLight.position.set(-5, -2, 4);
-  scene.add(fillLight);
-  const rimLight = new THREE.PointLight(0xffffff, 0.55, 55);
-  rimLight.position.set(0, 6, -7);
-  scene.add(rimLight);
 
-  /* Product group */
+  const limeSpot = new THREE.PointLight(0xc8f53c, 1.2, 40);
+  limeSpot.position.set(-3, 2, 4);
+  scene.add(limeSpot);
+
+  const blueRim = new THREE.PointLight(0x4488ff, 0.8, 40);
+  blueRim.position.set(4, -1, 3);
+  scene.add(blueRim);
+
+  const backRim = new THREE.PointLight(0xffffff, 0.5, 40);
+  backRim.position.set(0, 3, -6);
+  scene.add(backRim);
+
+  /* ── Product group ── */
   const productGroup = new THREE.Group();
   scene.add(productGroup);
   let modelHolder  = null;
   let modelScale   = 1;
   let introEase    = 0;
 
-  /* Loader UI */
+  /* ── Loader UI ── */
   const loaderEl  = $("modelLoader");
   const loaderTxt = $("modelLoaderText");
   if (loaderEl) loaderEl.classList.remove("d-none");
 
-  /* Load GLB */
+  /* ── Load GLB (v8 — re-sized model) ── */
   if (THREE.GLTFLoader) {
     new THREE.GLTFLoader().load(
-      "assets/3dimage.glb",
+      "assets/3dimage.glb?v=8",
       (gltf) => {
         const model = gltf.scene;
-        const box   = new THREE.Box3().setFromObject(model);
-        const size  = box.getSize(new THREE.Vector3());
-        const ctr   = box.getCenter(new THREE.Vector3());
-        model.position.set(-ctr.x, -ctr.y, -ctr.z);
+
+        /* Material polish + guards for any exporter output */
+        model.traverse(child => {
+          if (!child.isMesh) return;
+          child.castShadow = false;
+          child.receiveShadow = false;
+          child.frustumCulled = false;  /* spinning model never pops */
+          const mats = Array.isArray(child.material) ? child.material : [child.material];
+          mats.forEach((m) => {
+            if (!m) return;
+            if ("envMapIntensity" in m) m.envMapIntensity = 1;
+            if (m.map) m.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            m.needsUpdate = true;
+          });
+        });
+
+        /* Auto-fit: centre on bounding box, scale tallest edge → 2.6 units */
+        const box  = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        const ctr  = box.getCenter(new THREE.Vector3());
+        if (Number.isFinite(size.x + size.y + size.z) && size.x + size.y + size.z > 0) {
+          model.position.sub(ctr);
+          const maxDim = Math.max(size.x, size.y, size.z);
+          modelScale = maxDim > 0 ? 2.6 / maxDim : 1;
+        }
 
         modelHolder = new THREE.Group();
         modelHolder.add(model);
-
-        const maxDim  = Math.max(size.x, size.y, size.z) || 1;
-        modelScale = 1.8 / maxDim;   /* smaller — was 4.2 */
-        modelHolder.scale.setScalar(0.001);
+        modelHolder.scale.setScalar(0.001);  /* start tiny, eases in */
         productGroup.add(modelHolder);
 
         if (loaderEl) loaderEl.classList.add("d-none");
       },
       (xhr) => {
         if (loaderEl && loaderTxt) {
-          if (xhr.total > 0) {
-            const pct = Math.round((xhr.loaded / xhr.total) * 100);
-            loaderTxt.textContent = `Loading 3D… ${pct}%`;
-          } else {
-            loaderTxt.textContent = `Loading 3D… ${(xhr.loaded / 1048576).toFixed(1)} MB`;
-          }
+          loaderTxt.textContent = xhr.total > 0
+            ? `Loading 3D… ${Math.round(xhr.loaded / xhr.total * 100)}%`
+            : `Loading 3D… ${(xhr.loaded / 1048576).toFixed(1)} MB`;
         }
       },
       (err) => {
         console.warn("3D model failed:", err);
         if (loaderEl) loaderEl.classList.add("d-none");
-        /* Scene still animates with ring + particles */
       }
     );
   } else {
     if (loaderEl) loaderEl.classList.add("d-none");
   }
 
-  /* Orbiting ring — sized to match the smaller model */
+  /* ── Orbiting ring — glowing lime halo ── */
   const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(1.4, 0.025, 16, 90),
-    new THREE.MeshStandardMaterial({ color: 0xc8f53c, emissive: 0xc8f53c, emissiveIntensity: 1.0, metalness: 0.3, roughness: 0.2 })
+    new THREE.TorusGeometry(1.6, 0.022, 20, 100),
+    new THREE.MeshStandardMaterial({
+      color: 0xc8f53c,
+      emissive: 0xc8f53c,
+      emissiveIntensity: 1.2,
+      metalness: 0.2,
+      roughness: 0.15,
+      transparent: true,
+      opacity: 0.9,
+    })
   );
-  ring.rotation.x = Math.PI / 2.15;
-  ring.position.y = -1.4;
+  ring.rotation.x = Math.PI * 0.45;  /* slight tilt — not flat */
   scene.add(ring);
 
-  /* Particle field */
-  const PARTS = 180;
+  /* ── Tiny accent ring (counter-rotating) ── */
+  const ring2 = new THREE.Mesh(
+    new THREE.TorusGeometry(1.1, 0.012, 12, 80),
+    new THREE.MeshStandardMaterial({
+      color: 0x4488ff,
+      emissive: 0x4488ff,
+      emissiveIntensity: 0.8,
+      transparent: true,
+      opacity: 0.6,
+    })
+  );
+  ring2.rotation.x = Math.PI * 0.3;
+  ring2.rotation.z = Math.PI * 0.25;
+  scene.add(ring2);
+
+  /* ── Bubble particle field ── */
+  const PARTS = 160;
   const pPos  = new Float32Array(PARTS * 3);
   const pSpd  = new Float32Array(PARTS);
   for (let i = 0; i < PARTS; i++) {
-    pPos[i * 3]     = (Math.random() - 0.5) * 13;
-    pPos[i * 3 + 1] = (Math.random() - 0.5) * 10;
-    pPos[i * 3 + 2] = (Math.random() - 0.5) * 7 - 1;
-    pSpd[i] = 0.1 + Math.random() * 0.35;
+    pPos[i * 3]     = (Math.random() - 0.5) * 12;
+    pPos[i * 3 + 1] = (Math.random() - 0.5) * 9;
+    pPos[i * 3 + 2] = (Math.random() - 0.5) * 6 - 2;
+    pSpd[i] = 0.08 + Math.random() * 0.3;
   }
   const pGeo = new THREE.BufferGeometry();
   pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
   scene.add(new THREE.Points(pGeo, new THREE.PointsMaterial({
-    color: 0xc8f53c, size: 0.055, transparent: true, opacity: 0.38, sizeAttenuation: true
+    color: 0xc8f53c, size: 0.05, transparent: true, opacity: 0.32, sizeAttenuation: true,
   })));
 
   /* Scroll */
@@ -737,46 +781,83 @@ function initHero3D() {
 
   function animate() {
     rafId = requestAnimationFrame(animate);
-    scrollCurrent += (scrollTarget - scrollCurrent) * 0.08;
-    const p  = scrollCurrent;
+    scrollCurrent += (scrollTarget - scrollCurrent) * 0.07;
+    const p  = scrollCurrent;             /* 0 = top, 1 = bottom of scroll */
     const t  = clock.getElapsedTime();
     const mb = isMobile();
 
-    productGroup.rotation.y = p * Math.PI * 2.5 + Math.sin(t * 0.55) * 0.08 + t * 0.12;
-    productGroup.rotation.z = Math.sin(p * Math.PI) * 0.06;
-    const blend = smoothstep(p, 0.55, 0.95);
-    /* On desktop: show model on right half; on mobile: center */
-    productGroup.position.x = mb ? 0 : 2.4 * (1 - blend * 0.7);
-    productGroup.position.y = -0.1 + p * 0.2 + Math.sin(t * 0.7) * 0.08;
-    productGroup.scale.setScalar(mb ? 0.7 : 1);
+    /* ── Model: idle float + scroll-driven spin ── */
+    const idleY  = Math.sin(t * 0.6) * 0.12;  /* gentle bob */
+    const idleRZ = Math.sin(t * 0.4) * 0.04;  /* gentle lean */
+    productGroup.rotation.y  = t * 0.4 + p * Math.PI * 1.8; /* slow auto-spin */
+    productGroup.rotation.z  = idleRZ + Math.sin(p * Math.PI) * 0.05;
+    productGroup.position.y  = idleY + p * 0.3;
 
-    if (modelHolder) {
-      introEase = Math.min(1, introEase + (1 - introEase) * 0.06);
-      modelHolder.scale.setScalar(modelScale * Math.max(introEase, 0.001));
+    /* Desktop: model sits on right half, converges to centre at stage 3 */
+    const blend = smoothstep(p, 0.6, 1.0);
+    if (mb) {
+      /* Mobile: model is behind text, centred, smaller */
+      productGroup.position.x = 0;
+      productGroup.scale.setScalar(0.55);
+    } else {
+      /* Desktop: right-side showcase */
+      productGroup.position.x = 1.8 - blend * 1.8; /* moves left as we reach stage 3 */
+      productGroup.scale.setScalar(1);
     }
 
-    ring.rotation.z = t * 0.25 + p * Math.PI;
-    ring.position.x = productGroup.position.x;
-    ring.position.y = productGroup.position.y - 1.45;
+    /* ── Soft scale-in on load ── */
+    if (modelHolder) {
+      introEase = Math.min(1, introEase + (1 - introEase) * 0.055);
+      modelHolder.scale.setScalar(modelScale * Math.max(introEase, 0.0001));
+    }
 
-    const camZ = (mb ? 6.5 : 5.5) - Math.sin(p * Math.PI) * 0.6;
-    camera.position.set(mb ? 0 : -0.5, 0.1 - p * 0.15, camZ);
-    camera.lookAt(productGroup.position.x * 0.5, productGroup.position.y * 0.3, 0);
+    /* ── Rings orbit productGroup ── */
+    ring.position.copy(productGroup.position);
+    ring.rotation.y  = t * 0.5;
+    ring.rotation.x  = Math.PI * 0.45 + Math.sin(t * 0.3) * 0.06;
 
-    const orbit = p * Math.PI * 2;
-    keyLight.position.set(Math.cos(orbit) * 4.5, 2.5, Math.sin(orbit) * 4.5 + 1);
+    ring2.position.copy(productGroup.position);
+    ring2.rotation.y = -t * 0.7;
+    ring2.rotation.z = Math.PI * 0.25 + t * 0.2;
 
+    /* ── Camera ── */
+    if (mb) {
+      /* Mobile: camera straight-on, pull back a bit */
+      camera.position.set(0, 0.3, 8.5);
+      camera.lookAt(0, productGroup.position.y, 0);
+    } else {
+      /* Desktop: slightly left of centre so model on right is in view */
+      const camX = -1.2 + blend * 1.2;  /* moves right as page scrolls */
+      const camZ = 6.5 - Math.sin(p * Math.PI) * 0.5;
+      camera.position.set(camX, 0.2 + idleY * 0.3, camZ);
+      camera.lookAt(productGroup.position.x * 0.6, productGroup.position.y * 0.5, 0);
+    }
+
+    /* ── Key light orbits model ── */
+    limeSpot.position.set(
+      productGroup.position.x + Math.cos(t * 0.7) * 3.5,
+      2 + Math.sin(t * 0.4) * 1.5,
+      3 + Math.sin(t * 0.7) * 2
+    );
+    blueRim.position.set(
+      productGroup.position.x - Math.cos(t * 0.5) * 3,
+      -1 + Math.sin(t * 0.3),
+      4
+    );
+
+    /* ── Bubble particles drift upward ── */
     const pos = pGeo.attributes.position.array;
     for (let i = 0; i < PARTS; i++) {
-      pos[i * 3 + 1] += pSpd[i] * 0.016;
+      pos[i * 3 + 1] += pSpd[i] * 0.014;
       if (pos[i * 3 + 1] > 5) pos[i * 3 + 1] = -5;
     }
     pGeo.attributes.position.needsUpdate = true;
 
+    /* ── UI sync ── */
     railFills.forEach((el, i) => {
       el.style.width = `${Math.min(1, Math.max(0, p * 2 - i)) * 100}%`;
     });
-    if (cueEl)  cueEl.classList.toggle("hide", p > 0.02);
+    if (cueEl) cueEl.classList.toggle("hide", p > 0.02);
     setStage(p < 0.36 ? 0 : p < 0.72 ? 1 : 2);
 
     renderer.render(scene, camera);
