@@ -380,7 +380,7 @@ body.no-scroll { overflow: hidden; }
    HERO
    ════════════════════════════════════════════════════════ */
 .hero {
-  background: var(--s0);
+  background: #000;  /* pure-black field, like the reference backdrop */
   color: #fff;
   position: relative;
 }
@@ -402,44 +402,63 @@ body.no-scroll { overflow: hidden; }
   display: block;
 }
 
-/* Ambient orbs */
+/* Aurora silk ribbons — violet/blue/cyan light rising from the bottom
+   corners over the black field, slowly undulating like the reference */
 .hero-orb {
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
   z-index: 1;
+  will-change: transform;
 }
 .orb-blue {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(40,120,255,0.35) 0%, transparent 65%);
-  top: -100px; right: -60px;
-  animation: orb-float 12s ease-in-out infinite;
+  width: 64vmax; height: 26vmax;
+  right: -20vmax; bottom: -7vmax;
+  background:
+    radial-gradient(45% 65% at 78% 22%, rgba(64,224,255,0.5) 0%, transparent 60%),
+    radial-gradient(50% 70% at 55% 45%, rgba(64,120,255,0.48) 0%, transparent 65%),
+    radial-gradient(65% 85% at 35% 70%, rgba(150,80,255,0.52) 0%, transparent 70%),
+    radial-gradient(80% 100% at 20% 95%, rgba(88,60,220,0.42) 0%, transparent 75%);
+  filter: blur(46px) saturate(125%);
+  transform: rotate(24deg);
+  animation: aurora-right 16s ease-in-out infinite;
 }
 .orb-lime {
-  width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(200,245,60,0.15) 0%, transparent 70%);
-  bottom: 10%; left: 5%;
-  filter: blur(30px);
-  animation: orb-float 9s ease-in-out infinite reverse;
+  width: 64vmax; height: 26vmax;
+  left: -20vmax; bottom: -7vmax;
+  background:
+    radial-gradient(45% 65% at 22% 22%, rgba(64,224,255,0.45) 0%, transparent 60%),
+    radial-gradient(50% 70% at 45% 45%, rgba(96,110,255,0.48) 0%, transparent 65%),
+    radial-gradient(65% 85% at 65% 70%, rgba(168,85,247,0.52) 0%, transparent 70%),
+    radial-gradient(80% 100% at 80% 95%, rgba(88,60,220,0.42) 0%, transparent 75%);
+  filter: blur(46px) saturate(125%);
+  transform: rotate(-24deg);
+  animation: aurora-left 19s ease-in-out infinite;
 }
-@keyframes orb-float { 50% { transform: translate(24px, -18px); } }
+@keyframes aurora-right { 50% { transform: rotate(29deg) translate3d(-3vmax, -2vmax, 0) scale(1.07); } }
+@keyframes aurora-left  { 50% { transform: rotate(-29deg) translate3d(3vmax, -2vmax, 0) scale(1.07); } }
+@media (prefers-reduced-motion: reduce) { .orb-blue, .orb-lime { animation: none; } }
+@media (max-width: 991px) {
+  /* lift the ribbons above the mobile copy zone, lighter blur for small GPUs */
+  .orb-blue, .orb-lime { bottom: 14vmax; height: 30vmax; filter: blur(32px) saturate(120%); }
+}
 
-/* Mesh grid */
+/* Dot matrix — fine LED grid over the black field and the aurora,
+   but beneath the 3D canvas so the product itself stays clean */
 .hero-mesh {
-  position: absolute; inset: 0; z-index: 3; pointer-events: none;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 75%);
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background-image: radial-gradient(rgba(255,255,255,0.14) 1px, transparent 1.4px);
+  background-size: 16px 16px;
+  background-position: center top;
 }
 
-/* Vignette — darken left side for text legibility, keep right open for 3D */
+/* Vignette — dark pocket behind the copy, corners left open for the aurora */
 .hero-vignette {
   position: absolute; inset: 0; z-index: 3; pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(4,7,9,0.95) 0%, rgba(4,7,9,0.78) 28%, rgba(4,7,9,0.3) 50%, rgba(4,7,9,0.05) 65%, transparent 78%),
-    linear-gradient(to top, rgba(4,7,9,0.8) 0%, rgba(4,7,9,0.15) 18%, transparent 32%),
+    radial-gradient(56% 64% at 30% 46%, rgba(4,7,9,0.9) 0%, rgba(4,7,9,0.55) 48%, transparent 78%),
+    linear-gradient(90deg, rgba(4,7,9,0.55) 0%, rgba(4,7,9,0.2) 34%, transparent 55%),
+    linear-gradient(to top, rgba(4,7,9,0.45) 0%, transparent 20%),
     linear-gradient(to bottom, rgba(4,7,9,0.5) 0%, transparent 12%);
 }
 
