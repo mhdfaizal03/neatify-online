@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Neatify — premium exterior car care products for a cleaner, glossier drive.">
+  <meta property="og:title" content="Neatify — Clean. Shine. Protect.">
+  <meta property="og:description" content="Premium exterior car care products for a cleaner, glossier drive.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23d7ff3f'/><text x='16' y='22' text-anchor='middle' font-size='18' font-weight='800' fill='%23101510' font-family='sans-serif'>N</text></svg>">
+  <title>Neatify — Clean. Shine. Protect.</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=4">
+</head>
+
+<body>
+  <div class="announcement">
+    <div class="container d-flex justify-content-center align-items-center gap-2 flex-wrap">
+      <span class="pulse-dot"></span>
+      <span id="announceMain">Premium car care, made simple.</span>
+      <span class="d-none d-sm-inline" id="announceSub">Free shipping on orders above ₹999.</span>
+    </div>
+  </div>
+
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top" id="mainNav">
+    <div class="container py-2">
+      <a class="navbar-brand brand" href="#home" aria-label="Neatify home">
+        <span class="brand-mark">N</span>
+        <span>neatify<span class="brand-dot">.</span></span>
+      </a>
+
+      <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
+        data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="bi bi-list fs-2"></i>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-2">
+          <li class="nav-item"><a class="nav-link active" href="#home">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#shop">Shop</a></li>
+          <li class="nav-item"><a class="nav-link" href="#how-it-works">How It Works</a></li>
+          <li class="nav-item"><a class="nav-link" href="#story">Why Neatify</a></li>
+          <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
+        </ul>
+
+        <div class="nav-actions d-flex align-items-center gap-2">
+          <button class="icon-btn" id="searchToggle" aria-label="Search products"><i class="bi bi-search"></i></button>
+          <button class="icon-btn position-relative" id="cartToggle" aria-label="Shopping cart">
+            <i class="bi bi-bag"></i><span class="cart-count" id="cartCount">0</span>
+          </button>
+          <a class="btn btn-lime d-none d-lg-inline-flex" href="#shop">Shop Exterior <i
+              class="bi bi-arrow-up-right"></i></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="search-panel" id="searchPanel">
+    <div class="container py-3">
+      <div class="search-wrap">
+        <i class="bi bi-search"></i>
+        <input id="searchInput" type="search" placeholder="Search foam wash, sprayer, towels..." autocomplete="off"
+          aria-label="Search products">
+        <button class="icon-btn" id="searchClose" aria-label="Close search"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div id="searchResults" class="search-results" role="listbox" aria-live="polite" aria-label="Search results">
+      </div>
+    </div>
+  </div>
+
+  <main id="home">
+    <section class="hero" id="heroSection">
+      <div class="hero-scroll-space">
+        <div class="hero-sticky">
+          <div class="orb orb-a"></div>
+          <div class="orb orb-b"></div>
+          <canvas id="heroCanvas" role="img"
+            aria-label="3D product model that spins and moves through three stages as you scroll"></canvas>
+          <div class="hero-grid"></div>
+          <div class="hero-scrim" aria-hidden="true"></div>
+
+          <div class="container position-relative hero-stage-wrap">
+            <div class="hero-stage active" data-stage="0">
+              <div class="hero-chip"><span class="chip-dot"></span> pH-neutral · Paint-safe · New formula</div>
+              <h1 class="hero-title">Make your car<br><em>look freshly born.</em></h1>
+              <p class="hero-copy">A high-performance exterior care system for deep cleaning, rich foam and a
+                just-detailed finish. Keep scrolling — the model does the talking.</p>
+              <div class="hero-cta d-flex flex-wrap gap-3">
+                <a class="btn btn-lime btn-lg" href="#shop">Explore exterior care <i
+                    class="bi bi-arrow-right"></i></a>
+                <a class="btn btn-ghost btn-lg" href="#how-it-works"><i class="bi bi-play-circle"></i> See the
+                  process</a>
+              </div>
+              <div class="hero-trust">
+                <span class="trust-stars" aria-label="Rated 4.9 out of 5">
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                    class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><b>4.9</b>
+                </span>
+                <span class="trust-sep" aria-hidden="true"></span>
+                <span>2,300+ washes delivered</span>
+                <span class="trust-sep" aria-hidden="true"></span>
+                <span><i class="bi bi-truck" aria-hidden="true"></i> Free shipping over <span
+                    id="heroShipNote">₹999</span></span>
+              </div>
+              <div class="hero-stats">
+                <div class="stat-card"><strong>01</strong><span>Deep clean</span></div>
+                <div class="stat-card"><strong>02</strong><span>Thick foam</span></div>
+                <div class="stat-card"><strong>03</strong><span>Mirror gloss</span></div>
+              </div>
+            </div>
+
+            <div class="hero-stage" data-stage="1">
+              <div class="hero-chip"><span class="chip-dot"></span> Stage 02 — Thick foam</div>
+              <h2 class="hero-title">Snow foam.<br><em>Zero scrubbing.</em></h2>
+              <p class="hero-copy">Clean+ Foam Wash lays down a thick, paint-safe foam blanket that lifts grit away
+                before your mitt ever touches the surface.</p>
+              <div class="hero-cta d-flex flex-wrap gap-3">
+                <a class="btn btn-lime btn-lg" href="#shop">Shop the foam wash <i class="bi bi-droplet-half"></i></a>
+              </div>
+            </div>
+
+            <div class="hero-stage center" data-stage="2">
+              <div class="hero-chip"><span class="chip-dot"></span> Stage 03 — Crystal gloss</div>
+              <h2 class="hero-title">Finish with<br><em>mirror gloss.</em></h2>
+              <p class="hero-copy mx-auto">Dry with premium microfiber, step back, and admire that just-detailed
+                shine. Your whole routine lives on one shelf.</p>
+              <div class="hero-cta d-flex flex-wrap gap-3">
+                <a class="btn btn-lime btn-lg" href="#shop">Build your routine <i class="bi bi-stars"></i></a>
+                <button class="btn btn-ghost btn-lg" id="heroKitBtn">Add the weekend kit <i
+                    class="bi bi-plus-lg"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-3d-fallback d-none" id="heroFallback">
+            <img src="assets/hero-bottle.jpg" alt="Neatify Clean+ Foam Wash Shampoo">
+          </div>
+
+          <div class="hero-rail" aria-hidden="true">
+            <div class="rail-labels">
+              <span class="rail-label on">01 · Intro</span>
+              <span class="rail-label">02 · Foam</span>
+              <span class="rail-label">03 · Gloss</span>
+            </div>
+            <div class="rail-track"><span id="heroProgressFill"></span></div>
+          </div>
+
+          <div class="model-loader d-none" id="modelLoader" role="status">
+            <span class="loader-ring" aria-hidden="true"></span>
+            <span id="modelLoaderText">Loading 3D model…</span>
+          </div>
+
+          <div class="scroll-cue" id="scrollCue" aria-hidden="true">
+            <span class="cue-mouse"><span class="cue-wheel"></span></span> Scroll to explore
+          </div>
+        </div>
+      </div>
+      <div id="heroStatus" class="sr-only" aria-live="polite" aria-atomic="true">Viewing stage 1 of 3</div>
+    </section>
+
+    <section class="ticker" aria-label="Neatify benefits">
+      <div class="ticker-track">
+        <span>DEEP CLEAN</span><b>✦</b><span>PAINT SAFE</span><b>✦</b><span>THICK FOAM</span><b>✦</b><span>CRYSTAL
+          GLOSS</span><b>✦</b>
+        <span>DEEP CLEAN</span><b>✦</b><span>PAINT SAFE</span><b>✦</b><span>THICK FOAM</span><b>✦</b><span>CRYSTAL
+          GLOSS</span><b>✦</b>
+      </div>
+    </section>
+
+    <section class="section-pad" id="shop">
+      <div class="container">
+        <div class="section-head row align-items-end reveal">
+          <div class="col-lg-7">
+            <div class="eyebrow dark"><span></span> THE EXTERIOR EDIT</div>
+            <h2>Everything your <em>outside</em> needs.</h2>
+          </div>
+          <div class="col-lg-5 text-lg-end">
+            <p>Build a simple wash routine with the essentials: foam, pressure, touch and finish.</p>
+          </div>
+        </div>
+
+        <div class="shop-toolbar reveal">
+          <div class="filter-pills" id="filterPills" role="group" aria-label="Filter products by category">
+            <button class="filter-pill active" data-filter="all" aria-pressed="true">All products</button>
+            <button class="filter-pill" data-filter="wash" aria-pressed="false">Wash</button>
+            <button class="filter-pill" data-filter="tools" aria-pressed="false">Tools</button>
+            <button class="filter-pill" data-filter="kit" aria-pressed="false">Kits</button>
+            <button class="filter-pill" data-filter="finish" aria-pressed="false">Finish</button>
+          </div>
+          <select id="sortSelect" class="sort-select" aria-label="Sort products">
+            <option value="featured">Sort: Featured</option>
+            <option value="low">Price: Low to high</option>
+            <option value="high">Price: High to low</option>
+            <option value="name">Name A–Z</option>
+          </select>
+        </div>
+
+        <div class="row g-4" id="productGrid"></div>
+        <div class="empty-state d-none" id="emptyState">
+          <i class="bi bi-search"></i>
+          <h3 id="emptyStateTitle">No products found</h3>
+          <p id="emptyStateText">Try another search or category.</p>
+          <button class="btn btn-lime btn-sm d-none" id="retryProducts">Try again</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="bundle-section">
+      <div class="container">
+        <div class="bundle-card reveal">
+          <div class="bundle-copy">
+            <div class="eyebrow"><span></span> THE WEEKEND KIT</div>
+            <h2>Wash it.<br><em>Own the shine.</em></h2>
+            <p>One clean setup for your weekend detail. Foam, tools and premium microfiber essentials in one focused
+              kit.</p>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+              <button class="btn btn-lime" id="bundleBtn">Add the full kit <i class="bi bi-plus-lg"></i></button>
+              <span class="bundle-price" id="bundlePrice"></span>
+            </div>
+          </div>
+          <div class="bundle-visual">
+            <img src="assets/product-3.jpeg" alt="Neatify exterior cleaning kit" id="bundleImage">
+            <div class="bundle-badge"><strong>4.9</strong><span><i class="bi bi-star-fill"></i> customer rated</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-pad process-section" id="how-it-works">
+      <div class="container">
+        <div class="section-head text-center mx-auto process-head reveal">
+          <div class="eyebrow dark justify-content-center"><span></span> SIMPLE BY DESIGN</div>
+          <h2>Your clean in <em>four moves.</em></h2>
+          <p>No complicated detailing setup. Just the right product at the right moment.</p>
+        </div>
+
+        <div class="process-line"></div>
+        <div class="row g-4">
+          <div class="col-md-6 col-lg-3 reveal">
+            <div class="step-card">
+              <div class="step-number">01</div>
+              <div class="step-icon"><i class="bi bi-droplet-half"></i></div>
+              <h3>Pre-rinse</h3>
+              <p>Knock away loose grit before touching the paint.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3 reveal">
+            <div class="step-card">
+              <div class="step-number">02</div>
+              <div class="step-icon"><i class="bi bi-cloud-haze2"></i></div>
+              <h3>Foam</h3>
+              <p>Lay down rich foam and let it lift the dirt.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3 reveal">
+            <div class="step-card">
+              <div class="step-number">03</div>
+              <div class="step-icon"><i class="bi bi-hand-index-thumb"></i></div>
+              <h3>Touch</h3>
+              <p>Work with a soft mitt or brush using gentle passes.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3 reveal">
+            <div class="step-card">
+              <div class="step-number">04</div>
+              <div class="step-icon"><i class="bi bi-stars"></i></div>
+              <h3>Finish</h3>
+              <p>Dry with microfiber and reveal the clean gloss.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="interior-section">
+      <div class="container">
+        <div class="interior-card reveal">
+          <div class="interior-copy">
+            <span class="coming-chip"><i class="bi bi-hourglass-split"></i> COMING SOON</span>
+            <div class="eyebrow"><span></span> NEXT CHAPTER / 02</div>
+            <h2>Interior care is<br><em>on the way.</em></h2>
+            <p>We’re developing a dedicated interior range for dashboards, fabrics, plastics, glass and everyday cabin
+              mess. Exterior first. Interior next.</p>
+            <button class="btn btn-light" id="notifyBtn">Notify me when it drops <i class="bi bi-bell"></i></button>
+          </div>
+          <div class="interior-art">
+            <div class="dashboard-shape"></div>
+            <div class="seat-shape seat-one"></div>
+            <div class="seat-shape seat-two"></div>
+            <div class="interior-glow"></div>
+            <span class="art-label">INTERIOR / 02</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-pad story-section" id="story">
+      <div class="container">
+        <div class="row align-items-center g-5">
+          <div class="col-lg-6 reveal">
+            <div class="story-photo">
+              <img src="assets/product-10.jpeg" alt="Neatify Clean+ Foam Wash in a premium setting">
+              <div class="story-stamp"><i class="bi bi-check2"></i><span>Built for<br>real cars</span></div>
+            </div>
+          </div>
+          <div class="col-lg-6 reveal">
+            <div class="eyebrow dark"><span></span> WHY NEATIFY</div>
+            <h2>Less fuss.<br><em>More finish.</em></h2>
+            <p class="lead">Car care should feel satisfying, not like a chemistry exam.</p>
+            <div class="feature-list">
+              <div class="feature-row"><span><i class="bi bi-shield-check"></i></span>
+                <div>
+                  <h4>Paint-conscious formulas</h4>
+                  <p>Designed around a careful exterior wash routine.</p>
+                </div>
+              </div>
+              <div class="feature-row"><span><i class="bi bi-lightning-charge"></i></span>
+                <div>
+                  <h4>Purpose-built tools</h4>
+                  <p>Simple accessories that make the job easier and cleaner.</p>
+                </div>
+              </div>
+              <div class="feature-row"><span><i class="bi bi-box-seam"></i></span>
+                <div>
+                  <h4>Small range, clear purpose</h4>
+                  <p>No endless shelf. Just products with a job to do.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="reviews-section">
+      <div class="container">
+        <div class="section-head row align-items-end reveal">
+          <div class="col-lg-7">
+            <div class="eyebrow"><span></span> REAL CLEAN ENERGY</div>
+            <h2>Looks good.<br><em>Feels better.</em></h2>
+          </div>
+          <div class="col-lg-5 text-lg-end">
+            <p>What the Neatify routine is built around: easy steps, satisfying foam and a finish you notice.</p>
+          </div>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-4 reveal">
+            <article class="review-card">
+              <div class="stars">★★★★★</div>
+              <p>“The foam is the fun part. The car looks noticeably cleaner without making the routine complicated.”
+              </p><span>— Weekend detailer</span>
+            </article>
+          </div>
+          <div class="col-md-4 reveal">
+            <article class="review-card featured-review">
+              <div class="stars">★★★★★</div>
+              <p>“Everything feels like it belongs together. The sprayer, towel and wash make a great starter setup.”
+              </p><span>— Neatify customer</span>
+            </article>
+          </div>
+          <div class="col-md-4 reveal">
+            <article class="review-card">
+              <div class="stars">★★★★★</div>
+              <p>“Finally a car-care range that looks as good on the shelf as it does on the car.”</p><span>— Car
+                enthusiast</span>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq-section section-pad" id="faq">
+      <div class="container">
+        <div class="row g-5">
+          <div class="col-lg-4 reveal">
+            <div class="eyebrow dark"><span></span> NEED TO KNOW</div>
+            <h2>Questions,<br><em>answered.</em></h2>
+            <p>Still unsure which product belongs in your routine? Start with the foam wash, then build from there.</p>
+          </div>
+          <div class="col-lg-8 reveal">
+            <div class="accordion neatify-accordion" id="faqAccordion">
+              <div class="accordion-item">
+                <h3 class="accordion-header"><button class="accordion-button" data-bs-toggle="collapse"
+                    data-bs-target="#faq1">What is the Neatify Clean+ Foam Wash for?</button></h3>
+                <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                  <div class="accordion-body">It is positioned as an exterior car wash shampoo for creating a rich foam
+                    layer and supporting a clean, glossy wash routine.</div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse"
+                    data-bs-target="#faq2">Can I use the pressure foam sprayer without a pressure washer?</button></h3>
+                <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                  <div class="accordion-body">Yes. The featured sprayer is a manual pressure foam sprayer. Fill it
+                    according to its instructions, pressurize it and use the adjustable nozzle to apply foam.</div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse"
+                    data-bs-target="#faq3">Is the interior range available now?</button></h3>
+                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                  <div class="accordion-body">Not yet. Interior care is intentionally shown as an upcoming range so the
+                    current storefront stays focused on exterior cleaning.</div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse"
+                    data-bs-target="#faq4">Can I buy a complete cleaning setup?</button></h3>
+                <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                  <div class="accordion-body">Yes. Use the Weekend Kit area or add individual products to the cart and
+                    build your own exterior-care setup.</div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse"
+                    data-bs-target="#faq5">Do you offer free shipping?</button></h3>
+                <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                  <div class="accordion-body">Free shipping applies on orders above <span id="faqShipThreshold">₹999</span>.
+                    Standard delivery typically takes 3–5 business days across India.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="newsletter">
+      <div class="container">
+        <div class="newsletter-card reveal">
+          <div><span class="coming-chip dark-chip">NEATIFY NOTES</span>
+            <h2>Stay in the clean loop.</h2>
+            <p>Product drops, care tips and interior launch updates — no noise.</p>
+          </div>
+          <form id="newsletterForm" class="newsletter-form" novalidate>
+            <label class="visually-hidden" for="emailInput">Email address</label>
+            <input id="emailInput" type="email" placeholder="Your email address" required autocomplete="email">
+            <button class="btn btn-dark" type="submit" id="newsletterBtn">Join <i class="bi bi-arrow-right"></i></button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="row g-5">
+        <div class="col-lg-5">
+          <a class="brand footer-brand" href="#home"><span class="brand-mark">N</span><span>neatify<span
+                class="brand-dot">.</span></span></a>
+          <p class="footer-copy">Clean. Shine. Protect.<br>Exterior care for people who like their cars looking proper.
+          </p>
+          <div class="socials"><a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a><a href="#"
+              aria-label="Facebook"><i class="bi bi-facebook"></i></a><a href="#" aria-label="YouTube"><i
+                class="bi bi-youtube"></i></a></div>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h5>Explore</h5><a href="#shop">Shop</a><a href="#how-it-works">How it works</a><a href="#story">Why
+            Neatify</a>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h5>Care</h5><a href="#faq">FAQ</a><a href="#shop">Exterior</a><a href="#faq5">Shipping</a>
+        </div>
+        <div class="col-lg-3">
+          <h5>Coming next</h5>
+          <p class="small-note">Interior care is currently in development.</p><button class="footer-link"
+            id="footerNotify">Get launch alert <i class="bi bi-arrow-right"></i></button>
+        </div>
+      </div>
+      <div class="footer-bottom"><span>© 2026 Neatify. All rights reserved.</span><span>Made for clean drives.</span>
+      </div>
+    </div>
+  </footer>
+
+  <button class="back-to-top" id="backToTop" aria-label="Back to top"><i class="bi bi-arrow-up"></i></button>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+
+  <div class="offcanvas offcanvas-end cart-drawer" tabindex="-1" id="cartDrawer" aria-labelledby="cartTitle">
+    <div class="offcanvas-header">
+      <div><span class="eyebrow dark"><span></span> YOUR GARAGE</span>
+        <h2 id="cartTitle">Cart</h2>
+      </div>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close cart"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column">
+      <div id="cartItems" class="cart-items flex-grow-1"></div>
+      <div id="cartEmpty" class="cart-empty text-center"><i class="bi bi-bag-x"></i>
+        <h4>Your cart is empty</h4>
+        <p>Add a few exterior-care essentials.</p><button class="btn btn-dark" data-bs-dismiss="offcanvas">Browse
+          products</button>
+      </div>
+      <div class="cart-footer d-none" id="cartFooter">
+        <div class="ship-progress" id="shipProgress">
+          <p id="shipMessage"></p>
+          <div class="ship-bar"><span id="shipFill"></span></div>
+        </div>
+        <div class="d-flex justify-content-between cart-line"><span>Subtotal</span><span id="cartSubtotal">₹0</span></div>
+        <div class="d-flex justify-content-between cart-line"><span>Shipping</span><span id="cartShipping">₹0</span></div>
+        <div class="d-flex justify-content-between total-row"><span>Total</span><strong id="cartTotal">₹0</strong></div>
+        <button class="btn btn-dark w-100 py-3" id="checkoutBtn">Continue to checkout <i
+            class="bi bi-arrow-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content product-modal">
+        <button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="Close product details"><i
+            class="bi bi-x-lg"></i></button>
+        <div class="row g-0" id="productModalContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="notifyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content notify-modal">
+        <div class="notify-icon"><i class="bi bi-bell"></i></div>
+        <h3>Interior is coming.</h3>
+        <p>Leave your email and we’ll add you to the launch list.</p>
+        <form id="notifyForm"><input type="email" class="form-control" placeholder="you@example.com" required
+            aria-label="Email for launch alerts"><button class="btn btn-dark w-100 mt-3" type="submit"
+            id="notifySubmit">Notify me</button></form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="checkoutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content checkout-modal">
+        <button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="Close checkout"><i
+            class="bi bi-x-lg"></i></button>
+        <div class="row g-0">
+          <div class="col-md-7 checkout-form-side">
+            <span class="eyebrow dark"><span></span> CHECKOUT</span>
+            <h3>Almost there.</h3>
+            <p class="checkout-sub">Fill in your delivery details and place the order.</p>
+            <form id="checkoutForm" novalidate>
+              <div class="field-row">
+                <label>Full name<input type="text" id="coName" placeholder="Your name" required autocomplete="name">
+                  <small class="field-error" id="coNameError"></small></label>
+                <label>Phone<input type="tel" id="coPhone" placeholder="+91 98765 43210" required autocomplete="tel">
+                  <small class="field-error" id="coPhoneError"></small></label>
+              </div>
+              <label>Email<input type="email" id="coEmail" placeholder="you@example.com" required autocomplete="email">
+                <small class="field-error" id="coEmailError"></small></label>
+              <label>Delivery address<textarea id="coAddress" rows="3" placeholder="House, street, city, state, PIN"
+                  required autocomplete="street-address"></textarea>
+                <small class="field-error" id="coAddressError"></small></label>
+              <label>Order notes <span class="optional">(optional)</span><textarea id="coNotes" rows="2"
+                  placeholder="Anything we should know?"></textarea></label>
+            </form>
+          </div>
+          <div class="col-md-5 checkout-summary-side">
+            <h4>Order summary</h4>
+            <div id="checkoutItems" class="checkout-items"></div>
+            <div class="checkout-lines">
+              <div class="d-flex justify-content-between"><span>Subtotal</span><span id="coSubtotal">₹0</span></div>
+              <div class="d-flex justify-content-between"><span>Shipping</span><span id="coShipping">₹0</span></div>
+              <div class="d-flex justify-content-between co-total"><span>Total</span><strong id="coTotal">₹0</strong>
+              </div>
+            </div>
+            <button class="btn btn-lime w-100 py-3" id="placeOrderBtn" form="checkoutForm" type="submit">Place order <i
+                class="bi bi-check2-circle ms-1"></i></button>
+            <p class="checkout-note"><i class="bi bi-shield-lock"></i> Demo checkout — no payment is charged.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="orderSuccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content notify-modal success-modal">
+        <div class="notify-icon success"><i class="bi bi-check-lg"></i></div>
+        <h3>Order placed!</h3>
+        <p>Thanks for choosing Neatify. Your order has been received.</p>
+        <div class="order-id-chip" id="orderIdChip">ORD-000000</div>
+        <button class="btn btn-dark w-100 mt-3" data-bs-dismiss="modal">Keep browsing</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="script.js?v=4"></script>
+</body>
+
+</html>
