@@ -868,7 +868,8 @@ function initHero3D() {
   const sticky  = section && section.querySelector(".hero-sticky");
   if (!section || !canvas) return;
 
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches || typeof THREE === "undefined") {
+  const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (typeof THREE === "undefined") {
     showHeroFallback(section);
     return;
   }
@@ -1081,9 +1082,9 @@ function initHero3D() {
 
   function animate() {
     rafId = requestAnimationFrame(animate);
-    scrollCurrent += (scrollTarget - scrollCurrent) * 0.045;  /* floaty, premium lag */
-    const p  = scrollCurrent;             /* 0 = top, 1 = bottom of scroll */
-    const t  = clock.getElapsedTime();
+    if (!REDUCED) scrollCurrent += (scrollTarget - scrollCurrent) * 0.045;  /* floaty, premium lag */
+    const p  = REDUCED ? 0 : scrollCurrent;  /* reduced motion → static showcase pose */
+    const t  = REDUCED ? 0 : clock.getElapsedTime();
     const mb = isMobile();
 
     /* ── Model: scroll is the controller; idle adds life ── */
@@ -1109,7 +1110,7 @@ function initHero3D() {
 
     /* ── Soft scale-in on load ── */
     if (modelHolder) {
-      introEase = Math.min(1, introEase + (1 - introEase) * 0.055);
+      introEase = REDUCED ? 1 : Math.min(1, introEase + (1 - introEase) * 0.055);
       modelHolder.scale.setScalar(modelScale * Math.max(introEase, 0.0001));
     }
 
@@ -1148,12 +1149,14 @@ function initHero3D() {
     );
 
     /* ── Bubble particles drift upward ── */
-    const pos = pGeo.attributes.position.array;
-    for (let i = 0; i < PARTS; i++) {
-      pos[i * 3 + 1] += pSpd[i] * 0.014;
-      if (pos[i * 3 + 1] > 5) pos[i * 3 + 1] = -5;
+    if (!REDUCED) {
+      const pos = pGeo.attributes.position.array;
+      for (let i = 0; i < PARTS; i++) {
+        pos[i * 3 + 1] += pSpd[i] * 0.014;
+        if (pos[i * 3 + 1] > 5) pos[i * 3 + 1] = -5;
+      }
+      pGeo.attributes.position.needsUpdate = true;
     }
-    pGeo.attributes.position.needsUpdate = true;
 
     /* ── UI sync ── */
     railFills.forEach((el, i) => {
