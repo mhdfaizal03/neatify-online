@@ -576,6 +576,34 @@ function showHeroFallback(section) {
   $("heroCanvas")?.classList.add("d-none");
 }
 
+/* Procedural studio environment — light strips for PBR reflections */
+function makeStudioEnv(renderer) {
+  const size = 64;
+  const faces = [];
+  for (let i = 0; i < 6; i++) {
+    const c = document.createElement("canvas");
+    c.width = c.height = size;
+    const g = c.getContext("2d");
+    const grad = g.createLinearGradient(0, 0, 0, size);
+    grad.addColorStop(0, i === 2 ? "#46586c" : "#131c26");
+    grad.addColorStop(0.55, "#0a1016");
+    grad.addColorStop(1, "#04070a");
+    g.fillStyle = grad;
+    g.fillRect(0, 0, size, size);
+    g.fillStyle = "rgba(200,245,60,0.85)";  /* lime strip light */
+    g.fillRect(0, Math.round(size * 0.40), size, 3);
+    g.fillStyle = "rgba(120,170,255,0.55)"; /* cool strip light */
+    g.fillRect(0, Math.round(size * 0.62), size, 2);
+    faces.push(c);
+  }
+  const cube = new THREE.CubeTexture(faces);
+  cube.needsUpdate = true;
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const env = pmrem.fromCubemap(cube).texture;
+  pmrem.dispose();
+  return env;
+}
+
 function initHero3D() {
   const section = $("heroSection");
   const canvas  = $("heroCanvas");
@@ -594,6 +622,10 @@ function initHero3D() {
 
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   if (typeof THREE.sRGBEncoding !== "undefined") renderer.outputEncoding = THREE.sRGBEncoding;
+  if (typeof THREE.ACESFilmicToneMapping !== "undefined") {
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+  }
   renderer.shadowMap.enabled = false;
 
   /* ── Scene & Camera ── */
@@ -619,6 +651,9 @@ function initHero3D() {
   const backRim = new THREE.PointLight(0xffffff, 0.5, 40);
   backRim.position.set(0, 3, -6);
   scene.add(backRim);
+
+  /* ── Studio reflections for PBR materials ── */
+  try { scene.environment = makeStudioEnv(renderer); } catch { /* optional */ }
 
   /* ── Product group ── */
   const productGroup = new THREE.Group();
@@ -794,10 +829,10 @@ function initHero3D() {
     const t  = clock.getElapsedTime();
     const mb = isMobile();
 
-    /* ── Model: idle float + scroll-driven spin ── */
+    /* ── Model: scroll is the controller; idle adds life ── */
     const idleY  = Math.sin(t * 0.6) * 0.12;  /* gentle bob */
     const idleRZ = Math.sin(t * 0.4) * 0.04;  /* gentle lean */
-    productGroup.rotation.y  = t * 0.4 + p * Math.PI * 1.8; /* slow auto-spin */
+    productGroup.rotation.y  = p * Math.PI * 2 + Math.sin(t * 0.5) * 0.06; /* 2 full turns over scroll */
     productGroup.rotation.z  = idleRZ + Math.sin(p * Math.PI) * 0.05;
     productGroup.position.y  = idleY + p * 0.3;
 
