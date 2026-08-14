@@ -1653,7 +1653,20 @@ button:disabled { opacity: 0.5; pointer-events: none; }
 .co-grand { font-family: "Space Grotesk", sans-serif; font-size: 1.1rem; color: #fff; font-weight: 700; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.6rem; margin-top: 0.3rem; }
 .co-note { font-size: 0.66rem; color: rgba(255,255,255,0.3); text-align: center; margin: 0.8rem 0 0; }
 
-/* TOASTS */
+/* TOASTS — stacked top-right, clear of the navbar, never clipped */
+.toast-stack {
+  position: fixed;
+  top: calc(var(--header-height) + 14px);  /* safe gap below the sticky nav */
+  right: 14px;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  max-width: calc(100vw - 28px);
+  pointer-events: none;  /* the empty stack never blocks clicks */
+}
+.toast-stack .toast { pointer-events: auto; width: min(360px, calc(100vw - 28px)); }
 .toast {
   background: var(--s2);
   color: #fff;
