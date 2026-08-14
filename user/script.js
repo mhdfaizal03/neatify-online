@@ -847,8 +847,8 @@ function initHero3D() {
       productGroup.scale.setScalar(0.92);
     } else {
       /* Desktop/TV: right-side showcase, extra bias on wide aspects */
-      const wideBias = Math.max(0, camera.aspect - 1.6) * 1.2;
-      productGroup.position.x = (2.25 + wideBias) * (1 - blend); /* converges to centre at stage 3 */
+      const wideBias = Math.max(0, camera.aspect - 1.6) * 1.7;
+      productGroup.position.x = (2.65 + wideBias) * (1 - blend); /* converges to centre at stage 3 */
       productGroup.scale.setScalar(1);
     }
 
@@ -877,7 +877,7 @@ function initHero3D() {
       const camX = -1.2 + blend * 1.2;  /* moves right as page scrolls */
       const camZ = 6.5 - Math.sin(p * Math.PI) * 0.5;
       camera.position.set(camX, 0.2 + idleY * 0.3, camZ);
-      camera.lookAt(productGroup.position.x * 0.6, productGroup.position.y * 0.5, 0);
+      camera.lookAt(productGroup.position.x * 0.5, productGroup.position.y * 0.5, 0);
     }
 
     /* ── Key light orbits model ── */
