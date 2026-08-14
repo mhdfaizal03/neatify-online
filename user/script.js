@@ -607,6 +607,7 @@ function makeStudioEnv(renderer) {
 function initHero3D() {
   const section = $("heroSection");
   const canvas  = $("heroCanvas");
+  const sticky  = section && section.querySelector(".hero-sticky");
   if (!section || !canvas) return;
 
   if (matchMedia("(prefers-reduced-motion: reduce)").matches || typeof THREE === "undefined") {
@@ -800,7 +801,7 @@ function initHero3D() {
 
   function setSize() {
     const w = section.clientWidth;
-    const h = innerHeight;
+    const h = (sticky && sticky.clientHeight) || innerHeight;  /* tracks svh sticky box, immune to browser chrome */
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
@@ -808,7 +809,7 @@ function initHero3D() {
 
   function readScroll() {
     if (!space) return;
-    const total = space.offsetHeight - innerHeight;
+    const total = space.offsetHeight - ((sticky && sticky.clientHeight) || innerHeight);
     scrollTarget = total > 0
       ? Math.min(1, Math.max(0, -space.getBoundingClientRect().top / total))
       : 0;

@@ -287,7 +287,7 @@ button, .btn-hero-primary, .btn-hero-ghost, .btn-primary-sm, .f-pill, .socials a
   position: relative;
 }
 .hero-scroll-space { height: 340vh; position: relative; }
-.hero-sticky { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+.hero-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
 
 /* Canvas */
 #heroCanvas {
@@ -589,7 +589,7 @@ button, .btn-hero-primary, .btn-hero-ghost, .btn-primary-sm, .f-pill, .socials a
   width: min(40%, 400px); z-index: 4;
 }
 .hero-fallback img { border-radius: var(--r-lg); filter: drop-shadow(0 24px 48px rgba(0,0,0,0.7)); }
-.hero.no-3d .hero-scroll-space { height: 100vh; }
+.hero.no-3d .hero-scroll-space { height: 100vh; height: 100svh; }
 .hero.no-3d .hero-rail,
 .hero.no-3d .scroll-hint,
 .hero.no-3d .model-loader { display: none; }
@@ -1571,9 +1571,6 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   .btn-hero-ghost   { font-size: 0.82rem; padding: 0.75rem 1.1rem; }
   .hero-meta { display: none; } /* too cramped on portrait tablet */
 
-  /* Product cards */
-  .prod-img { height: 300px; }
-
   /* Bundle */
   .bundle-copy, .interior-copy { padding: 2.5rem 2rem; }
   .bundle-title { font-size: clamp(2.4rem, 7vw, 3.5rem); }
@@ -1600,7 +1597,7 @@ button:disabled { opacity: 0.5; pointer-events: none; }
 
   /* Product modal */
   .prod-modal .row { display: block; }
-  .modal-prod-img { height: 260px; border-radius: var(--r-lg) var(--r-lg) 0 0; }
+  .modal-prod-img { border-radius: var(--r-lg) var(--r-lg) 0 0; }
   .modal-prod-copy { padding: 1.8rem 1.5rem; }
   .modal-prod-copy h2 { font-size: 1.8rem; }
 
@@ -1631,7 +1628,6 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   .filter-row { gap: 0.3rem; }
   .f-pill { font-size: 0.72rem; padding: 0.4rem 0.7rem; }
   .sort-dd { width: 100%; }
-  .prod-img { height: 240px; }
 
   /* Bundle & Interior */
   .bundle-card, .interior-card { border-radius: var(--r-md); }
@@ -1671,6 +1667,8 @@ button:disabled { opacity: 0.5; pointer-events: none; }
 
 /* ── Very small screens (≤380px) ── */
 @media (max-width: 380px) {
+  .hero-scroll-space { height: 250vh; }
+  .sec { padding: 3rem 0; }
   .hero-h1 { font-size: 1.9rem; }
   .hero-sub { font-size: 0.8rem; }
   .stage-label { font-size: 0.6rem; }
