@@ -411,101 +411,38 @@ body.no-scroll { overflow: hidden; }
   display: block;
 }
 
-/* Liquid aurora — flowing silk light rising from the bottom corners over a
-   pure-black field; inner strands drift at different speeds so the colour
-   pours and folds like the reference video */
+/* Night-sky backdrop — pure black field with a soft studio glow at the
+   top-right and sparse star dust, matching the reference art */
 .hero-orb {
   position: absolute;
+  inset: 0;
   pointer-events: none;
   z-index: 1;
-  filter: blur(42px) saturate(135%);
-  mix-blend-mode: screen;
-  will-change: transform, border-radius;
-}
-.hero-orb::before,
-.hero-orb::after {
-  content: "";
-  position: absolute; inset: 6% 3%;
-  border-radius: inherit;
-  mix-blend-mode: screen;   /* luminous folds inside the body */
 }
 .orb-blue {
-  width: 66vmax; height: 28vmax;
-  right: -21vmax; bottom: -8vmax;
   background:
-    radial-gradient(45% 65% at 78% 22%, rgba(64,224,255,0.55) 0%, transparent 60%),
-    radial-gradient(50% 70% at 55% 45%, rgba(64,120,255,0.5) 0%, transparent 65%),
-    radial-gradient(65% 85% at 35% 70%, rgba(150,80,255,0.55) 0%, transparent 70%),
-    radial-gradient(80% 100% at 20% 95%, rgba(88,60,220,0.45) 0%, transparent 75%);
-  border-radius: 62% 38% 55% 45% / 60% 45% 55% 40%;
-  transform: rotate(24deg);
-  animation: liquid-right 14s ease-in-out infinite;
-}
-.orb-blue::before {
-  background: radial-gradient(50% 60% at 62% 38%, rgba(96,220,255,0.5) 0%, transparent 65%);
-  animation: strand-a 9s ease-in-out infinite alternate;
-}
-.orb-blue::after {
-  background: radial-gradient(55% 65% at 38% 66%, rgba(170,90,255,0.5) 0%, transparent 70%);
-  animation: strand-b 11s ease-in-out infinite alternate;
+    radial-gradient(46% 38% at 84% 10%, rgba(64,110,255,0.30) 0%, rgba(40,70,190,0.14) 48%, transparent 74%),
+    radial-gradient(28% 24% at 92% 4%, rgba(130,175,255,0.22) 0%, transparent 70%);
 }
 .orb-lime {
-  width: 66vmax; height: 28vmax;
-  left: -21vmax; bottom: -8vmax;
-  background:
-    radial-gradient(45% 65% at 22% 22%, rgba(64,224,255,0.5) 0%, transparent 60%),
-    radial-gradient(50% 70% at 45% 45%, rgba(96,110,255,0.5) 0%, transparent 65%),
-    radial-gradient(65% 85% at 65% 70%, rgba(168,85,247,0.55) 0%, transparent 70%),
-    radial-gradient(80% 100% at 80% 95%, rgba(88,60,220,0.45) 0%, transparent 75%);
-  border-radius: 38% 62% 45% 55% / 45% 60% 40% 55%;
-  transform: rotate(-24deg);
-  animation: liquid-left 17s ease-in-out infinite;
-}
-.orb-lime::before {
-  background: radial-gradient(50% 60% at 38% 38%, rgba(96,220,255,0.45) 0%, transparent 65%);
-  animation: strand-b 10s ease-in-out infinite alternate;
-}
-.orb-lime::after {
-  background: radial-gradient(55% 65% at 62% 66%, rgba(170,90,255,0.5) 0%, transparent 70%);
-  animation: strand-a 12s ease-in-out infinite alternate;
-}
-/* morphing border-radius + drift = the liquid pour */
-@keyframes liquid-right {
-  0%, 100% { transform: rotate(24deg) translate3d(0, 0, 0) scale(1);
-             border-radius: 62% 38% 55% 45% / 60% 45% 55% 40%; }
-  33%      { transform: rotate(28deg) translate3d(-3vmax, -2vmax, 0) scale(1.07);
-             border-radius: 48% 52% 40% 60% / 52% 58% 42% 48%; }
-  66%      { transform: rotate(21deg) translate3d(-1vmax, 1vmax, 0) scale(1.03);
-             border-radius: 55% 45% 62% 38% / 45% 52% 48% 55%; }
-}
-@keyframes liquid-left {
-  0%, 100% { transform: rotate(-24deg) translate3d(0, 0, 0) scale(1);
-             border-radius: 38% 62% 45% 55% / 45% 60% 40% 55%; }
-  33%      { transform: rotate(-28deg) translate3d(3vmax, -2vmax, 0) scale(1.06);
-             border-radius: 52% 48% 60% 40% / 58% 52% 48% 42%; }
-  66%      { transform: rotate(-21deg) translate3d(1vmax, 1vmax, 0) scale(1.03);
-             border-radius: 45% 55% 38% 62% / 52% 45% 55% 48%; }
-}
-@keyframes strand-a {
-  from { transform: translate3d(-4%, 2%, 0) scale(1.06); }
-  to   { transform: translate3d(5%, -4%, 0) scale(0.94); }
-}
-@keyframes strand-b {
-  from { transform: translate3d(4%, -3%, 0) scale(0.95); }
-  to   { transform: translate3d(-5%, 3%, 0) scale(1.08); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero-orb, .hero-orb::before, .hero-orb::after { animation: none; }
-}
-@media (max-width: 991px) {
-  /* lift the ribbons above the mobile copy zone, lighter blur for small GPUs */
-  .orb-blue, .orb-lime { bottom: 14vmax; height: 30vmax; filter: blur(30px) saturate(125%); }
+  /* sparse star dust — tiny static dots scattered like the reference */
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 22%, rgba(255,255,255,0.50) 50%, transparent 51%),
+    radial-gradient(1px 1px at 28% 64%, rgba(255,255,255,0.35) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 44% 12%, rgba(255,255,255,0.40) 50%, transparent 51%),
+    radial-gradient(1px 1px at 58% 42%, rgba(255,255,255,0.30) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 70% 78%, rgba(255,255,255,0.35) 50%, transparent 51%),
+    radial-gradient(1px 1px at 82% 30%, rgba(255,255,255,0.40) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 91% 58%, rgba(255,255,255,0.30) 50%, transparent 51%),
+    radial-gradient(1px 1px at 8% 84%, rgba(255,255,255,0.30) 50%, transparent 51%),
+    radial-gradient(1px 1px at 66% 8%, rgba(255,255,255,0.35) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 36% 88%, rgba(255,255,255,0.30) 50%, transparent 51%);
 }
 
-/* Backdrop stays pure black — dot texture removed, only the liquid aurora */
+/* Backdrop stays pure black — night-sky glow + star dust only */
 .hero-mesh { display: none; }
 
-/* Vignette — dark pocket behind the copy, corners left open for the aurora */
+/* Vignette — dark pocket behind the copy, corners left open for the glow */
 .hero-vignette {
   position: absolute; inset: 0; z-index: 3; pointer-events: none;
   background:

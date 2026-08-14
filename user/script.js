@@ -926,64 +926,64 @@ function initHero3D() {
   const loaderTxt = $("modelLoaderText");
   if (loaderEl) loaderEl.classList.remove("d-none");
 
-  /* ── Load GLB (v8 — re-sized model) ── */
+  /* ── Load GLB (v11 — webp-textured model, no Draco needed) ── */
   if (THREE.GLTFLoader) {
-    /* Model is Draco-compressed — wire the WASM decoder */
-    const dracoLoader = new THREE.DRACOLoader();
-    dracoLoader.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/draco/gltf/");
-    dracoLoader.preload();
     const gltfLoader = new THREE.GLTFLoader();
-    gltfLoader.setDRACOLoader(dracoLoader);
-    gltfLoader.load(
-      "assets/3dmodel.glb?v=11",
-      (gltf) => {
-        const model = gltf.scene;
+    const tryLoad = (attempt) => {
+      gltfLoader.load(
+        "assets/3dmodel.glb?v=11",
+        (gltf) => {
+          const model = gltf.scene;
 
-        /* Material polish + guards for any exporter output */
-        model.traverse(child => {
-          if (!child.isMesh) return;
-          child.castShadow = false;
-          child.receiveShadow = false;
-          child.frustumCulled = false;  /* spinning model never pops */
-          const mats = Array.isArray(child.material) ? child.material : [child.material];
-          mats.forEach((m) => {
-            if (!m) return;
-            if ("envMapIntensity" in m) m.envMapIntensity = 1;
-            if (m.map) m.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
-            m.needsUpdate = true;
+          /* Material polish + guards for any exporter output */
+          model.traverse(child => {
+            if (!child.isMesh) return;
+            child.castShadow = false;
+            child.receiveShadow = false;
+            child.frustumCulled = false;  /* spinning model never pops */
+            const mats = Array.isArray(child.material) ? child.material : [child.material];
+            mats.forEach((m) => {
+              if (!m) return;
+              if ("envMapIntensity" in m) m.envMapIntensity = 1;
+              if (m.map) m.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+              m.needsUpdate = true;
+            });
           });
-        });
 
-        /* Auto-fit: centre on bounding box, scale tallest edge → 2.6 units */
-        const box  = new THREE.Box3().setFromObject(model);
-        const size = box.getSize(new THREE.Vector3());
-        const ctr  = box.getCenter(new THREE.Vector3());
-        if (Number.isFinite(size.x + size.y + size.z) && size.x + size.y + size.z > 0) {
-          model.position.sub(ctr);
-          const maxDim = Math.max(size.x, size.y, size.z);
-          modelScale = maxDim > 0 ? 2.6 / maxDim : 1;
+          /* Auto-fit: centre on bounding box, scale tallest edge → 2.6 units */
+          const box  = new THREE.Box3().setFromObject(model);
+          const size = box.getSize(new THREE.Vector3());
+          const ctr  = box.getCenter(new THREE.Vector3());
+          if (Number.isFinite(size.x + size.y + size.z) && size.x + size.y + size.z > 0) {
+            model.position.sub(ctr);
+            const maxDim = Math.max(size.x, size.y, size.z);
+            modelScale = maxDim > 0 ? 2.6 / maxDim : 1;
+          }
+
+          modelHolder = new THREE.Group();
+          modelHolder.add(model);
+          modelHolder.scale.setScalar(0.001);  /* start tiny, eases in */
+          productGroup.add(modelHolder);
+
+          if (loaderEl) loaderEl.classList.add("d-none");
+        },
+        (xhr) => {
+          if (loaderEl && loaderTxt) {
+            loaderTxt.textContent = xhr.total > 0
+              ? `Loading 3D… ${Math.round(xhr.loaded / xhr.total * 100)}%`
+              : `Loading 3D… ${(xhr.loaded / 1048576).toFixed(1)} MB`;
+          }
+        },
+        (err) => {
+          console.warn(`3D model attempt ${attempt} failed:`, err);
+          if (attempt < 3) { setTimeout(() => tryLoad(attempt + 1), 900 * attempt); return; }
+          /* Retries spent — keep the live canvas (rings + particles) so the
+             hero still breathes instead of collapsing to the flat photo */
+          if (loaderEl) loaderEl.classList.add("d-none");
         }
-
-        modelHolder = new THREE.Group();
-        modelHolder.add(model);
-        modelHolder.scale.setScalar(0.001);  /* start tiny, eases in */
-        productGroup.add(modelHolder);
-
-        if (loaderEl) loaderEl.classList.add("d-none");
-      },
-      (xhr) => {
-        if (loaderEl && loaderTxt) {
-          loaderTxt.textContent = xhr.total > 0
-            ? `Loading 3D… ${Math.round(xhr.loaded / xhr.total * 100)}%`
-            : `Loading 3D… ${(xhr.loaded / 1048576).toFixed(1)} MB`;
-        }
-      },
-      (err) => {
-        console.warn("3D model failed:", err);
-        if (loaderEl) loaderEl.classList.add("d-none");
-        showHeroFallback(section);
-      }
-    );
+      );
+    };
+    tryLoad(1);
   } else {
     if (loaderEl) loaderEl.classList.add("d-none");
     showHeroFallback(section);
