@@ -732,33 +732,31 @@ function initHero3D() {
     showHeroFallback(section);
   }
 
-  /* ── Orbiting ring — glowing lime halo ── */
+  /* ── Orbiting ring — lime halo that truly wraps the bottle ── */
   const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(1.6, 0.022, 20, 100),
-    new THREE.MeshStandardMaterial({
+    new THREE.TorusGeometry(1.6, 0.03, 20, 120),
+    new THREE.MeshBasicMaterial({
       color: 0xc8f53c,
-      emissive: 0xc8f53c,
-      emissiveIntensity: 0.9,
-      metalness: 0.2,
-      roughness: 0.15,
-      depthWrite: false,   /* halo never cuts across the bottle */
+      transparent: true,
+      opacity: 0.55,
+      blending: THREE.AdditiveBlending, /* draws as light, never a hard cutting line */
+      depthWrite: false,                /* bottle depth still hides the back arc → real wrap */
     })
   );
-  ring.renderOrder = -1;   /* drawn before the product → always behind it */
   ring.rotation.x = Math.PI * 0.45;  /* slight tilt — not flat */
   scene.add(ring);
 
   /* ── Tiny accent ring (counter-rotating) ── */
   const ring2 = new THREE.Mesh(
-    new THREE.TorusGeometry(1.1, 0.012, 12, 80),
-    new THREE.MeshStandardMaterial({
-      color: 0x2266cc,
-      emissive: 0x4488ff,
-      emissiveIntensity: 0.55,
+    new THREE.TorusGeometry(1.1, 0.018, 12, 96),
+    new THREE.MeshBasicMaterial({
+      color: 0x4488ff,
+      transparent: true,
+      opacity: 0.45,
+      blending: THREE.AdditiveBlending,
       depthWrite: false,
     })
   );
-  ring2.renderOrder = -2;
   ring2.rotation.x = Math.PI * 0.3;
   ring2.rotation.z = Math.PI * 0.25;
   scene.add(ring2);
