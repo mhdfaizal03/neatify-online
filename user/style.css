@@ -52,7 +52,12 @@
 
 /* ── RESET ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; font-size: 16px; }
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  scroll-snap-type: y proximity;            /* site-wide swipe-screen paging */
+  scroll-padding-top: var(--header-height); /* sections settle below the sticky nav */
+}
 body {
   background: var(--paper);
   color: var(--t-dark);
@@ -754,6 +759,18 @@ body.no-scroll { overflow: hidden; }
 /* Scroll reveal */
 .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.65s var(--ease-decel), transform 0.65s var(--ease-decel); }
 .reveal.visible { opacity: 1; transform: none; }
+
+/* ── Swipe-screen method — each section pages like a full screen ── */
+main > section { scroll-snap-align: start; }
+.site-footer { scroll-snap-align: end; }
+@media (min-width: 992px) {
+  /* screen-sized sections centre their content within the viewport */
+  #story, .process-sec, .reviews-sec, .faq-sec,
+  .bundle-wrap, .interior-sec, .news-sec {
+    min-height: 100vh; min-height: 100svh;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+}
 
 /* ════════════════════════════════════════════════════════
    SHARED BUTTONS
