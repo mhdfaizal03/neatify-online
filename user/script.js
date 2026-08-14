@@ -51,7 +51,7 @@ async function loadSettings() {
     settings = { ...settings, ...data };
   } catch { /* keep defaults */ }
   const ann = $("announceMain");
-  if (ann) ann.textContent = settings.announcement || "Premium car care, made simple.";
+  if (ann) ann.textContent = settings.announcement || "Premium vehicle care, made simple.";
   const sub = $("announceSub");
   if (sub) sub.textContent = settings.announcementSub || `Free shipping on orders above ${money(settings.freeShippingThreshold)}.`;
   const faqT = $("faqShipThreshold");
@@ -639,7 +639,7 @@ function initHero3D() {
         modelHolder.add(model);
 
         const maxDim  = Math.max(size.x, size.y, size.z) || 1;
-        modelScale = 4.2 / maxDim;
+        modelScale = 1.8 / maxDim;   /* smaller — was 4.2 */
         modelHolder.scale.setScalar(0.001);
         productGroup.add(modelHolder);
 
@@ -665,13 +665,13 @@ function initHero3D() {
     if (loaderEl) loaderEl.classList.add("d-none");
   }
 
-  /* Orbiting ring */
+  /* Orbiting ring — sized to match the smaller model */
   const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(2.5, 0.035, 16, 90),
-    new THREE.MeshStandardMaterial({ color: 0xc8f53c, emissive: 0xc8f53c, emissiveIntensity: 0.9, metalness: 0.4, roughness: 0.2 })
+    new THREE.TorusGeometry(1.4, 0.025, 16, 90),
+    new THREE.MeshStandardMaterial({ color: 0xc8f53c, emissive: 0xc8f53c, emissiveIntensity: 1.0, metalness: 0.3, roughness: 0.2 })
   );
   ring.rotation.x = Math.PI / 2.15;
-  ring.position.y = -2.2;
+  ring.position.y = -1.4;
   scene.add(ring);
 
   /* Particle field */
@@ -693,8 +693,8 @@ function initHero3D() {
   /* Scroll */
   const space    = section.querySelector(".hero-scroll-space");
   const stages   = [...document.querySelectorAll(".hero-stage")];
-  const railDots = [...document.querySelectorAll(".rail-dot")];
-  const fillEl   = $("heroProgressFill");
+  const railDots  = [...document.querySelectorAll(".rail-dot")];
+  const railFills = [...document.querySelectorAll(".rail-track > span")];
   const cueEl    = $("scrollCue");
   const statusEl = $("heroStatus");
 
@@ -742,25 +742,26 @@ function initHero3D() {
     const t  = clock.getElapsedTime();
     const mb = isMobile();
 
-    productGroup.rotation.y = p * Math.PI * 2.5 + Math.sin(t * 0.55) * 0.06;
-    productGroup.rotation.z = Math.sin(p * Math.PI) * 0.08;
+    productGroup.rotation.y = p * Math.PI * 2.5 + Math.sin(t * 0.55) * 0.08 + t * 0.12;
+    productGroup.rotation.z = Math.sin(p * Math.PI) * 0.06;
     const blend = smoothstep(p, 0.55, 0.95);
-    productGroup.position.x = mb ? 0 : 1.9 * (1 - blend);
-    productGroup.position.y = 0.05 + p * 0.35 + Math.sin(t * 0.8) * 0.06;
-    productGroup.scale.setScalar(mb ? 0.62 : 1);
+    /* On desktop: show model on right half; on mobile: center */
+    productGroup.position.x = mb ? 0 : 2.4 * (1 - blend * 0.7);
+    productGroup.position.y = -0.1 + p * 0.2 + Math.sin(t * 0.7) * 0.08;
+    productGroup.scale.setScalar(mb ? 0.7 : 1);
 
     if (modelHolder) {
-      introEase = Math.min(1, introEase + (1 - introEase) * 0.065);
+      introEase = Math.min(1, introEase + (1 - introEase) * 0.06);
       modelHolder.scale.setScalar(modelScale * Math.max(introEase, 0.001));
     }
 
-    ring.rotation.z      = t * 0.2 + p * Math.PI;
-    ring.position.x      = productGroup.position.x;
-    ring.position.y      = productGroup.position.y - 2.25;
+    ring.rotation.z = t * 0.25 + p * Math.PI;
+    ring.position.x = productGroup.position.x;
+    ring.position.y = productGroup.position.y - 1.45;
 
-    const camZ = (mb ? 9.5 : 7.8) - Math.sin(p * Math.PI) * 1.1;
-    camera.position.set(0, 0.38 - p * 0.2, camZ);
-    camera.lookAt(productGroup.position.x * 0.35, 0.1, 0);
+    const camZ = (mb ? 6.5 : 5.5) - Math.sin(p * Math.PI) * 0.6;
+    camera.position.set(mb ? 0 : -0.5, 0.1 - p * 0.15, camZ);
+    camera.lookAt(productGroup.position.x * 0.5, productGroup.position.y * 0.3, 0);
 
     const orbit = p * Math.PI * 2;
     keyLight.position.set(Math.cos(orbit) * 4.5, 2.5, Math.sin(orbit) * 4.5 + 1);
@@ -772,7 +773,9 @@ function initHero3D() {
     }
     pGeo.attributes.position.needsUpdate = true;
 
-    if (fillEl) fillEl.style.width = `${p * 100}%`;
+    railFills.forEach((el, i) => {
+      el.style.width = `${Math.min(1, Math.max(0, p * 2 - i)) * 100}%`;
+    });
     if (cueEl)  cueEl.classList.toggle("hide", p > 0.02);
     setStage(p < 0.36 ? 0 : p < 0.72 ? 1 : 2);
 
@@ -797,6 +800,24 @@ function initHero3D() {
   start();
 }
 
+/* ── MATERIAL RIPPLE ───────────────────────────────────── */
+function initRipple() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  document.addEventListener("pointerdown", (e) => {
+    const t = e.target.closest("button, .btn-hero-primary, .btn-hero-ghost, .btn-primary-sm, .f-pill, .nav-link, .socials a");
+    if (!t || t.disabled) return;
+    const r = t.getBoundingClientRect();
+    const d = Math.max(r.width, r.height) * 1.2;
+    const s = document.createElement("span");
+    s.className = "ripple-ink";
+    s.style.width = s.style.height = d + "px";
+    s.style.left = e.clientX - r.left - d / 2 + "px";
+    s.style.top  = e.clientY - r.top - d / 2 + "px";
+    t.appendChild(s);
+    setTimeout(() => s.remove(), 600);
+  });
+}
+
 /* ── BOOT ───────────────────────────────────────────────── */
 async function boot() {
   if (location.protocol === "file:") {
@@ -804,6 +825,7 @@ async function boot() {
   }
   const step = fn => Promise.resolve().then(fn).catch(err => console.warn("Boot step failed:", err));
   await step(updateHeaderHeight);
+  await step(initRipple);
   await step(initReveal);
   await step(initHero3D);
   await step(loadSettings);

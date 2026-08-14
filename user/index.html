@@ -90,50 +90,50 @@
           <div class="hero-mesh"></div>
           <div class="hero-vignette"></div>
 
-          <div class="hero-content" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;pointer-events:none;">
-            <div class="container" style="position:relative;">
+          <!-- All stages share this single wrapper -->
+          <div class="hero-stages-wrap">
+            <div class="container">
+              <div class="hero-stages-inner">
 
-              <div class="hero-stage active" data-stage="0">
-                <div class="stage-label"><span class="label-line"></span><span>01 / EXTERIOR CARE</span></div>
-                <h1 class="hero-h1">Make your vehicle<br><em>look freshly born.</em></h1>
-                <p class="hero-sub">A high-performance exterior system for deep cleaning, rich foam and a mirror-gloss finish. Scroll — the model does the talking.</p>
-                <div class="hero-actions" style="pointer-events:auto;">
-                  <a class="btn-hero-primary" href="#shop">Explore the range <i class="bi bi-arrow-right"></i></a>
-                  <a class="btn-hero-ghost" href="#how-it-works">See the process</a>
-                </div>
-                <div class="hero-meta">
-                  <div class="meta-item">
-                    <div class="meta-stars">★★★★★</div>
-                    <span>4.9 rating</span>
+                <div class="hero-stage active" data-stage="0">
+                  <div class="stage-label"><span class="label-line"></span><span>01 / EXTERIOR CARE</span></div>
+                  <h1 class="hero-h1">Make your vehicle<br><em>look freshly born.</em></h1>
+                  <p class="hero-sub">A high-performance exterior system for deep cleaning, rich foam and a mirror-gloss finish. Scroll — the model does the talking.</p>
+                  <div class="hero-actions">
+                    <a class="btn-hero-primary" href="#shop">Explore the range <i class="bi bi-arrow-right"></i></a>
+                    <a class="btn-hero-ghost" href="#how-it-works">See the process</a>
                   </div>
-                  <div class="meta-divider"></div>
-                  <div class="meta-item"><i class="bi bi-people"></i><span>2,300+ washes</span></div>
-                  <div class="meta-divider"></div>
-                  <div class="meta-item"><i class="bi bi-truck"></i><span>Free ship <span id="heroShipNote">₹999</span>+</span></div>
+                  <div class="hero-meta">
+                    <div class="meta-item"><div class="meta-stars">★★★★★</div><span>4.9 rating</span></div>
+                    <div class="meta-divider"></div>
+                    <div class="meta-item"><i class="bi bi-people"></i><span>2,300+ washes</span></div>
+                    <div class="meta-divider"></div>
+                    <div class="meta-item"><i class="bi bi-truck"></i><span>Free ship <span id="heroShipNote">₹999</span>+</span></div>
+                  </div>
                 </div>
-              </div>
 
-              <div class="hero-stage" data-stage="1">
-                <div class="stage-label"><span class="label-line"></span><span>02 / FOAM WASH</span></div>
-                <h2 class="hero-h1">Snow foam.<br><em>Zero scrubbing.</em></h2>
-                <p class="hero-sub">Clean+ Foam Wash lays down a thick, paint-safe blanket that lifts grit away before your mitt touches the surface.</p>
-                <div class="hero-actions" style="pointer-events:auto;">
-                  <a class="btn-hero-primary" href="#shop">Shop foam wash <i class="bi bi-droplet-half"></i></a>
+                <div class="hero-stage" data-stage="1">
+                  <div class="stage-label"><span class="label-line"></span><span>02 / FOAM WASH</span></div>
+                  <h2 class="hero-h1">Snow foam.<br><em>Zero scrubbing.</em></h2>
+                  <p class="hero-sub">Clean+ Foam Wash lays down a thick, paint-safe blanket that lifts grit away before your mitt touches the surface.</p>
+                  <div class="hero-actions">
+                    <a class="btn-hero-primary" href="#shop">Shop foam wash <i class="bi bi-droplet-half"></i></a>
+                  </div>
                 </div>
-              </div>
 
-              <div class="hero-stage stage-center" data-stage="2">
-                <div class="stage-label" style="justify-content:center;"><span class="label-line"></span><span>03 / MIRROR GLOSS</span></div>
-                <h2 class="hero-h1">Finish with<br><em>mirror gloss.</em></h2>
-                <p class="hero-sub" style="margin-left:auto;margin-right:auto;">Dry with premium microfiber, step back and admire. Your entire routine, one shelf.</p>
-                <div class="hero-actions" style="pointer-events:auto;justify-content:center;">
-                  <a class="btn-hero-primary" href="#shop">Build your routine <i class="bi bi-stars"></i></a>
-                  <button class="btn-hero-ghost" id="heroKitBtn">Add weekend kit</button>
+                <div class="hero-stage stage-center" data-stage="2">
+                  <div class="stage-label"><span class="label-line"></span><span>03 / MIRROR GLOSS</span></div>
+                  <h2 class="hero-h1">Finish with<br><em>mirror gloss.</em></h2>
+                  <p class="hero-sub">Dry with premium microfiber, step back and admire. Your entire routine, one shelf.</p>
+                  <div class="hero-actions">
+                    <a class="btn-hero-primary" href="#shop">Build your routine <i class="bi bi-stars"></i></a>
+                    <button class="btn-hero-ghost" id="heroKitBtn">Add weekend kit</button>
+                  </div>
                 </div>
-              </div>
 
-            </div>
-          </div>
+              </div><!-- /.hero-stages-inner -->
+            </div><!-- /.container -->
+          </div><!-- /.hero-stages-wrap -->
 
           <!-- Fallback -->
           <div class="hero-fallback d-none" id="heroFallback">
@@ -160,8 +160,8 @@
             <span class="hint-line"></span>
             <span>Scroll</span>
           </div>
-        </div>
-      </div>
+        </div><!-- /.hero-sticky -->
+      </div><!-- /.hero-scroll-space -->
       <div id="heroStatus" class="sr-only" aria-live="polite" aria-atomic="true">Stage 1 of 3</div>
     </section>
 
