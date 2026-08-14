@@ -58,6 +58,7 @@ html {
   scroll-snap-type: y proximity;            /* site-wide swipe-screen paging */
   scroll-padding-top: var(--header-height); /* sections settle below the sticky nav */
   overflow-x: hidden;                       /* no sideways scroll, ever */
+  overflow-x: clip;                         /* clip keeps position:sticky working */
   scrollbar-width: none;                    /* Firefox: scroll without visible bars */
 }
 body {
@@ -65,6 +66,7 @@ body {
   color: var(--t-dark);
   font-family: "Inter", -apple-system, sans-serif;
   overflow-x: hidden;
+  overflow-x: clip;  /* hidden alone would trap the sticky hero */
   scrollbar-width: none;
   -ms-overflow-style: none;
   -webkit-font-smoothing: antialiased;
