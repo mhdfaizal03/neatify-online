@@ -1,7 +1,7 @@
 {
   "name": "neatify-car-care",
   "version": "1.0.0",
-  "description": "Neatify car care storefront with admin dashboard",
+  "description": "Neatify vehicle care storefront with admin dashboard",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -1,4 +1,4 @@
-# Neatify Car Care Website
+# Neatify Vehicle Care Website
 
 A responsive, funky-premium storefront built with:
 - HTML5

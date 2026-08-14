@@ -78,7 +78,7 @@ async function loadSettings() {
   } catch {
     /* keep defaults */
   }
-  $("announceMain").textContent = settings.announcement || "Premium car care, made simple.";
+  $("announceMain").textContent = settings.announcement || "Premium vehicle care, made simple.";
   $("announceSub").textContent = settings.announcementSub || `Free shipping on orders above ${money(settings.freeShippingThreshold)}.`;
   $("faqShipThreshold").textContent = money(settings.freeShippingThreshold);
   if ($("heroShipNote")) $("heroShipNote").textContent = money(settings.freeShippingThreshold);
