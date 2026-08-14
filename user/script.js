@@ -944,13 +944,26 @@ function initRipple() {
   });
 }
 
-/* ── BOOT ───────────────────────────────────────────────── */
+/* ── ANNOUNCE POPUP ─────────────────────────────────────── */
+function initAnnouncePop() {
+  const pop = $("annPop");
+  if (!pop) return;
+  if (sessionStorage.getItem("neatify-ann-dismissed")) return;
+  setTimeout(() => pop.classList.add("show"), 1200);
+  $("annPopClose")?.addEventListener("click", () => {
+    pop.classList.remove("show");
+    sessionStorage.setItem("neatify-ann-dismissed", "1");
+  });
+}
+
+/* ── BOOT ──────────────────────────────────────────────── */
 async function boot() {
   if (location.protocol === "file:") {
     showToast("Open via http://localhost:3000 (npm start).", true);
   }
   const step = fn => Promise.resolve().then(fn).catch(err => console.warn("Boot step failed:", err));
   await step(updateHeaderHeight);
+  await step(initAnnouncePop);
   await step(initRipple);
   await step(initReveal);
   await step(initHero3D);
