@@ -1,10 +1,8 @@
-/* ═══════════════════════════════════════════════
-   NEATIFY STOREFRONT — Live store logic
-   Products, settings, orders and subscribers are
-   all synced with the server API in real time.
-   ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   NEATIFY STOREFRONT — script.js v6
+   ═══════════════════════════════════════════════════════════ */
 
-const CART_KEY = "neatify-cart";
+const CART_KEY = "neatify-cart-v2";
 const SHIPPING_FEE = 49;
 
 let products = [];
@@ -12,93 +10,72 @@ let settings = { freeShippingThreshold: 999, weekendKitIds: [1, 2, 4, 7], highli
 let state = { filter: "all", search: "", sort: "featured", cart: [] };
 
 const $ = (id) => document.getElementById(id);
-const productGrid = $("productGrid");
-const emptyState = $("emptyState");
-const cartCount = $("cartCount");
-const cartItems = $("cartItems");
-const cartEmpty = $("cartEmpty");
-const cartFooter = $("cartFooter");
-const cartTotal = $("cartTotal");
-const cartSubtotal = $("cartSubtotal");
-const cartShipping = $("cartShipping");
-const searchPanel = $("searchPanel");
-const searchInput = $("searchInput");
-const searchResults = $("searchResults");
-const mainNav = $("mainNav");
-const navMenu = $("navMenu");
-const backToTop = $("backToTop");
-
-/* Bootstrap UI is optional — if the CDN is unreachable the store still
-   renders products; modals/drawer degrade to no-ops instead of crashing. */
-const hasBootstrap = typeof window.bootstrap !== "undefined";
+const hasBS = typeof window.bootstrap !== "undefined";
 const noopUi = { show() {}, hide() {}, toggle() {} };
-const productModal = hasBootstrap ? bootstrap.Modal.getOrCreateInstance("#productModal") : noopUi;
-const notifyModal = hasBootstrap ? bootstrap.Modal.getOrCreateInstance("#notifyModal") : noopUi;
-const checkoutModal = hasBootstrap ? bootstrap.Modal.getOrCreateInstance("#checkoutModal") : noopUi;
-const orderSuccessModal = hasBootstrap ? bootstrap.Modal.getOrCreateInstance("#orderSuccessModal") : noopUi;
-const cartDrawer = hasBootstrap ? bootstrap.Offcanvas.getOrCreateInstance("#cartDrawer") : noopUi;
-const navCollapse = hasBootstrap ? bootstrap.Collapse.getOrCreateInstance(navMenu, { toggle: false }) : noopUi;
 
-/* ── HELPERS ── */
-function money(v) {
-  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(v);
-}
+const productModal   = hasBS ? bootstrap.Modal.getOrCreateInstance("#productModal")     : noopUi;
+const notifyModal    = hasBS ? bootstrap.Modal.getOrCreateInstance("#notifyModal")      : noopUi;
+const checkoutModal  = hasBS ? bootstrap.Modal.getOrCreateInstance("#checkoutModal")    : noopUi;
+const orderSuccModal = hasBS ? bootstrap.Modal.getOrCreateInstance("#orderSuccessModal"): noopUi;
+const cartDrawer     = hasBS ? bootstrap.Offcanvas.getOrCreateInstance("#cartDrawer")   : noopUi;
+const navCollapse    = hasBS ? bootstrap.Collapse.getOrCreateInstance($("navMenu"), { toggle: false }) : noopUi;
 
-function getProduct(id) {
-  return products.find((p) => p.id === id);
-}
+/* ── HELPERS ────────────────────────────────────────────── */
+const money = (v) =>
+  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(v);
 
-function matchesSearch(product, query) {
-  if (!query) return true;
-  const haystack = `${product.name} ${product.type} ${product.category} ${product.description}`.toLowerCase();
-  return haystack.includes(query.toLowerCase());
-}
+const getProduct = (id) => products.find((p) => p.id === id);
+
+const matchesSearch = (p, q) => {
+  if (!q) return true;
+  return `${p.name} ${p.type} ${p.category} ${p.description}`.toLowerCase().includes(q.toLowerCase());
+};
 
 function esc(str) {
-  const div = document.createElement("div");
-  div.textContent = str == null ? "" : String(str);
-  return div.innerHTML;
+  const d = document.createElement("div");
+  d.textContent = str == null ? "" : String(str);
+  return d.innerHTML;
 }
 
 async function api(path, opts = {}) {
-  const res = await fetch(path, {
-    headers: { "Content-Type": "application/json" },
-    ...opts,
-  });
+  const res = await fetch(path, { headers: { "Content-Type": "application/json" }, ...opts });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || "Request failed");
   return data;
 }
 
-/* ── SETTINGS (announcement, shipping, kit, highlight) ── */
+/* ── SETTINGS ───────────────────────────────────────────── */
 async function loadSettings() {
   try {
     const data = await api("/api/settings");
     settings = { ...settings, ...data };
-  } catch {
-    /* keep defaults */
-  }
-  $("announceMain").textContent = settings.announcement || "Premium vehicle care, made simple.";
-  $("announceSub").textContent = settings.announcementSub || `Free shipping on orders above ${money(settings.freeShippingThreshold)}.`;
-  $("faqShipThreshold").textContent = money(settings.freeShippingThreshold);
-  if ($("heroShipNote")) $("heroShipNote").textContent = money(settings.freeShippingThreshold);
+  } catch { /* keep defaults */ }
+  const ann = $("announceMain");
+  if (ann) ann.textContent = settings.announcement || "Premium car care, made simple.";
+  const sub = $("announceSub");
+  if (sub) sub.textContent = settings.announcementSub || `Free shipping on orders above ${money(settings.freeShippingThreshold)}.`;
+  const faqT = $("faqShipThreshold");
+  if (faqT) faqT.textContent = money(settings.freeShippingThreshold);
+  const heroS = $("heroShipNote");
+  if (heroS) heroS.textContent = money(settings.freeShippingThreshold);
   document.title = `${settings.storeName || "Neatify"} — Clean. Shine. Protect.`;
 }
 
-/* ── PRODUCTS ── */
+/* ── PRODUCTS ───────────────────────────────────────────── */
 async function loadProducts(attempt = 1) {
-  productGrid.innerHTML = `<div class="col-12"><div class="grid-loading"><div class="spinner-ring"></div><span>Loading the lineup…</span></div></div>`;
+  const grid = $("productGrid");
+  grid.innerHTML = `<div class="col-12"><div class="grid-loading"><div class="spin-ring"></div><span>Loading products…</span></div></div>`;
   try {
     products = await api("/api/products");
   } catch {
     if (attempt < 3) {
-      await new Promise((r) => setTimeout(r, 600 * attempt)); // brief backoff, then retry
+      await new Promise(r => setTimeout(r, 600 * attempt));
       return loadProducts(attempt + 1);
     }
-    productGrid.innerHTML = "";
-    emptyState.classList.remove("d-none");
+    grid.innerHTML = "";
+    $("emptyState").classList.remove("d-none");
     $("emptyStateTitle").textContent = "Couldn't load products";
-    $("emptyStateText").textContent = "The store API didn't respond. Make sure the server is running (npm start) and you opened http://localhost:3000.";
+    $("emptyStateText").textContent = "Make sure the server is running (npm start) and open http://localhost:3000.";
     $("retryProducts").classList.remove("d-none");
     showToast("Could not load products. Please refresh.", true);
     return;
@@ -110,85 +87,86 @@ async function loadProducts(attempt = 1) {
 }
 
 function renderPillCounts() {
-  document.querySelectorAll(".filter-pill").forEach((pill) => {
+  document.querySelectorAll(".f-pill").forEach((pill) => {
     const key = pill.dataset.filter;
-    const count = key === "all" ? products.length : products.filter((p) => p.category === key).length;
+    const count = key === "all" ? products.length : products.filter(p => p.category === key).length;
     const label = pill.textContent.replace(/\s*\d+$/, "").trim();
     pill.innerHTML = `${esc(label)}<span class="pill-count">${count}</span>`;
   });
 }
 
 function renderBundle() {
-  const kitIds = Array.isArray(settings.weekendKitIds) ? settings.weekendKitIds : [];
-  const kitProducts = kitIds.map(getProduct).filter(Boolean);
-  const total = kitProducts.reduce((s, p) => s + p.price, 0);
-  $("bundlePrice").textContent = kitProducts.length ? `${kitProducts.length} essentials · ${money(total)}` : "";
-
-  const highlight = getProduct(settings.highlightProductId);
-  if (highlight) $("bundleImage").src = highlight.image;
+  const ids = Array.isArray(settings.weekendKitIds) ? settings.weekendKitIds : [];
+  const kits = ids.map(getProduct).filter(Boolean);
+  const total = kits.reduce((s, p) => s + p.price, 0);
+  const bp = $("bundlePrice");
+  if (bp) bp.textContent = kits.length ? `${kits.length} items · ${money(total)}` : "";
+  const h = getProduct(settings.highlightProductId);
+  const bi = $("bundleImage");
+  if (h && bi) bi.src = h.image;
 }
 
 function filteredProducts() {
-  let list = products.filter((p) => state.filter === "all" || p.category === state.filter);
-  if (state.search) list = list.filter((p) => matchesSearch(p, state.search));
+  let list = products.filter(p => state.filter === "all" || p.category === state.filter);
+  if (state.search) list = list.filter(p => matchesSearch(p, state.search));
   if (state.sort === "featured") list.sort((a, b) => a.featured - b.featured);
-  if (state.sort === "low") list.sort((a, b) => a.price - b.price);
-  if (state.sort === "high") list.sort((a, b) => b.price - a.price);
-  if (state.sort === "name") list.sort((a, b) => a.name.localeCompare(b.name));
+  if (state.sort === "low")      list.sort((a, b) => a.price - b.price);
+  if (state.sort === "high")     list.sort((a, b) => b.price - a.price);
+  if (state.sort === "name")     list.sort((a, b) => a.name.localeCompare(b.name));
   return list;
 }
 
 function renderProducts() {
   const list = filteredProducts();
-  productGrid.innerHTML = list
-    .map(
-      (p) => `
-    <div class="col-sm-6 col-lg-4 col-xl-3">
-      <article class="product-card">
-        <div class="product-image" data-id="${p.id}">
-          <span class="product-badge ${p.id === settings.highlightProductId ? "lime" : ""}">${esc(p.badge)}</span>
-          <button class="product-quick" data-view="${p.id}" aria-label="Quick view ${esc(p.name)}"><i class="bi bi-eye"></i></button>
-          <img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">
-        </div>
-        <div class="product-info">
-          <span class="product-kicker">${esc(p.type)} / Exterior</span>
-          <h3>${esc(p.name)}</h3>
-          <p>${esc(p.description)}</p>
-          <div class="product-bottom">
-            <span class="price">${money(p.price)}</span>
-            <button class="add-btn" data-add="${p.id}" aria-label="Add ${esc(p.name)} to cart"><i class="bi bi-plus-lg"></i></button>
-          </div>
-        </div>
-      </article>
-    </div>`
-    )
-    .join("");
+  const grid = $("productGrid");
+  const empty = $("emptyState");
+  empty.classList.toggle("d-none", list.length !== 0);
   if (!list.length) {
     $("emptyStateTitle").textContent = "No products found";
     $("emptyStateText").textContent = "Try another search or category.";
+    grid.innerHTML = "";
+    return;
   }
-  emptyState.classList.toggle("d-none", list.length !== 0);
+  grid.innerHTML = list.map(p => `
+    <div class="col-sm-6 col-lg-4 col-xl-3">
+      <article class="product-card">
+        <div class="prod-img" data-id="${p.id}" role="button" tabindex="0" aria-label="View ${esc(p.name)}">
+          <span class="prod-badge${p.id === settings.highlightProductId ? " lime" : ""}">${esc(p.badge)}</span>
+          <button class="prod-quick" data-view="${p.id}" aria-label="Quick view ${esc(p.name)}">
+            <i class="bi bi-eye"></i>
+          </button>
+          <img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">
+        </div>
+        <div class="prod-body">
+          <span class="prod-kicker">${esc(p.type)} / Exterior</span>
+          <h3>${esc(p.name)}</h3>
+          <p>${esc(p.description)}</p>
+          <div class="prod-foot">
+            <span class="prod-price">${money(p.price)}</span>
+            <button class="add-btn" data-add="${p.id}" aria-label="Add ${esc(p.name)} to cart">
+              <i class="bi bi-plus-lg"></i>
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>`).join("");
 }
 
-/* ── CART ── */
+/* ── CART ───────────────────────────────────────────────── */
 function loadCart() {
   try {
     const saved = localStorage.getItem(CART_KEY);
     if (!saved) return;
     const parsed = JSON.parse(saved);
     if (Array.isArray(parsed)) {
-      state.cart = parsed.filter((item) => getProduct(item.id) && item.qty > 0);
+      state.cart = parsed.filter(item => getProduct(item.id) && item.qty > 0);
     }
-  } catch {
-    state.cart = [];
-  }
+  } catch { state.cart = []; }
 }
 
-function saveCart() {
-  localStorage.setItem(CART_KEY, JSON.stringify(state.cart));
-}
+function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(state.cart)); }
 
-function cartSubtotalValue() {
+function subtotalValue() {
   return state.cart.reduce((sum, item) => {
     const p = getProduct(item.id);
     return p ? sum + p.price * item.qty : sum;
@@ -201,95 +179,103 @@ function shippingFor(subtotal) {
 }
 
 function addToCart(id, openDrawer = false) {
-  const product = getProduct(id);
-  if (!product) return;
-  const found = state.cart.find((i) => i.id === id);
+  const p = getProduct(id);
+  if (!p) return;
+  const found = state.cart.find(i => i.id === id);
   if (found) found.qty++;
   else state.cart.push({ id, qty: 1 });
   saveCart();
   renderCart();
-  bumpCartBadge();
-  showToast(`${product.name} added to cart`);
+  bumpBadge();
+  showToast(`${p.name} added`);
   if (openDrawer) cartDrawer.show();
 }
 
 function addBundle(ids) {
   const added = ids.map(getProduct).filter(Boolean);
   if (!added.length) return;
-  added.forEach((p) => {
-    const found = state.cart.find((i) => i.id === p.id);
+  added.forEach(p => {
+    const found = state.cart.find(i => i.id === p.id);
     if (found) found.qty++;
     else state.cart.push({ id: p.id, qty: 1 });
   });
   saveCart();
   renderCart();
-  bumpCartBadge();
-  showToast("Weekend kit essentials added to cart");
+  bumpBadge();
+  showToast("Weekend kit added to cart");
   cartDrawer.show();
 }
 
-function bumpCartBadge() {
-  cartCount.classList.remove("bump");
-  void cartCount.offsetWidth;
-  cartCount.classList.add("bump");
+function bumpBadge() {
+  const badge = $("cartCount");
+  badge.classList.remove("bump");
+  void badge.offsetWidth;
+  badge.classList.add("bump");
 }
 
 function renderCart() {
   const count = state.cart.reduce((s, i) => s + i.qty, 0);
-  cartCount.textContent = count;
-  cartCount.style.display = count ? "grid" : "none";
+  const badge = $("cartCount");
+  badge.textContent = count;
+  badge.style.display = count ? "grid" : "none";
+
+  const empty  = $("cartEmpty");
+  const foot   = $("cartFooter");
+  const items  = $("cartItems");
 
   if (!state.cart.length) {
-    cartItems.innerHTML = "";
-    cartEmpty.classList.remove("d-none");
-    cartFooter.classList.add("d-none");
+    items.innerHTML = "";
+    empty.classList.remove("d-none");
+    foot.classList.add("d-none");
     return;
   }
+  empty.classList.add("d-none");
+  foot.classList.remove("d-none");
 
-  cartEmpty.classList.add("d-none");
-  cartFooter.classList.remove("d-none");
-  cartItems.innerHTML = state.cart
-    .map((item) => {
-      const p = getProduct(item.id);
-      if (!p) return "";
-      return `<div class="cart-item">
+  items.innerHTML = state.cart.map(item => {
+    const p = getProduct(item.id);
+    if (!p) return "";
+    return `<div class="cart-item">
       <img src="${esc(p.image)}" alt="${esc(p.name)}">
-      <div><h4>${esc(p.name)}</h4><p>${money(p.price)} each</p>
-        <div class="qty-control">
-          <button data-qty="${p.id}" data-delta="-1" aria-label="Decrease quantity of ${esc(p.name)}">−</button>
+      <div>
+        <h4>${esc(p.name)}</h4>
+        <p>${money(p.price)} each</p>
+        <div class="qty-ctrl">
+          <button data-qty="${p.id}" data-delta="-1" aria-label="Decrease">−</button>
           <strong aria-live="polite">${item.qty}</strong>
-          <button data-qty="${p.id}" data-delta="1" aria-label="Increase quantity of ${esc(p.name)}">+</button>
+          <button data-qty="${p.id}" data-delta="1" aria-label="Increase">+</button>
         </div>
       </div>
-      <button class="remove-item" data-remove="${p.id}" aria-label="Remove ${esc(p.name)} from cart"><i class="bi bi-trash3"></i></button>
+      <button class="remove-btn" data-remove="${p.id}" aria-label="Remove ${esc(p.name)}">
+        <i class="bi bi-trash3"></i>
+      </button>
     </div>`;
-    })
-    .join("");
+  }).join("");
 
-  const subtotal = cartSubtotalValue();
-  const shipping = shippingFor(subtotal);
-  cartSubtotal.textContent = money(subtotal);
-  cartShipping.textContent = shipping === 0 ? "FREE" : money(shipping);
-  cartTotal.textContent = money(subtotal + shipping);
-  renderShipProgress(subtotal);
+  const sub  = subtotalValue();
+  const ship = shippingFor(sub);
+  $("cartSubtotal").textContent = money(sub);
+  $("cartShipping").textContent = ship === 0 ? "FREE" : money(ship);
+  $("cartTotal").textContent    = money(sub + ship);
+  renderShipProgress(sub);
 }
 
-function renderShipProgress(subtotal) {
+function renderShipProgress(sub) {
   const threshold = settings.freeShippingThreshold || 999;
-  const msg = $("shipMessage");
+  const msg  = $("shipMessage");
   const fill = $("shipFill");
-  if (subtotal >= threshold) {
-    msg.innerHTML = `<b>You unlocked FREE shipping!</b> 🎉`;
+  if (sub >= threshold) {
+    msg.innerHTML = `<b>Free shipping unlocked!</b> 🎉`;
     msg.classList.add("free");
     fill.style.width = "100%";
   } else {
-    msg.innerHTML = `Add <b>${money(threshold - subtotal)}</b> more for free shipping`;
+    msg.innerHTML = `Add <b>${money(threshold - sub)}</b> more for free shipping`;
     msg.classList.remove("free");
-    fill.style.width = `${Math.min(100, Math.round((subtotal / threshold) * 100))}%`;
+    fill.style.width = `${Math.min(100, Math.round((sub / threshold) * 100))}%`;
   }
 }
 
-/* ── CHECKOUT ── */
+/* ── CHECKOUT ───────────────────────────────────────────── */
 function openCheckout() {
   if (!state.cart.length) return;
   renderCheckoutSummary();
@@ -298,39 +284,36 @@ function openCheckout() {
 }
 
 function renderCheckoutSummary() {
-  const items = state.cart
-    .map((item) => {
-      const p = getProduct(item.id);
-      if (!p) return "";
-      return `<div class="checkout-line-item">
-        <span>${esc(p.name)}<small>Qty ${item.qty} × ${money(p.price)}</small></span>
-        <span>${money(p.price * item.qty)}</span>
-      </div>`;
-    })
-    .join("");
+  const items = state.cart.map(item => {
+    const p = getProduct(item.id);
+    if (!p) return "";
+    return `<div class="co-line-item">
+      <span>${esc(p.name)}<small>Qty ${item.qty} × ${money(p.price)}</small></span>
+      <span>${money(p.price * item.qty)}</span>
+    </div>`;
+  }).join("");
   $("checkoutItems").innerHTML = items;
-
-  const subtotal = cartSubtotalValue();
-  const shipping = shippingFor(subtotal);
-  $("coSubtotal").textContent = money(subtotal);
-  $("coShipping").textContent = shipping === 0 ? "FREE" : money(shipping);
-  $("coTotal").textContent = money(subtotal + shipping);
+  const sub  = subtotalValue();
+  const ship = shippingFor(sub);
+  $("coSubtotal").textContent = money(sub);
+  $("coShipping").textContent = ship === 0 ? "FREE" : money(ship);
+  $("coTotal").textContent    = money(sub + ship);
 }
 
 function validateCheckout() {
   let valid = true;
   const rules = [
-    { id: "coName", err: "coNameError", test: (v) => v.length >= 2, message: "Please enter your name" },
-    { id: "coPhone", err: "coPhoneError", test: (v) => /^[+\d][\d\s\-()]{7,14}$/.test(v), message: "Enter a valid phone number" },
-    { id: "coEmail", err: "coEmailError", test: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), message: "Enter a valid email" },
-    { id: "coAddress", err: "coAddressError", test: (v) => v.length >= 10, message: "Please enter a full delivery address" },
+    { id: "coName",    err: "coNameError",    test: v => v.length >= 2,                      msg: "Enter your name" },
+    { id: "coPhone",   err: "coPhoneError",   test: v => /^[+\d][\d\s\-()]{7,14}$/.test(v), msg: "Enter a valid phone" },
+    { id: "coEmail",   err: "coEmailError",   test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), msg: "Enter a valid email" },
+    { id: "coAddress", err: "coAddressError", test: v => v.length >= 10,                     msg: "Enter a full address" },
   ];
-  rules.forEach((rule) => {
+  rules.forEach(rule => {
     const input = $(rule.id);
-    const error = $(rule.err);
-    const ok = rule.test(input.value.trim());
+    const errEl = $(rule.err);
+    const ok    = rule.test(input.value.trim());
     input.classList.toggle("invalid", !ok);
-    error.textContent = ok ? "" : rule.message;
+    if (errEl) errEl.textContent = ok ? "" : rule.msg;
     if (!ok) valid = false;
   });
   return valid;
@@ -339,29 +322,26 @@ function validateCheckout() {
 async function placeOrder(e) {
   e.preventDefault();
   if (!validateCheckout() || !state.cart.length) return;
-
   const btn = $("placeOrderBtn");
   btn.disabled = true;
-  btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Placing order…`;
+  btn.innerHTML = `<span class="loader-spin" style="width:14px;height:14px;border-width:1.5px;margin-right:0.4rem;"></span>Placing…`;
 
-  const subtotal = cartSubtotalValue();
-  const shipping = shippingFor(subtotal);
+  const sub  = subtotalValue();
+  const ship = shippingFor(sub);
   const payload = {
-    items: state.cart.map((item) => {
+    items: state.cart.map(item => {
       const p = getProduct(item.id);
       return { id: p.id, name: p.name, price: p.price, qty: item.qty };
     }),
-    total: subtotal + shipping,
-    shipping,
+    total: sub + ship, shipping: ship,
     customer: {
-      name: $("coName").value.trim(),
-      phone: $("coPhone").value.trim(),
-      email: $("coEmail").value.trim(),
+      name:    $("coName").value.trim(),
+      phone:   $("coPhone").value.trim(),
+      email:   $("coEmail").value.trim(),
       address: $("coAddress").value.trim(),
-      notes: $("coNotes").value.trim(),
+      notes:   $("coNotes").value.trim(),
     },
   };
-
   try {
     const order = await api("/api/orders", { method: "POST", body: JSON.stringify(payload) });
     checkoutModal.hide();
@@ -370,189 +350,151 @@ async function placeOrder(e) {
     saveCart();
     renderCart();
     $("orderIdChip").textContent = order.id;
-    orderSuccessModal.show();
+    orderSuccModal.show();
   } catch (err) {
     showToast(err.message || "Could not place order. Try again.", true);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `Place order <i class="bi bi-check2-circle ms-1"></i>`;
+    btn.innerHTML = `Place order <i class="bi bi-check2-circle"></i>`;
   }
 }
 
-/* ── SUBSCRIBERS ── */
-async function subscribe(email, type, button) {
-  button.disabled = true;
+/* ── SUBSCRIBE ──────────────────────────────────────────── */
+async function subscribe(email, type, btn) {
+  btn.disabled = true;
   try {
     const res = await api("/api/subscribers", { method: "POST", body: JSON.stringify({ email, type }) });
-    if (res.duplicate) {
-      showToast(type === "newsletter" ? "You're already subscribed." : "You're already on the launch list.");
-    } else {
-      showToast(type === "newsletter" ? "Welcome to Neatify Notes. 💌" : "You're on the interior launch list. 🔔");
-    }
+    showToast(res.duplicate
+      ? (type === "newsletter" ? "Already subscribed." : "Already on the list.")
+      : (type === "newsletter" ? "Welcome to Neatify Notes 💌" : "You're on the launch list 🔔"));
     return true;
   } catch (err) {
-    showToast(err.message || "Subscription failed", true);
+    showToast(err.message || "Subscription failed.", true);
     return false;
-  } finally {
-    button.disabled = false;
-  }
+  } finally { btn.disabled = false; }
 }
 
-/* ── TOASTS ── */
+/* ── TOASTS ─────────────────────────────────────────────── */
 function showToast(message, isError = false) {
   const el = document.createElement("div");
   el.className = "toast align-items-center border-0";
   el.setAttribute("role", "alert");
   el.setAttribute("aria-live", "assertive");
-  const icon = isError ? "bi-exclamation-circle-fill me-2 text-danger" : "bi-check-circle-fill me-2";
-  const safe = esc(message);
-  el.innerHTML = `<div class="d-flex"><div class="toast-body"><i class="bi ${icon}"></i>${safe}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>`;
+  const icon = isError ? "bi-exclamation-circle-fill text-danger" : "bi-check-circle-fill";
+  el.innerHTML = `<div class="d-flex"><div class="toast-body"><i class="bi ${icon} me-2"></i>${esc(message)}</div>
+    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>`;
   $("toastContainer").appendChild(el);
-  const t = new bootstrap.Toast(el, { delay: 2800 });
-  t.show();
-  el.addEventListener("hidden.bs.toast", () => el.remove());
+  if (hasBS) {
+    const t = new bootstrap.Toast(el, { delay: 2800 });
+    t.show();
+    el.addEventListener("hidden.bs.toast", () => el.remove());
+  } else {
+    setTimeout(() => el.remove(), 3000);
+  }
 }
 
-/* ── PRODUCT QUICK VIEW ── */
+/* ── PRODUCT QUICK VIEW ─────────────────────────────────── */
 function openProduct(id) {
   const p = getProduct(id);
   if (!p) return;
   $("productModalContent").innerHTML = `
-    <div class="col-md-6 modal-product-image"><img src="${esc(p.image)}" alt="${esc(p.name)}"></div>
-    <div class="col-md-6 modal-product-copy">
-      <span class="product-kicker">${esc(p.type)} / Exterior Care</span>
+    <div class="col-md-6 modal-prod-img"><img src="${esc(p.image)}" alt="${esc(p.name)}"></div>
+    <div class="col-md-6 modal-prod-copy">
+      <span class="prod-kicker">${esc(p.type)} / Exterior</span>
       <h2 id="productModalTitle">${esc(p.name)}</h2>
-      <div class="price mb-3">${money(p.price)}</div>
+      <div class="modal-price">${money(p.price)}</div>
       <p>${esc(p.description)}</p>
-      <ul class="detail-points">${(p.points || []).map((x) => `<li><i class="bi bi-check2"></i>${esc(x)}</li>`).join("")}</ul>
-      <button class="btn btn-dark w-100" data-modal-add="${p.id}">Add to cart <i class="bi bi-bag ms-1"></i></button>
+      <ul class="detail-pts">${(p.points || []).map(x => `<li><i class="bi bi-check2"></i>${esc(x)}</li>`).join("")}</ul>
+      <button class="btn-lime w-100" data-modal-add="${p.id}">Add to cart <i class="bi bi-bag ms-1"></i></button>
     </div>`;
   $("productModal").setAttribute("aria-labelledby", "productModalTitle");
   productModal.show();
 }
 
-/* ── SEARCH ── */
+/* ── SEARCH ─────────────────────────────────────────────── */
 function closeSearch() {
-  searchPanel.classList.remove("open");
-  searchInput.value = "";
+  $("searchPanel").classList.remove("open");
+  $("searchInput").value = "";
   state.search = "";
-  searchResults.innerHTML = "";
+  $("searchResults").innerHTML = "";
   renderProducts();
 }
 
 function renderSearchResults() {
-  const query = state.search.trim();
-  if (!query) {
-    searchResults.innerHTML = "";
-    return;
-  }
-  const results = products.filter((p) => matchesSearch(p, query)).slice(0, 5);
-  searchResults.innerHTML = results.length
-    ? results
-        .map(
-          (p) =>
-            `<div class="search-result" data-search-id="${p.id}" role="option"><span>${esc(p.name)}</span><strong>${money(p.price)}</strong></div>`
-        )
-        .join("")
-    : "<div class='search-result' role='status'>No matching product</div>";
+  const q = state.search.trim();
+  const container = $("searchResults");
+  if (!q) { container.innerHTML = ""; return; }
+  const results = products.filter(p => matchesSearch(p, q)).slice(0, 5);
+  container.innerHTML = results.length
+    ? results.map(p => `<div class="search-result" data-search-id="${p.id}" role="option">
+        <span>${esc(p.name)}</span><strong>${money(p.price)}</strong></div>`).join("")
+    : `<div class="search-result" role="status">No matching product</div>`;
 }
 
-function updateSearchPanelOffset() {
-  const announcement = document.querySelector(".announcement");
-  const headerHeight = (announcement?.offsetHeight || 0) + (mainNav?.offsetHeight || 0);
-  document.documentElement.style.setProperty("--header-height", `${headerHeight}px`);
+function updateHeaderHeight() {
+  const ann = document.querySelector(".ann-bar");
+  const nav = $("mainNav");
+  const h   = (ann?.offsetHeight || 0) + (nav?.offsetHeight || 0);
+  document.documentElement.style.setProperty("--header-height", `${h}px`);
 }
 
 function updateActiveNav() {
-  const navLinks = document.querySelectorAll("#navMenu .nav-link");
-  const scrollPos = window.scrollY + 120;
+  const links = document.querySelectorAll("#navMenu .nav-link");
+  const pos   = window.scrollY + 130;
   let current = "home";
-
-  document.querySelectorAll("main > section[id], main[id]").forEach((section) => {
-    if (section.offsetTop <= scrollPos) current = section.id || "home";
+  document.querySelectorAll("main > section[id]").forEach(s => {
+    if (s.offsetTop <= pos) current = s.id;
   });
-
-  navLinks.forEach((link) => {
-    const href = link.getAttribute("href");
-    link.classList.toggle("active", href === `#${current}`);
-  });
+  links.forEach(a => a.classList.toggle("active", a.getAttribute("href") === `#${current}`));
 }
 
-/* ── SCROLL REVEAL ── */
+/* ── REVEAL OBSERVER ────────────────────────────────────── */
 function initReveal() {
   const els = document.querySelectorAll(".reveal");
   if (!("IntersectionObserver" in window) || matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    els.forEach((el) => el.classList.add("visible"));
+    els.forEach(el => el.classList.add("visible"));
     return;
   }
-  const io = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-          io.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
-  );
-  els.forEach((el) => io.observe(el));
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("visible"); io.unobserve(e.target); } });
+  }, { threshold: 0.1, rootMargin: "0px 0px -36px 0px" });
+  els.forEach(el => io.observe(el));
 }
 
-/* ── EVENTS ── */
-document.addEventListener("click", (e) => {
+/* ── EVENTS ─────────────────────────────────────────────── */
+document.addEventListener("click", e => {
   const add = e.target.closest("[data-add]");
-  if (add) {
-    addToCart(Number(add.dataset.add));
-    return;
-  }
+  if (add) { addToCart(Number(add.dataset.add)); return; }
 
   const view = e.target.closest("[data-view]");
-  if (view) {
-    openProduct(Number(view.dataset.view));
-    return;
-  }
+  if (view) { openProduct(Number(view.dataset.view)); return; }
 
-  const image = e.target.closest(".product-image");
-  if (image && !e.target.closest("button")) {
-    openProduct(Number(image.dataset.id));
-    return;
-  }
+  const prodImg = e.target.closest(".prod-img");
+  if (prodImg && !e.target.closest("button")) { openProduct(Number(prodImg.dataset.id)); return; }
 
   const modalAdd = e.target.closest("[data-modal-add]");
-  if (modalAdd) {
-    addToCart(Number(modalAdd.dataset.modalAdd));
-    productModal.hide();
-    cartDrawer.show();
-    return;
-  }
+  if (modalAdd) { addToCart(Number(modalAdd.dataset.modalAdd)); productModal.hide(); cartDrawer.show(); return; }
 
   const qty = e.target.closest("[data-qty]");
   if (qty) {
-    const id = Number(qty.dataset.qty);
-    const item = state.cart.find((i) => i.id === id);
+    const id   = Number(qty.dataset.qty);
+    const item = state.cart.find(i => i.id === id);
     if (!item) return;
     item.qty += Number(qty.dataset.delta);
-    if (item.qty <= 0) state.cart = state.cart.filter((i) => i.id !== id);
-    saveCart();
-    renderCart();
-    return;
+    if (item.qty <= 0) state.cart = state.cart.filter(i => i.id !== id);
+    saveCart(); renderCart(); return;
   }
 
   const rem = e.target.closest("[data-remove]");
   if (rem) {
-    state.cart = state.cart.filter((i) => i.id !== Number(rem.dataset.remove));
-    saveCart();
-    renderCart();
+    state.cart = state.cart.filter(i => i.id !== Number(rem.dataset.remove));
+    saveCart(); renderCart();
   }
 });
 
-document.querySelectorAll(".filter-pill").forEach((btn) => {
+document.querySelectorAll(".f-pill").forEach(btn => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll(".filter-pill").forEach((x) => {
-      x.classList.remove("active");
-      x.setAttribute("aria-pressed", "false");
-    });
+    document.querySelectorAll(".f-pill").forEach(x => { x.classList.remove("active"); x.setAttribute("aria-pressed", "false"); });
     btn.classList.add("active");
     btn.setAttribute("aria-pressed", "true");
     state.filter = btn.dataset.filter;
@@ -560,91 +502,74 @@ document.querySelectorAll(".filter-pill").forEach((btn) => {
   });
 });
 
-$("sortSelect").addEventListener("change", (e) => {
-  state.sort = e.target.value;
-  renderProducts();
-});
-
+$("sortSelect").addEventListener("change", e => { state.sort = e.target.value; renderProducts(); });
 $("cartToggle").addEventListener("click", () => cartDrawer.show());
 $("checkoutBtn").addEventListener("click", openCheckout);
 $("checkoutForm").addEventListener("submit", placeOrder);
 $("bundleBtn").addEventListener("click", () => addBundle(settings.weekendKitIds || []));
 
 $("searchToggle").addEventListener("click", () => {
-  searchPanel.classList.add("open");
-  updateSearchPanelOffset();
-  searchInput.focus();
+  $("searchPanel").classList.add("open");
+  updateHeaderHeight();
+  $("searchInput").focus();
 });
-
 $("searchClose").addEventListener("click", closeSearch);
-
-searchInput.addEventListener("input", () => {
-  state.search = searchInput.value.trim();
+$("searchInput").addEventListener("input", () => {
+  state.search = $("searchInput").value.trim();
   renderProducts();
   renderSearchResults();
 });
-
-searchResults.addEventListener("click", (e) => {
+$("searchResults").addEventListener("click", e => {
   const r = e.target.closest("[data-search-id]");
   if (!r) return;
   openProduct(Number(r.dataset.searchId));
   closeSearch();
 });
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && searchPanel.classList.contains("open")) closeSearch();
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && $("searchPanel").classList.contains("open")) closeSearch();
 });
 
-document.querySelectorAll("#navMenu .nav-link").forEach((a) => {
+document.querySelectorAll("#navMenu .nav-link").forEach(a => {
   a.addEventListener("click", () => navCollapse.hide());
 });
 
-document.querySelectorAll(".socials a").forEach((a) => {
-  a.addEventListener("click", (e) => {
-    e.preventDefault();
-    showToast("Social profiles coming soon.");
-  });
+document.querySelectorAll(".socials a").forEach(a => {
+  a.addEventListener("click", e => { e.preventDefault(); showToast("Social profiles coming soon."); });
 });
 
-backToTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
-
-window.addEventListener(
-  "scroll",
-  () => {
-    mainNav.classList.toggle("scrolled", scrollY > 20);
-    backToTop.classList.toggle("show", scrollY > 700);
-    updateActiveNav();
-  },
-  { passive: true }
-);
-
-window.addEventListener("resize", updateSearchPanelOffset);
-
+$("backToTop").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 $("notifyBtn").addEventListener("click", () => notifyModal.show());
 $("footerNotify").addEventListener("click", () => notifyModal.show());
 
-$("notifyForm").addEventListener("submit", async (e) => {
+$("notifyForm").addEventListener("submit", async e => {
   e.preventDefault();
   const input = e.target.querySelector("input[type=email]");
   const ok = await subscribe(input.value.trim(), "notify", $("notifySubmit"));
-  if (ok) {
-    notifyModal.hide();
-    e.target.reset();
-  }
+  if (ok) { notifyModal.hide(); e.target.reset(); }
 });
 
-$("newsletterForm").addEventListener("submit", async (e) => {
+$("newsletterForm").addEventListener("submit", async e => {
   e.preventDefault();
   const input = $("emailInput");
-  if (!input.checkValidity()) {
-    input.reportValidity();
-    return;
-  }
+  if (!input.checkValidity()) { input.reportValidity(); return; }
   const ok = await subscribe(input.value.trim(), "newsletter", $("newsletterBtn"));
   if (ok) e.target.reset();
 });
 
-/* ── 3D SCROLL HERO (Three.js) ── */
+window.addEventListener("scroll", () => {
+  $("mainNav").classList.toggle("scrolled", scrollY > 20);
+  $("backToTop").classList.toggle("show", scrollY > 700);
+  updateActiveNav();
+}, { passive: true });
+
+window.addEventListener("resize", updateHeaderHeight);
+
+$("retryProducts").addEventListener("click", () => loadProducts());
+
+/* ══════════════════════════════════════════════════════════
+   3D SCROLL HERO (Three.js r128)
+   ══════════════════════════════════════════════════════════ */
+
 function showHeroFallback(section) {
   section.classList.add("no-3d");
   $("heroFallback")?.classList.remove("d-none");
@@ -653,227 +578,217 @@ function showHeroFallback(section) {
 
 function initHero3D() {
   const section = $("heroSection");
-  const canvas = $("heroCanvas");
+  const canvas  = $("heroCanvas");
   if (!section || !canvas) return;
 
-  // Reduced motion or missing Three.js → accessible static fallback
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches || !window.THREE) {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches || typeof THREE === "undefined") {
     showHeroFallback(section);
     return;
   }
 
+  /* Renderer */
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  } catch {
-    showHeroFallback(section);
-    return;
-  }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+  } catch { showHeroFallback(section); return; }
 
-  const scene = new THREE.Scene();
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  if (typeof THREE.sRGBEncoding !== "undefined") renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.shadowMap.enabled = false;
+
+  /* Scene */
+  const scene  = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
 
-  // Lighting — brand palette: lime key, electric blue fill, white rim
-  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-  const limeLight = new THREE.PointLight(0xd7ff3f, 1.4, 40);
-  limeLight.position.set(4, 3, 5);
-  scene.add(limeLight);
-  const blueLight = new THREE.PointLight(0x2182dc, 1.2, 40);
-  blueLight.position.set(-5, -2, 4);
-  scene.add(blueLight);
-  const rimLight = new THREE.PointLight(0xffffff, 0.5, 40);
-  rimLight.position.set(0, 5, -6);
+  /* Lighting */
+  scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+  const keyLight = new THREE.PointLight(0xc8f53c, 1.8, 55);  // lime key
+  keyLight.position.set(5, 4, 6);
+  scene.add(keyLight);
+  const fillLight = new THREE.PointLight(0x2878ff, 1.2, 55); // blue fill
+  fillLight.position.set(-5, -2, 4);
+  scene.add(fillLight);
+  const rimLight = new THREE.PointLight(0xffffff, 0.55, 55);
+  rimLight.position.set(0, 6, -7);
   scene.add(rimLight);
 
-  /* ── YOUR PRODUCT in 3D ──
-     The real GLB model spins and travels through the scroll journey.
-     Swap the path below to feature a different model. */
-  const HERO_MODEL = "assets/3dimage.glb";
+  /* Product group */
+  const productGroup = new THREE.Group();
+  scene.add(productGroup);
+  let modelHolder  = null;
+  let modelScale   = 1;
+  let introEase    = 0;
 
-  const product = new THREE.Group();
-  scene.add(product);
+  /* Loader UI */
+  const loaderEl  = $("modelLoader");
+  const loaderTxt = $("modelLoaderText");
+  if (loaderEl) loaderEl.classList.remove("d-none");
 
-  let modelHolder = null; // set once the GLB arrives
-  let modelBaseScale = 1;
-  let introScale = 0; // eased 0 → 1 for a soft entrance
-  const loaderEl = $("modelLoader");
-  const loaderText = $("modelLoaderText");
-
+  /* Load GLB */
   if (THREE.GLTFLoader) {
     new THREE.GLTFLoader().load(
-      HERO_MODEL,
+      "assets/3dimage.glb",
       (gltf) => {
         const model = gltf.scene;
-        // Center the model on the origin
-        const box = new THREE.Box3().setFromObject(model);
-        const size = box.getSize(new THREE.Vector3());
-        const center = box.getCenter(new THREE.Vector3());
-        model.position.set(-center.x, -center.y, -center.z);
+        const box   = new THREE.Box3().setFromObject(model);
+        const size  = box.getSize(new THREE.Vector3());
+        const ctr   = box.getCenter(new THREE.Vector3());
+        model.position.set(-ctr.x, -ctr.y, -ctr.z);
+
         modelHolder = new THREE.Group();
         modelHolder.add(model);
-        // Fit the tallest axis to the stage height
-        modelBaseScale = 4.4 / (Math.max(size.x, size.y, size.z) || 1);
-        modelHolder.scale.setScalar(0.0001);
-        product.add(modelHolder);
-        loaderEl?.classList.add("d-none");
+
+        const maxDim  = Math.max(size.x, size.y, size.z) || 1;
+        modelScale = 4.2 / maxDim;
+        modelHolder.scale.setScalar(0.001);
+        productGroup.add(modelHolder);
+
+        if (loaderEl) loaderEl.classList.add("d-none");
       },
       (xhr) => {
-        // Visible progress feedback while the heavy model streams in
-        if (xhr.total && loaderEl && loaderText) {
-          loaderEl.classList.remove("d-none");
-          loaderText.textContent = `Loading 3D model… ${Math.round((xhr.loaded / xhr.total) * 100)}%`;
+        if (loaderEl && loaderTxt) {
+          if (xhr.total > 0) {
+            const pct = Math.round((xhr.loaded / xhr.total) * 100);
+            loaderTxt.textContent = `Loading 3D… ${pct}%`;
+          } else {
+            loaderTxt.textContent = `Loading 3D… ${(xhr.loaded / 1048576).toFixed(1)} MB`;
+          }
         }
       },
-      () => {
-        loaderEl?.classList.add("d-none");
+      (err) => {
+        console.warn("3D model failed:", err);
+        if (loaderEl) loaderEl.classList.add("d-none");
+        /* Scene still animates with ring + particles */
       }
     );
+  } else {
+    if (loaderEl) loaderEl.classList.add("d-none");
   }
 
-  // Orbiting podium ring under the product
+  /* Orbiting ring */
   const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(2.6, 0.04, 16, 90),
-    new THREE.MeshStandardMaterial({
-      color: 0xd7ff3f, emissive: 0xd7ff3f, emissiveIntensity: 0.7,
-      metalness: 0.4, roughness: 0.3,
-    })
+    new THREE.TorusGeometry(2.5, 0.035, 16, 90),
+    new THREE.MeshStandardMaterial({ color: 0xc8f53c, emissive: 0xc8f53c, emissiveIntensity: 0.9, metalness: 0.4, roughness: 0.2 })
   );
-  ring.rotation.x = Math.PI / 2.2;
-  ring.position.y = -2.3;
+  ring.rotation.x = Math.PI / 2.15;
+  ring.position.y = -2.2;
   scene.add(ring);
 
-  // Foam bubble particle field
-  const PARTICLES = 170;
-  const positions = new Float32Array(PARTICLES * 3);
-  const speeds = new Float32Array(PARTICLES);
-  for (let i = 0; i < PARTICLES; i++) {
-    positions[i * 3] = (Math.random() - 0.5) * 13;
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 9;
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 6 - 1;
-    speeds[i] = 0.15 + Math.random() * 0.4;
+  /* Particle field */
+  const PARTS = 180;
+  const pPos  = new Float32Array(PARTS * 3);
+  const pSpd  = new Float32Array(PARTS);
+  for (let i = 0; i < PARTS; i++) {
+    pPos[i * 3]     = (Math.random() - 0.5) * 13;
+    pPos[i * 3 + 1] = (Math.random() - 0.5) * 10;
+    pPos[i * 3 + 2] = (Math.random() - 0.5) * 7 - 1;
+    pSpd[i] = 0.1 + Math.random() * 0.35;
   }
-  const particleGeo = new THREE.BufferGeometry();
-  particleGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-  scene.add(
-    new THREE.Points(
-      particleGeo,
-      new THREE.PointsMaterial({ color: 0xd7ff3f, size: 0.055, transparent: true, opacity: 0.5 })
-    )
-  );
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
+  scene.add(new THREE.Points(pGeo, new THREE.PointsMaterial({
+    color: 0xc8f53c, size: 0.055, transparent: true, opacity: 0.38, sizeAttenuation: true
+  })));
 
-  // Scroll state with damping (native scroll drives the scene)
-  const space = section.querySelector(".hero-scroll-space");
-  const stages = [...document.querySelectorAll(".hero-stage")];
-  const dots = [...document.querySelectorAll(".rail-label")];
-  const fill = $("heroProgressFill");
-  const cue = $("scrollCue");
+  /* Scroll */
+  const space    = section.querySelector(".hero-scroll-space");
+  const stages   = [...document.querySelectorAll(".hero-stage")];
+  const railDots = [...document.querySelectorAll(".rail-dot")];
+  const fillEl   = $("heroProgressFill");
+  const cueEl    = $("scrollCue");
   const statusEl = $("heroStatus");
-  let target = 0;
-  let current = 0;
-  let activeStage = 0;
-  let rafId = null;
-  let heroVisible = true;
+
+  let scrollTarget  = 0;
+  let scrollCurrent = 0;
+  let activeStage   = -1;
+  let rafId         = null;
+  let heroVisible   = true;
   const clock = new THREE.Clock();
 
-  const smooth = (x, a, b) => {
-    const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+  const smoothstep = (x, a, b) => {
+    const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
     return t * t * (3 - 2 * t);
   };
-  const isMobile = () => window.innerWidth < 992;
+  const isMobile = () => innerWidth < 992;
 
   function setSize() {
-    camera.aspect = section.clientWidth / window.innerHeight;
+    const w = section.clientWidth;
+    const h = innerHeight;
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    renderer.setSize(section.clientWidth, window.innerHeight);
+    renderer.setSize(w, h, false);
   }
 
   function readScroll() {
-    const total = space.offsetHeight - window.innerHeight;
-    target = total > 0 ? Math.min(1, Math.max(0, -space.getBoundingClientRect().top / total)) : 0;
+    if (!space) return;
+    const total = space.offsetHeight - innerHeight;
+    scrollTarget = total > 0
+      ? Math.min(1, Math.max(0, -space.getBoundingClientRect().top / total))
+      : 0;
   }
 
   function setStage(index) {
     if (index === activeStage) return;
     activeStage = index;
     stages.forEach((s, i) => s.classList.toggle("active", i === index));
-    dots.forEach((d, i) => d.classList.toggle("on", i === index));
-    statusEl.textContent = `Viewing stage ${index + 1} of ${stages.length}`;
+    railDots.forEach((d, i) => d.classList.toggle("active", i === index));
+    if (statusEl) statusEl.textContent = `Stage ${index + 1} of ${stages.length}`;
   }
 
   function animate() {
     rafId = requestAnimationFrame(animate);
-    current += (target - current) * 0.08; // damped, buttery follow
-    const p = current;
-    const t = clock.getElapsedTime();
-    const mobile = isMobile();
+    scrollCurrent += (scrollTarget - scrollCurrent) * 0.08;
+    const p  = scrollCurrent;
+    const t  = clock.getElapsedTime();
+    const mb = isMobile();
 
-    // Scroll-linked product spin, tilt, drift and re-center for the finale
-    product.rotation.y = p * Math.PI * 2.5 + Math.sin(t * 0.6) * 0.05;
-    product.rotation.z = Math.sin(p * Math.PI) * 0.08;
-    const centerBlend = smooth(p, 0.55, 0.95);
-    product.position.x = mobile ? 0 : 1.8 * (1 - centerBlend);
-    product.position.y = 0.05 + p * 0.35 + Math.sin(t * 0.8) * 0.06;
-    product.scale.setScalar(mobile ? 0.62 : 1);
+    productGroup.rotation.y = p * Math.PI * 2.5 + Math.sin(t * 0.55) * 0.06;
+    productGroup.rotation.z = Math.sin(p * Math.PI) * 0.08;
+    const blend = smoothstep(p, 0.55, 0.95);
+    productGroup.position.x = mb ? 0 : 1.9 * (1 - blend);
+    productGroup.position.y = 0.05 + p * 0.35 + Math.sin(t * 0.8) * 0.06;
+    productGroup.scale.setScalar(mb ? 0.62 : 1);
 
-    // Soft scale-in once the GLB arrives
     if (modelHolder) {
-      introScale += (1 - introScale) * 0.07;
-      modelHolder.scale.setScalar(modelBaseScale * Math.max(introScale, 0.0001));
+      introEase = Math.min(1, introEase + (1 - introEase) * 0.065);
+      modelHolder.scale.setScalar(modelScale * Math.max(introEase, 0.001));
     }
 
-    // Podium ring reacts to scroll too
-    ring.rotation.z = t * 0.25 + p * Math.PI;
-    ring.position.x = product.position.x;
-    ring.position.y = product.position.y - 2.35;
+    ring.rotation.z      = t * 0.2 + p * Math.PI;
+    ring.position.x      = productGroup.position.x;
+    ring.position.y      = productGroup.position.y - 2.25;
 
-    // Camera dolly through the journey
-    camera.position.set(0, 0.4 - p * 0.2, (mobile ? 9.4 : 7.6) - Math.sin(p * Math.PI) * 1);
-    camera.lookAt(product.position.x * 0.45, 0.1, 0);
+    const camZ = (mb ? 9.5 : 7.8) - Math.sin(p * Math.PI) * 1.1;
+    camera.position.set(0, 0.38 - p * 0.2, camZ);
+    camera.lookAt(productGroup.position.x * 0.35, 0.1, 0);
 
-    // Lime light orbits the product as you scroll
     const orbit = p * Math.PI * 2;
-    limeLight.position.set(Math.cos(orbit) * 4.5, 2.6, Math.sin(orbit) * 4.5 + 1);
+    keyLight.position.set(Math.cos(orbit) * 4.5, 2.5, Math.sin(orbit) * 4.5 + 1);
 
-    // Foam bubbles drift upward
-    const pos = particleGeo.attributes.position.array;
-    for (let i = 0; i < PARTICLES; i++) {
-      pos[i * 3 + 1] += speeds[i] * 0.016;
-      if (pos[i * 3 + 1] > 4.5) pos[i * 3 + 1] = -4.5;
+    const pos = pGeo.attributes.position.array;
+    for (let i = 0; i < PARTS; i++) {
+      pos[i * 3 + 1] += pSpd[i] * 0.016;
+      if (pos[i * 3 + 1] > 5) pos[i * 3 + 1] = -5;
     }
-    particleGeo.attributes.position.needsUpdate = true;
+    pGeo.attributes.position.needsUpdate = true;
 
-    // UI sync: progress bar, cue, stage crossfade
-    fill.style.height = `${p * 100}%`;
-    cue.classList.toggle("hide", p > 0.02);
+    if (fillEl) fillEl.style.width = `${p * 100}%`;
+    if (cueEl)  cueEl.classList.toggle("hide", p > 0.02);
     setStage(p < 0.36 ? 0 : p < 0.72 ? 1 : 2);
 
     renderer.render(scene, camera);
   }
 
-  function start() {
-    if (rafId === null && heroVisible) rafId = requestAnimationFrame(animate);
-  }
-  function stop() {
-    if (rafId !== null) {
-      cancelAnimationFrame(rafId);
-      rafId = null;
-    }
-  }
+  const start = () => { if (rafId === null && heroVisible) rafId = requestAnimationFrame(animate); };
+  const stop  = () => { if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; } };
 
-  // Pause rendering when the hero is off-screen (performance)
   new IntersectionObserver(([entry]) => {
     heroVisible = entry.isIntersecting;
-    if (heroVisible) start();
-    else stop();
+    heroVisible ? start() : stop();
   }).observe(section);
 
   window.addEventListener("scroll", readScroll, { passive: true });
-  window.addEventListener("resize", () => {
-    setSize();
-    readScroll();
-  });
+  window.addEventListener("resize", () => { setSize(); readScroll(); });
 
   $("heroKitBtn")?.addEventListener("click", () => addBundle(settings.weekendKitIds || []));
 
@@ -882,14 +797,13 @@ function initHero3D() {
   start();
 }
 
-/* ── BOOT ── */
+/* ── BOOT ───────────────────────────────────────────────── */
 async function boot() {
   if (location.protocol === "file:") {
-    showToast("Open the store via http://localhost:3000 (run npm start first).", true);
+    showToast("Open via http://localhost:3000 (npm start).", true);
   }
-  // Each step is isolated so one failure can never block the rest
-  const step = (fn) => Promise.resolve().then(fn).catch((err) => console.error("Boot step failed:", err));
-  await step(updateSearchPanelOffset);
+  const step = fn => Promise.resolve().then(fn).catch(err => console.warn("Boot step failed:", err));
+  await step(updateHeaderHeight);
   await step(initReveal);
   await step(initHero3D);
   await step(loadSettings);
@@ -898,7 +812,5 @@ async function boot() {
   await step(renderCart);
   await step(updateActiveNav);
 }
-
-$("retryProducts").addEventListener("click", () => loadProducts());
 
 boot();
