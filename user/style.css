@@ -385,7 +385,7 @@ body.no-scroll { overflow: hidden; }
   position: relative;
 }
 .hero-scroll-space { height: 300vh; position: relative; }  /* sticky screen + 2 stage scrolls; next scroll exits */
-.hero-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+.hero-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; height: 100dvh; overflow: hidden; }  /* dvh tracks the live viewport — no black band when the browser chrome collapses */
 
 /* Canvas */
 #heroCanvas {
@@ -688,7 +688,7 @@ body.no-scroll { overflow: hidden; }
 }
 .hero-fallback img { border-radius: var(--r-lg); filter: drop-shadow(0 24px 48px rgba(0,0,0,0.7)); }
 .hero.no-3d .hero-scroll-space { height: auto; }  /* content decides the height — never clip */
-.hero.no-3d .hero-sticky { position: relative; height: auto; min-height: 100svh; overflow: visible; }
+.hero.no-3d .hero-sticky { position: relative; height: auto; min-height: 100svh; min-height: 100dvh; overflow: visible; }
 .hero.no-3d .hero-stages-wrap { position: relative; inset: auto; padding: 7rem 0 4rem; pointer-events: auto; }
 .hero.no-3d .hero-stages-wrap > .container { height: auto; align-items: flex-start; padding-bottom: 0; }
 .hero.no-3d .hero-stages-inner { display: block; padding: 0; }
@@ -1794,7 +1794,7 @@ button:disabled { opacity: 0.5; pointer-events: none; }
 /* ── Short landscape screens (phones rotated) ── */
 @media (max-height: 560px) {
   .navbar { padding: 0.5rem 0; }
-  .hero-sticky { min-height: 100svh; }
+  .hero-sticky { min-height: 100svh; min-height: 100dvh; }
   .hero-stages-wrap > .container { align-items: flex-end; padding-bottom: 2.5rem; }
   .hero-stages-inner { padding: 1.5rem 0 0; }
   .hero-h1 { font-size: clamp(1.6rem, 5.5vh, 2.4rem); margin-bottom: 0.6rem; }
