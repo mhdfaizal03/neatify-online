@@ -910,43 +910,51 @@ button:disabled { opacity: 0.5; pointer-events: none; }
    PROCESS
    ════════════════════════════════════════════════════════ */
 .process-sec { background: #edeee9; }
-.process-grid { margin-top: 3.5rem; position: relative; }
+.process-grid { margin-top: 3rem; position: relative; }
 .process-line {
   position: absolute;
-  top: 42px; left: 0; right: 0;
+  top: 56px; left: 0; right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.12) 10%, rgba(0,0,0,0.12) 90%, transparent);
+  background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.14) 8%, rgba(0,0,0,0.14) 92%, transparent);
   z-index: 0;
 }
 .step-card {
   position: relative;
-  padding: 1.5rem 0 0.5rem;
   z-index: 1;
-  transition: transform var(--dur-med) var(--ease);
+  height: 100%;
+  background: #fff;
+  border-radius: var(--r-lg);
+  box-shadow: var(--elev-1);
+  padding: 1.6rem 1.5rem 1.75rem;
+  transition: transform var(--dur-med) var(--ease), box-shadow var(--dur-med) var(--ease);
 }
-.step-card:hover { transform: translateY(-4px); }
+.step-card:hover { transform: translateY(-4px); box-shadow: var(--elev-2); }
 .step-n {
+  position: absolute;
+  top: 1.5rem; right: 1.5rem;
   font-family: "Space Grotesk", sans-serif;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  color: #9aa09b;
+  color: #b6bbb2;
   letter-spacing: 0.1em;
 }
 .step-icon {
   width: 60px; height: 60px;
   border-radius: var(--r-md);
-  background: #fff;
+  background: #f2f3ee;
   display: grid;
   place-items: center;
   font-size: 1.4rem;
-  margin: 1.2rem 0;
-  box-shadow: var(--elev-1);
+  margin: 0 0 1.3rem;
   transition: background var(--dur-med) var(--ease), transform var(--dur-med) var(--ease);
   color: #444;
 }
 .step-card:hover .step-icon { background: var(--lime); color: #111; transform: rotate(-5deg); }
-.step-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.45rem; }
-.step-card p { font-size: 0.82rem; color: #72786e; line-height: 1.6; max-width: 220px; }
+.step-card h3 { font-size: 1.08rem; font-weight: 700; margin-bottom: 0.45rem; }
+.step-card p { font-size: 0.82rem; color: #72786e; line-height: 1.6; margin: 0; }
+@media (max-width: 991px) {
+  .process-line { display: none; }
+}
 
 /* ════════════════════════════════════════════════════════
    INTERIOR TEASER
