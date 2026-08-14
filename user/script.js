@@ -839,10 +839,10 @@ function initHero3D() {
     /* Desktop: model sits on right half, converges to centre at stage 3 */
     const blend = smoothstep(p, 0.6, 1.0);
     if (mb) {
-      /* Mobile: float in the open upper space, clear of the copy */
+      /* Mobile: zoomed in, gently biased toward the top */
       productGroup.position.x = 0;
-      productGroup.position.y = 1.25 + p * 0.2;
-      productGroup.scale.setScalar(0.5);
+      productGroup.position.y = 0.85 + p * 0.2;
+      productGroup.scale.setScalar(0.62);
     } else {
       /* Desktop: right-side showcase */
       productGroup.position.x = 1.8 - blend * 1.8; /* moves left as we reach stage 3 */
@@ -866,9 +866,9 @@ function initHero3D() {
 
     /* ── Camera ── */
     if (mb) {
-      /* Mobile: frame the upper showcase zone */
-      camera.position.set(0, 0.35, 8.5);
-      camera.lookAt(0, 0.7, 0);
+      /* Mobile: closer lens, frame the upper-middle zone */
+      camera.position.set(0, 0.3, 8.2);
+      camera.lookAt(0, 0.45, 0);
     } else {
       /* Desktop: slightly left of centre so model on right is in view */
       const camX = -1.2 + blend * 1.2;  /* moves right as page scrolls */
