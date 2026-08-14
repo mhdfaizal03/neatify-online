@@ -672,12 +672,21 @@ body.no-scroll { overflow: hidden; }
   width: min(40%, 400px); z-index: 4;
 }
 .hero-fallback img { border-radius: var(--r-lg); filter: drop-shadow(0 24px 48px rgba(0,0,0,0.7)); }
-.hero.no-3d .hero-scroll-space { height: 100vh; height: 100svh; }
+.hero.no-3d .hero-scroll-space { height: auto; }  /* content decides the height — never clip */
+.hero.no-3d .hero-sticky { position: relative; height: auto; min-height: 100svh; overflow: visible; }
+.hero.no-3d .hero-stages-wrap { position: relative; inset: auto; padding: 7rem 0 4rem; pointer-events: auto; }
+.hero.no-3d .hero-stages-wrap > .container { height: auto; align-items: flex-start; padding-bottom: 0; }
+.hero.no-3d .hero-stages-inner { display: block; padding: 0; }
 .hero.no-3d .hero-rail,
 .hero.no-3d .scroll-hint,
 .hero.no-3d .model-loader { display: none; }
-.hero.no-3d .hero-stage { display: none; position: relative; top: auto; transform: none; opacity: 1; translate: none; }
+.hero.no-3d .hero-stage { display: none; position: relative; top: auto; transform: none; opacity: 1; translate: none; max-width: 560px; margin: 0 auto 3rem; pointer-events: auto; }
 .hero.no-3d .hero-stage[data-stage="0"] { display: block; }
+.hero.no-3d .hero-stage .stage-label,
+.hero.no-3d .hero-stage .hero-h1,
+.hero.no-3d .hero-stage .hero-sub,
+.hero.no-3d .hero-stage .hero-actions,
+.hero.no-3d .hero-stage .hero-meta { opacity: 1; animation: none; }
 
 /* Stage animation keyframe */
 @keyframes fade-up {
@@ -1565,8 +1574,9 @@ button:disabled { opacity: 0.5; pointer-events: none; }
 @media (max-width: 991px) {
   :root { --header-height: 100px; }
 
-  /* Nav */
+  /* Nav — collapse is hidden, so push icons right next to the burger */
   .navbar { padding: 0.75rem 0; }
+  .nav-end { margin-left: auto; }
   /* Hero */
   .hero-scroll-space { height: 400vh; }  /* 3 stage scrolls + exit scroll */
   .hero-stages-wrap > .container { align-items: flex-end; padding-bottom: 6rem; }
@@ -1618,6 +1628,11 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   .co-form-side { border-radius: var(--r-lg) var(--r-lg) 0 0; }
   .co-summary-side { border-radius: 0 0 var(--r-lg) var(--r-lg); padding: 2rem; }
   .co-items { max-height: 200px; }
+
+  /* Inputs ≥16px — stops iOS Safari from zooming the page on focus */
+  .search-field input, .news-form input, .sort-dd,
+  .co-form-side input, .co-form-side textarea,
+  .info-modal .form-control { font-size: 1rem; }
 }
 
 /* ── Tablet portrait (≤767px) ── */
@@ -1656,7 +1671,7 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   .news-form .btn-dark { border-left: 0; border-top: 1px solid rgba(255,255,255,0.1); border-radius: 0; width: 100%; justify-content: center; }
 
   /* Footer */
-  .foot-bottom { flex-direction: column; gap: 0.35rem; }
+  .foot-bottom { flex-direction: column; gap: 0.35rem; align-items: center; text-align: center; }
 
   /* Cart drawer */
   .cart-drawer { width: 100%; }
@@ -1690,6 +1705,7 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   .sec { padding: 3.5rem 0; }
 
   /* Shop */
+  #productGrid { --bs-gutter-x: 0.75rem; }  /* tighter gutter for the two-up grid */
   .shop-bar { flex-direction: column; align-items: stretch; gap: 0.75rem; }
   .filter-row { gap: 0.3rem; }
   .f-pill { font-size: 0.72rem; padding: 0.4rem 0.7rem; }
@@ -1727,6 +1743,9 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   .co-form-side { padding: 1.5rem 1.2rem; }
   .co-summary-side { padding: 1.5rem 1.2rem; }
 
+  /* Announce popup — keep clear of screen edges */
+  .ann-pop { width: min(92vw, 460px); bottom: 14px; padding: 0.8rem; }
+
   /* Back to top */
   .btt { right: 14px; bottom: 14px; }
 }
@@ -1740,6 +1759,23 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   .stage-label { font-size: 0.6rem; }
   .sec-title { font-size: 1.9rem; }
   .bundle-title { font-size: 2rem; }
+  .nav-brand { font-size: 1.3rem; }
+  .icon-btn { width: 34px; height: 34px; }
+  .f-pill { font-size: 0.68rem; padding: 0.38rem 0.6rem; }
+}
+
+/* ── Short landscape screens (phones rotated) ── */
+@media (max-height: 560px) {
+  .navbar { padding: 0.5rem 0; }
+  .hero-sticky { min-height: 100svh; }
+  .hero-stages-wrap > .container { align-items: flex-end; padding-bottom: 2.5rem; }
+  .hero-stages-inner { padding: 1.5rem 0 0; }
+  .hero-h1 { font-size: clamp(1.6rem, 5.5vh, 2.4rem); margin-bottom: 0.6rem; }
+  .hero-sub { display: none; }             /* copy must fit the short viewport */
+  .hero-meta { display: none; }
+  .hero-actions { margin-bottom: 0; gap: 0.5rem; }
+  .btn-hero-primary, .btn-hero-ghost { padding: 0.55rem 1rem; font-size: 0.8rem; }
+  .model-loader { bottom: 14px; }
 }
 
 /* ── Reduced motion ── */
