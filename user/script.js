@@ -850,9 +850,9 @@ function initHero3D() {
       productGroup.position.y = 2.1 + p * 0.2;
       productGroup.scale.setScalar(0.92);
     } else {
-      /* Desktop/TV: right-side showcase, extra bias on wide aspects */
-      const wideBias = Math.min(0.6, Math.max(0, camera.aspect - 1.6) * 1.2);
-      productGroup.position.x = (3.0 + wideBias) * (1 - blend); /* converges to centre at stage 3 */
+      /* Desktop/TV: right-side showcase, tablet-and-up sits a touch further right */
+      const wideBias = Math.min(0.8, Math.max(0, camera.aspect - 1.45) * 1.4);
+      productGroup.position.x = (3.3 + wideBias) * (1 - blend); /* converges to centre at stage 3 */
       productGroup.scale.setScalar(1);
     }
 
