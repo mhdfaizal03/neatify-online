@@ -4,6 +4,16 @@
 
 const CART_KEY = "neatify-cart-v2";
 const SHIPPING_FEE = 49;
+const TOKEN_KEY = "neatify-token";
+const USER_KEY  = "neatify-user";
+
+/* Stored customer session (token + profile) survives reloads */
+let session = { token: "", user: null };
+try {
+  session.token = localStorage.getItem(TOKEN_KEY) || "";
+  session.user = JSON.parse(localStorage.getItem(USER_KEY) || "null");
+} catch { /* storage unavailable — session stays in memory */ }
+let pendingCheckout = false;
 
 let products = [];
 let settings = { freeShippingThreshold: 999, weekendKitIds: [1, 2, 4, 7], highlightProductId: 3 };
@@ -18,6 +28,8 @@ const notifyModal    = hasBS ? bootstrap.Modal.getOrCreateInstance("#notifyModal
 const checkoutModal  = hasBS ? bootstrap.Modal.getOrCreateInstance("#checkoutModal")    : noopUi;
 const orderSuccModal = hasBS ? bootstrap.Modal.getOrCreateInstance("#orderSuccessModal"): noopUi;
 const cartDrawer     = hasBS ? bootstrap.Offcanvas.getOrCreateInstance("#cartDrawer")   : noopUi;
+const authModal      = hasBS ? bootstrap.Modal.getOrCreateInstance("#authModal")        : noopUi;
+const accountModal   = hasBS ? bootstrap.Modal.getOrCreateInstance("#accountModal")     : noopUi;
 const navCollapse    = hasBS ? bootstrap.Collapse.getOrCreateInstance($("navMenu"), { toggle: false }) : noopUi;
 
 /* ── HELPERS ────────────────────────────────────────────── */
@@ -38,7 +50,9 @@ function esc(str) {
 }
 
 async function api(path, opts = {}) {
-  const res = await fetch(path, { headers: { "Content-Type": "application/json" }, ...opts });
+  const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
+  if (session.token && !headers.Authorization) headers.Authorization = `Bearer ${session.token}`;
+  const res = await fetch(path, { ...opts, headers });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || "Request failed");
   return data;
@@ -278,9 +292,28 @@ function renderShipProgress(sub) {
 /* ── CHECKOUT ───────────────────────────────────────────── */
 function openCheckout() {
   if (!state.cart.length) return;
+  if (!isLoggedIn()) {
+    /* Purchases require an account — route through auth, then resume */
+    pendingCheckout = true;
+    cartDrawer.hide();
+    showAuthNotice(true);
+    authSwitch("login");
+    authModal.show();
+    return;
+  }
+  prefillCheckout();
   renderCheckoutSummary();
   cartDrawer.hide();
   checkoutModal.show();
+}
+
+/* Returning customers never re-type what we already know */
+function prefillCheckout() {
+  const u = session.user || {};
+  if (!$("coName").value.trim())    $("coName").value    = u.name || "";
+  if (!$("coPhone").value.trim())   $("coPhone").value   = u.phone || "";
+  if (!$("coEmail").value.trim())   $("coEmail").value   = u.email || "";
+  if (!$("coAddress").value.trim()) $("coAddress").value = u.address || "";
 }
 
 function renderCheckoutSummary() {
@@ -352,11 +385,229 @@ async function placeOrder(e) {
     $("orderIdChip").textContent = order.id;
     orderSuccModal.show();
   } catch (err) {
+    if (/sign in/i.test(err.message)) {
+      /* token expired mid-checkout — re-auth then resume */
+      clearSession();
+      pendingCheckout = true;
+      checkoutModal.hide();
+      showAuthNotice(true);
+      authModal.show();
+    }
     showToast(err.message || "Could not place order. Try again.", true);
   } finally {
     btn.disabled = false;
     btn.innerHTML = `Place order <i class="bi bi-check2-circle"></i>`;
   }
+}
+
+/* ── ACCOUNT: session, auth modal, profile, orders ──────── */
+const isLoggedIn = () => !!(session.token && session.user);
+
+function setSession(token, user) {
+  session.token = token;
+  session.user = user;
+  try {
+    localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+  } catch { /* storage unavailable */ }
+  updateAccountUi();
+}
+
+function clearSession() {
+  session.token = "";
+  session.user = null;
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+  } catch { /* storage unavailable */ }
+  updateAccountUi();
+}
+
+function updateAccountUi() {
+  const icon = $("accountIcon");
+  if (!icon) return;
+  icon.className = isLoggedIn() ? "bi bi-person-check-fill" : "bi bi-person-circle";
+  $("accountBtn").title = isLoggedIn() ? `Hi, ${session.user.name.split(" ")[0]}` : "Sign in / Register";
+}
+
+function showAuthNotice(show) { $("authNotice").classList.toggle("d-none", !show); }
+
+function authSwitch(tab) {
+  $("authTabLogin").classList.toggle("active", tab === "login");
+  $("authTabRegister").classList.toggle("active", tab === "register");
+  $("loginForm").classList.toggle("d-none", tab !== "login");
+  $("registerForm").classList.toggle("d-none", tab !== "register");
+  $("authError").classList.add("d-none");
+}
+
+function authFail(msg) {
+  const el = $("authError");
+  el.textContent = msg;
+  el.classList.remove("d-none");
+}
+
+async function handleAuth(e, mode) {
+  e.preventDefault();
+  const email = (mode === "login" ? $("liEmail") : $("rgEmail")).value.trim();
+  const password = (mode === "login" ? $("liPassword") : $("rgPassword")).value;
+  const name = mode === "register" ? $("rgName").value.trim() : "";
+  if (mode === "register" && name.length < 2) return authFail("Please enter your name");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return authFail("Please enter a valid email");
+  if (password.length < 6) return authFail("Password must be at least 6 characters");
+
+  const btn = mode === "login" ? $("loginBtn") : $("registerBtn");
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="loader-spin" style="width:14px;height:14px;border-width:1.5px;margin-right:0.4rem;"></span>${mode === "login" ? "Signing in…" : "Creating…"}`;
+  try {
+    const data = await api(`/api/account/${mode}`, {
+      method: "POST",
+      body: JSON.stringify(mode === "login" ? { email, password } : { name, email, password }),
+    });
+    setSession(data.token, data.user);
+    authModal.hide();
+    showToast(`${mode === "login" ? "Welcome back" : "Account created — welcome"}, ${esc(data.user.name.split(" ")[0])}!`);
+    if (pendingCheckout) { pendingCheckout = false; openCheckout(); }
+  } catch (err) {
+    authFail(err.message || "Something went wrong. Try again.");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+}
+
+function openAccount() {
+  const u = session.user;
+  $("accAvatar").textContent = (u.name || "?").trim().charAt(0).toUpperCase();
+  $("accName").textContent = u.name;
+  $("accEmail").textContent = u.email;
+  $("accSince").textContent = u.createdAt
+    ? `Member since ${new Date(u.createdAt).toLocaleDateString("en-IN", { month: "short", year: "numeric" })}`
+    : "";
+  $("pfName").value = u.name || "";
+  $("pfEmail").value = u.email || "";
+  $("pfPhone").value = u.phone || "";
+  $("pfAddress").value = u.address || "";
+  document.querySelector('.acc-tab[data-acc="orders"]').click();
+  accountModal.show();
+}
+
+async function loadAccountOrders() {
+  const box = $("accOrders");
+  box.innerHTML = `<div class="acc-empty"><div class="spin-ring"></div></div>`;
+  let orders;
+  try {
+    orders = await api("/api/account/orders");
+  } catch {
+    box.innerHTML = `<div class="acc-empty"><p>Could not load orders.</p></div>`;
+    return;
+  }
+  if (!orders.length) {
+    box.innerHTML = `<div class="acc-empty"><i class="bi bi-box-seam"></i><p>No orders yet — your purchases will live here.</p></div>`;
+    return;
+  }
+  box.innerHTML = orders.map((o) => {
+    const status = String(o.status || "pending").toLowerCase();
+    const date = new Date(o.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+    const lines = (o.items || []).map((it) =>
+      `<span>${esc(it.name)} × ${it.qty}<small>${money((it.price || 0) * (it.qty || 1))}</small></span>`).join("");
+    return `<div class="acc-order">
+      <div class="acc-order-head">
+        <span class="acc-order-id">${esc(o.id)}</span>
+        <span class="acc-order-date">${date}</span>
+        <span class="acc-status ${esc(status)}">${esc(status)}</span>
+      </div>
+      <div class="acc-order-items">${lines}</div>
+      <div class="acc-order-total"><span>Total</span><strong>${money(o.total || 0)}</strong></div>
+    </div>`;
+  }).join("");
+}
+
+async function saveProfile(e) {
+  e.preventDefault();
+  const btn = $("profileSaveBtn");
+  btn.disabled = true;
+  try {
+    const u = await api("/api/account/profile", {
+      method: "PUT",
+      body: JSON.stringify({ name: $("pfName").value, phone: $("pfPhone").value, address: $("pfAddress").value }),
+    });
+    setSession(session.token, u);
+    $("accAvatar").textContent = (u.name || "?").trim().charAt(0).toUpperCase();
+    $("accName").textContent = u.name;
+    showToast("Profile updated.");
+  } catch (err) {
+    showToast(err.message || "Could not save profile.", true);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function savePassword(e) {
+  e.preventDefault();
+  const btn = $("passwordSaveBtn");
+  btn.disabled = true;
+  try {
+    await api("/api/account/password", {
+      method: "PUT",
+      body: JSON.stringify({ current: $("pwCurrent").value, next: $("pwNext").value }),
+    });
+    $("passwordForm").reset();
+    showToast("Password updated.");
+  } catch (err) {
+    showToast(err.message || "Could not update password.", true);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function initAccount() {
+  updateAccountUi();
+
+  /* Validate a stored session in the background and keep the nav in sync */
+  if (session.token) {
+    api("/api/account/me")
+      .then((u) => { session.user = u; try { localStorage.setItem(USER_KEY, JSON.stringify(u)); } catch {} updateAccountUi(); })
+      .catch(() => clearSession());
+  }
+
+  $("accountBtn").addEventListener("click", () => {
+    if (isLoggedIn()) { openAccount(); return; }
+    showAuthNotice(false);
+    authSwitch("login");
+    authModal.show();
+  });
+
+  $("authTabLogin").addEventListener("click", () => authSwitch("login"));
+  $("authTabRegister").addEventListener("click", () => authSwitch("register"));
+  document.querySelectorAll(".pw-eye").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const input = $(btn.dataset.eye);
+      const show = input.type === "password";
+      input.type = show ? "text" : "password";
+      btn.querySelector("i").className = show ? "bi bi-eye-slash" : "bi bi-eye";
+    });
+  });
+
+  $("loginForm").addEventListener("submit", (e) => handleAuth(e, "login"));
+  $("registerForm").addEventListener("submit", (e) => handleAuth(e, "register"));
+
+  document.querySelectorAll(".acc-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".acc-tab").forEach((t) => t.classList.toggle("active", t === tab));
+      document.querySelectorAll(".acc-pane").forEach((p) => p.classList.remove("active"));
+      $(`accPane${tab.dataset.acc.charAt(0).toUpperCase()}${tab.dataset.acc.slice(1)}`).classList.add("active");
+      if (tab.dataset.acc === "orders") loadAccountOrders();
+    });
+  });
+
+  $("profileForm").addEventListener("submit", saveProfile);
+  $("passwordForm").addEventListener("submit", savePassword);
+  $("logoutBtn").addEventListener("click", () => {
+    clearSession();
+    accountModal.hide();
+    showToast("Signed out. See you soon!");
+  });
 }
 
 /* ── SUBSCRIBE ──────────────────────────────────────────── */
@@ -998,6 +1249,7 @@ async function boot() {
   await step(updateHeaderHeight);
   await step(initDrawer);
   await step(initAnnouncePop);
+  await step(initAccount);
   await step(initRipple);
   await step(initReveal);
   await step(initHero3D);

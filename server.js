@@ -244,6 +244,121 @@ app.get("/api/auth/me", authMiddleware, (req, res) => {
   res.json({ username: req.admin.username });
 });
 
+/* ── Customer accounts: register / login / profile / orders ──
+   Storefront purchases require a signed-in account; tokens are
+   HMAC-signed like the admin ones but carry a `uid` claim. */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function createUserToken(user) {
+  const payload = { uid: user.id, exp: Date.now() + 7 * 24 * 60 * 60 * 1000 };
+  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const sig = crypto.createHmac("sha256", SESSION_SECRET).update(body).digest("base64url");
+  return `${body}.${sig}`;
+}
+
+async function resolveUser(req) {
+  const header = req.headers.authorization || "";
+  const token = header.startsWith("Bearer ") ? header.slice(7) : null;
+  const payload = verifyToken(token);
+  if (!payload || !payload.uid) return null;
+  const users = await readJson("users.json", []);
+  return users.find((u) => u.id === payload.uid) || null;
+}
+
+const publicUser = (u) => ({
+  id: u.id,
+  name: u.name,
+  email: u.email,
+  phone: u.phone || "",
+  address: u.address || "",
+  createdAt: u.createdAt,
+});
+
+app.post("/api/account/register", wrap(async (req, res) => {
+  const { name, email, password } = req.body || {};
+  if (!name || String(name).trim().length < 2) return res.status(400).json({ error: "Please enter your name" });
+  if (!email || !EMAIL_RE.test(String(email))) return res.status(400).json({ error: "Please enter a valid email" });
+  if (!password || String(password).length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
+  const users = await readJson("users.json", []);
+  if (users.some((u) => u.email.toLowerCase() === String(email).toLowerCase().trim())) {
+    return res.status(409).json({ error: "An account with this email already exists — try signing in" });
+  }
+  const user = {
+    id: `U-${Date.now()}`,
+    name: String(name).trim(),
+    email: String(email).toLowerCase().trim(),
+    phone: "",
+    address: "",
+    passHash: await bcrypt.hash(String(password), 10),
+    createdAt: new Date().toISOString(),
+  };
+  users.push(user);
+  await writeJson("users.json", users);
+  res.status(201).json({ token: createUserToken(user), user: publicUser(user) });
+}));
+
+app.post("/api/account/login", wrap(async (req, res) => {
+  const { email, password } = req.body || {};
+  const users = await readJson("users.json", []);
+  const user = users.find((u) => u.email === String(email || "").toLowerCase().trim());
+  if (!user || !(await bcrypt.compare(String(password || ""), user.passHash))) {
+    return res.status(401).json({ error: "Incorrect email or password" });
+  }
+  res.json({ token: createUserToken(user), user: publicUser(user) });
+}));
+
+app.get("/api/account/me", wrap(async (req, res) => {
+  const user = await resolveUser(req);
+  if (!user) return res.status(401).json({ error: "Not signed in" });
+  res.json(publicUser(user));
+}));
+
+app.put("/api/account/profile", wrap(async (req, res) => {
+  const user = await resolveUser(req);
+  if (!user) return res.status(401).json({ error: "Not signed in" });
+  const { name, phone, address } = req.body || {};
+  if (name !== undefined && String(name).trim().length < 2) {
+    return res.status(400).json({ error: "Please enter your name" });
+  }
+  const users = await readJson("users.json", []);
+  const i = users.findIndex((u) => u.id === user.id);
+  users[i] = {
+    ...users[i],
+    name: name !== undefined ? String(name).trim() : users[i].name,
+    phone: phone !== undefined ? String(phone).trim() : users[i].phone || "",
+    address: address !== undefined ? String(address).trim() : users[i].address || "",
+  };
+  await writeJson("users.json", users);
+  res.json(publicUser(users[i]));
+}));
+
+app.put("/api/account/password", wrap(async (req, res) => {
+  const user = await resolveUser(req);
+  if (!user) return res.status(401).json({ error: "Not signed in" });
+  const { current, next } = req.body || {};
+  if (!(await bcrypt.compare(String(current || ""), user.passHash))) {
+    return res.status(401).json({ error: "Current password is incorrect" });
+  }
+  if (!next || String(next).length < 6) {
+    return res.status(400).json({ error: "New password must be at least 6 characters" });
+  }
+  const users = await readJson("users.json", []);
+  const i = users.findIndex((u) => u.id === user.id);
+  users[i] = { ...users[i], passHash: await bcrypt.hash(String(next), 10) };
+  await writeJson("users.json", users);
+  res.json({ success: true });
+}));
+
+app.get("/api/account/orders", wrap(async (req, res) => {
+  const user = await resolveUser(req);
+  if (!user) return res.status(401).json({ error: "Not signed in" });
+  const orders = await readJson("orders.json", []);
+  const mine = orders.filter(
+    (o) => o.userId === user.id || String(o.customer?.email || "").toLowerCase() === user.email
+  );
+  res.json(mine.reverse()); /* newest first, like a real order history */
+}));
+
 app.get("/api/stats", authMiddleware, wrap(async (_req, res) => {
   res.json(await computeStats());
 }));
@@ -407,7 +522,10 @@ app.get("/api/orders", authMiddleware, wrap(async (_req, res) => {
 }));
 
 app.post("/api/orders", wrap(async (req, res) => {
-  const { items, total, customer } = req.body || {};
+  /* Purchases require a signed-in customer account */
+  const user = await resolveUser(req);
+  if (!user) return res.status(401).json({ error: "Please sign in to place an order" });
+  const { items, total, shipping, customer } = req.body || {};
   if (!Array.isArray(items) || !items.length) {
     return res.status(400).json({ error: "Order items required" });
   }
@@ -416,7 +534,9 @@ app.post("/api/orders", wrap(async (req, res) => {
     id: `ORD-${Date.now()}`,
     items,
     total: Number(total) || 0,
-    customer: customer || {},
+    shipping: Number(shipping) || 0,
+    customer: { ...(customer || {}), email: (customer && customer.email) || user.email },
+    userId: user.id,
     status: "pending",
     createdAt: new Date().toISOString(),
   };
