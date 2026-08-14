@@ -170,7 +170,7 @@ button, .btn-hero-primary, .btn-hero-ghost, .btn-primary-sm, .f-pill, .socials a
 
 /* Brand — text only */
 .nav-brand {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Poppins", sans-serif;  /* brand logo type */
   font-size: 1.55rem;
   font-weight: 800;
   color: #fff;
@@ -241,7 +241,7 @@ button, .btn-hero-primary, .btn-hero-ghost, .btn-primary-sm, .f-pill, .socials a
 }
 .nav-drawer.open { transform: translateX(0); visibility: visible; }
 .nav-drawer-head { display: flex; align-items: center; margin-bottom: 1.4rem; }
-.drawer-brand { font-family: "Space Grotesk", sans-serif; font-size: 1.35rem; font-weight: 800; color: #fff; letter-spacing: -0.03em; }
+.drawer-brand { font-family: "Poppins", sans-serif; font-size: 1.35rem; font-weight: 800; color: #fff; letter-spacing: -0.03em; }
 .nav-drawer-head .ann-pop-x { margin-left: auto; }
 .nav-drawer-links { display: flex; flex-direction: column; gap: 0.3rem; }
 .drawer-link {
@@ -1288,7 +1288,7 @@ button:disabled { opacity: 0.5; pointer-events: none; }
    ════════════════════════════════════════════════════════ */
 .site-footer { background: var(--s0); color: #fff; padding: 5rem 0 1.5rem; }
 .foot-brand {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: 1.6rem;
   font-weight: 800;
   letter-spacing: -0.05em;
