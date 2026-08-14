@@ -843,11 +843,12 @@ function initHero3D() {
     if (mb) {
       /* Mobile: large bottle, anchored high above the copy */
       productGroup.position.x = 0;
-      productGroup.position.y = 1.9 + p * 0.2;
+      productGroup.position.y = 2.1 + p * 0.2;
       productGroup.scale.setScalar(0.92);
     } else {
-      /* Desktop: right-side showcase */
-      productGroup.position.x = 1.8 - blend * 1.8; /* moves left as we reach stage 3 */
+      /* Desktop/TV: right-side showcase, extra bias on wide aspects */
+      const wideBias = Math.max(0, camera.aspect - 1.6) * 1.2;
+      productGroup.position.x = (2.25 + wideBias) * (1 - blend); /* converges to centre at stage 3 */
       productGroup.scale.setScalar(1);
     }
 
@@ -857,20 +858,20 @@ function initHero3D() {
       modelHolder.scale.setScalar(modelScale * Math.max(introEase, 0.0001));
     }
 
-    /* ── Rings orbit productGroup ── */
+    /* ── Rings orbit productGroup — scroll drives the rounds ── */
     ring.position.copy(productGroup.position);
-    ring.rotation.y  = t * 0.5;
+    ring.rotation.y  = t * 0.5 + p * Math.PI * 2;
     ring.rotation.x  = Math.PI * 0.45 + Math.sin(t * 0.3) * 0.06;
 
     ring2.position.copy(productGroup.position);
-    ring2.rotation.y = -t * 0.7;
+    ring2.rotation.y = -t * 0.7 - p * Math.PI * 2.5;
     ring2.rotation.z = Math.PI * 0.25 + t * 0.2;
 
     /* ── Camera ── */
     if (mb) {
       /* Mobile: tight lens aimed high */
       camera.position.set(0, 0.5, 7.5);
-      camera.lookAt(0, 1.25, 0);
+      camera.lookAt(0, 1.4, 0);
     } else {
       /* Desktop: slightly left of centre so model on right is in view */
       const camX = -1.2 + blend * 1.2;  /* moves right as page scrolls */

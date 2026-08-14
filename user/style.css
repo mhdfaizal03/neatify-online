@@ -591,13 +591,13 @@ body.no-scroll { overflow: hidden; }
   gap: 6px;
 }
 .rail-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.2);
-  transition: background var(--dur-med), transform var(--dur-med);
+  width: 16px; height: 2px;   /* underline-style stage marks, not round dots */
+  border-radius: 1px;
+  background: rgba(255,255,255,0.22);
+  transition: background var(--dur-med), width var(--dur-med);
   flex-shrink: 0;
 }
-.rail-dot.active { background: var(--lime); transform: scale(1.4); }
+.rail-dot.active { background: var(--lime); width: 26px; }
 .rail-track {
   width: 36px; height: 2px;
   background: rgba(255,255,255,0.1);
