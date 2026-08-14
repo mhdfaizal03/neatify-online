@@ -22,9 +22,50 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "neatify2026";
 
 const sessions = new Map();
 
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+const IS_SERVERLESS = !!process.env.VERCEL;
+
+try {
+  if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+} catch {
+  /* read-only filesystem on Vercel — uploads are kept in memory */
+}
+
+// Persistent store: Vercel's filesystem is read-only, so JSON data uses a
+// Redis store when one is linked (add a Redis integration in Vercel →
+// Storage; env vars are injected automatically), otherwise it falls back to
+// memory for the life of the serverless instance.
+let kv = null;
+{
+  const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (kvUrl && kvToken) {
+    try {
+      const { Redis } = require("@upstash/redis");
+      kv = new Redis({ url: kvUrl, token: kvToken });
+    } catch {
+      kv = null;
+    }
+  }
+}
+
+const memoryData = new Map();
+const memoryMedia = new Map();
+const KV_PREFIX = "neatify:";
+
+// Express 4 doesn't catch rejected promises in async handlers —
+// this wrapper forwards them to the error middleware below.
+const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 app.use(express.json({ limit: "10mb" }));
+
+// Serve in-memory uploads on serverless (registered before static mounts)
+app.get("/assets/uploads/:name", (req, res, next) => {
+  const m = memoryMedia.get(req.params.name);
+  if (!m) return next();
+  res.setHeader("Content-Type", m.mimetype);
+  res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  res.send(m.buffer);
+});
 
 /* Route structure:
    /        → user storefront  (user/ folder)
@@ -35,7 +76,16 @@ app.use("/admin", express.static(ADMIN_DIR));
 app.get("/admin", (_req, res) => res.redirect("/admin/"));
 app.use(express.static(USER_DIR));
 
-function readJson(file, fallback) {
+async function readJson(file, fallback) {
+  if (kv) {
+    try {
+      const stored = await kv.get(KV_PREFIX + file);
+      if (stored !== null && stored !== undefined) return stored;
+    } catch {
+      /* KV unreachable — fall back to memory/disk seed data */
+    }
+  }
+  if (memoryData.has(file)) return memoryData.get(file);
   const filePath = path.join(DATA_DIR, file);
   try {
     return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -44,9 +94,21 @@ function readJson(file, fallback) {
   }
 }
 
-function writeJson(file, data) {
-  const filePath = path.join(DATA_DIR, file);
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+async function writeJson(file, data) {
+  memoryData.set(file, data);
+  if (kv) {
+    try {
+      await kv.set(KV_PREFIX + file, data);
+      return;
+    } catch {
+      /* KV write failed — the in-memory copy keeps this instance working */
+    }
+  }
+  try {
+    fs.writeFileSync(path.join(DATA_DIR, file), JSON.stringify(data, null, 2));
+  } catch {
+    /* read-only FS — the in-memory copy keeps every feature working */
+  }
 }
 
 function createToken(username) {
@@ -83,14 +145,18 @@ function authMiddleware(req, res, next) {
   next();
 }
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase() || ".jpg";
-    const safe = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "-").toLowerCase();
-    cb(null, `${Date.now()}-${safe.endsWith(ext) ? safe : safe + ext}`);
-  },
-});
+function safeUploadName(originalname) {
+  const ext = path.extname(originalname).toLowerCase() || ".jpg";
+  const safe = originalname.replace(/[^a-zA-Z0-9.-]/g, "-").toLowerCase();
+  return `${Date.now()}-${safe.endsWith(ext) ? safe : safe + ext}`;
+}
+
+const storage = IS_SERVERLESS
+  ? multer.memoryStorage()
+  : multer.diskStorage({
+      destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
+      filename: (_req, file, cb) => cb(null, safeUploadName(file.originalname)),
+    });
 
 const upload = multer({
   storage,
@@ -102,11 +168,20 @@ const upload = multer({
 });
 
 function listMediaFiles() {
+  const files = [];
+  memoryMedia.forEach((m, name) => {
+    files.push({
+      name,
+      url: `assets/uploads/${name}`,
+      size: m.buffer.length,
+      uploadedAt: m.uploadedAt,
+      source: "upload",
+    });
+  });
   const dirs = [
     { dir: path.join(ROOT, "assets"), prefix: "assets" },
     { dir: UPLOAD_DIR, prefix: "assets/uploads" },
   ];
-  const files = [];
   dirs.forEach(({ dir, prefix }) => {
     if (!fs.existsSync(dir)) return;
     fs.readdirSync(dir).forEach((name) => {
@@ -125,10 +200,12 @@ function listMediaFiles() {
   return files.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
 }
 
-function computeStats() {
-  const products = readJson("products.json", []);
-  const orders = readJson("orders.json", []);
-  const subscribers = readJson("subscribers.json", []);
+async function computeStats() {
+  const [products, orders, subscribers] = await Promise.all([
+    readJson("products.json", []),
+    readJson("orders.json", []),
+    readJson("subscribers.json", []),
+  ]);
   const activeProducts = products.filter((p) => p.active !== false);
   const revenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
   const categoryCounts = activeProducts.reduce((acc, p) => {
@@ -167,21 +244,21 @@ app.get("/api/auth/me", authMiddleware, (req, res) => {
   res.json({ username: req.admin.username });
 });
 
-app.get("/api/stats", authMiddleware, (_req, res) => {
-  res.json(computeStats());
-});
+app.get("/api/stats", authMiddleware, wrap(async (_req, res) => {
+  res.json(await computeStats());
+}));
 
-app.get("/api/products", (_req, res) => {
-  const products = readJson("products.json", []);
+app.get("/api/products", wrap(async (_req, res) => {
+  const products = await readJson("products.json", []);
   res.json(products.filter((p) => p.active !== false));
-});
+}));
 
-app.get("/api/products/all", authMiddleware, (_req, res) => {
-  res.json(readJson("products.json", []));
-});
+app.get("/api/products/all", authMiddleware, wrap(async (_req, res) => {
+  res.json(await readJson("products.json", []));
+}));
 
-app.post("/api/products", authMiddleware, (req, res) => {
-  const products = readJson("products.json", []);
+app.post("/api/products", authMiddleware, wrap(async (req, res) => {
+  const products = await readJson("products.json", []);
   const body = req.body || {};
   const nextId = products.reduce((max, p) => Math.max(max, p.id), 0) + 1;
   const product = {
@@ -198,13 +275,13 @@ app.post("/api/products", authMiddleware, (req, res) => {
     active: body.active !== false,
   };
   products.push(product);
-  writeJson("products.json", products);
+  await writeJson("products.json", products);
   res.status(201).json(product);
-});
+}));
 
-app.put("/api/products/:id", authMiddleware, (req, res) => {
+app.put("/api/products/:id", authMiddleware, wrap(async (req, res) => {
   const id = Number(req.params.id);
-  const products = readJson("products.json", []);
+  const products = await readJson("products.json", []);
   const index = products.findIndex((p) => p.id === id);
   if (index === -1) return res.status(404).json({ error: "Product not found" });
 
@@ -226,40 +303,40 @@ app.put("/api/products/:id", authMiddleware, (req, res) => {
         : products[index].points,
     active: body.active !== undefined ? body.active !== false : products[index].active,
   };
-  writeJson("products.json", products);
+  await writeJson("products.json", products);
   res.json(products[index]);
-});
+}));
 
-app.delete("/api/products/:id", authMiddleware, (req, res) => {
+app.delete("/api/products/:id", authMiddleware, wrap(async (req, res) => {
   const id = Number(req.params.id);
-  const products = readJson("products.json", []);
+  const products = await readJson("products.json", []);
   const index = products.findIndex((p) => p.id === id);
   if (index === -1) return res.status(404).json({ error: "Product not found" });
   products[index].active = false;
-  writeJson("products.json", products);
+  await writeJson("products.json", products);
   res.json({ success: true });
-});
+}));
 
-app.patch("/api/products/:id/restore", authMiddleware, (req, res) => {
+app.patch("/api/products/:id/restore", authMiddleware, wrap(async (req, res) => {
   const id = Number(req.params.id);
-  const products = readJson("products.json", []);
+  const products = await readJson("products.json", []);
   const index = products.findIndex((p) => p.id === id);
   if (index === -1) return res.status(404).json({ error: "Product not found" });
   products[index].active = true;
-  writeJson("products.json", products);
+  await writeJson("products.json", products);
   res.json(products[index]);
-});
+}));
 
-app.get("/api/settings", (_req, res) => {
-  res.json(readJson("settings.json", {}));
-});
+app.get("/api/settings", wrap(async (_req, res) => {
+  res.json(await readJson("settings.json", {}));
+}));
 
-app.put("/api/settings", authMiddleware, (req, res) => {
-  const current = readJson("settings.json", {});
+app.put("/api/settings", authMiddleware, wrap(async (req, res) => {
+  const current = await readJson("settings.json", {});
   const updated = { ...current, ...req.body };
-  writeJson("settings.json", updated);
+  await writeJson("settings.json", updated);
   res.json(updated);
-});
+}));
 
 app.get("/api/media", authMiddleware, (_req, res) => {
   res.json(listMediaFiles());
@@ -267,9 +344,18 @@ app.get("/api/media", authMiddleware, (_req, res) => {
 
 app.post("/api/media/upload", authMiddleware, upload.single("image"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+  let name = req.file.filename;
+  if (IS_SERVERLESS) {
+    name = safeUploadName(req.file.originalname);
+    memoryMedia.set(name, {
+      buffer: req.file.buffer,
+      mimetype: req.file.mimetype,
+      uploadedAt: new Date().toISOString(),
+    });
+  }
   res.status(201).json({
-    name: req.file.filename,
-    url: `assets/uploads/${req.file.filename}`,
+    name,
+    url: `assets/uploads/${name}`,
     size: req.file.size,
     uploadedAt: new Date().toISOString(),
     source: "upload",
@@ -281,41 +367,51 @@ app.delete("/api/media", authMiddleware, (req, res) => {
   if (!url || !url.startsWith("assets/uploads/")) {
     return res.status(400).json({ error: "Only uploaded files can be deleted" });
   }
+  const name = path.basename(url);
+  if (memoryMedia.has(name)) {
+    memoryMedia.delete(name);
+    return res.json({ success: true });
+  }
   const filePath = path.join(ROOT, url);
-  if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File not found" });
-  fs.unlinkSync(filePath);
+  try {
+    if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File not found" });
+    fs.unlinkSync(filePath);
+  } catch {
+    /* read-only FS on Vercel — the file isn't in memory and can't be removed from disk */
+    return res.status(404).json({ error: "File not found" });
+  }
   res.json({ success: true });
 });
 
-app.get("/api/subscribers", authMiddleware, (_req, res) => {
-  res.json(readJson("subscribers.json", []));
-});
+app.get("/api/subscribers", authMiddleware, wrap(async (_req, res) => {
+  res.json(await readJson("subscribers.json", []));
+}));
 
-app.post("/api/subscribers", (req, res) => {
+app.post("/api/subscribers", wrap(async (req, res) => {
   const { email, type = "newsletter" } = req.body || {};
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({ error: "Valid email required" });
   }
-  const subscribers = readJson("subscribers.json", []);
+  const subscribers = await readJson("subscribers.json", []);
   if (subscribers.some((s) => s.email.toLowerCase() === email.toLowerCase() && s.type === type)) {
     return res.json({ success: true, duplicate: true });
   }
   const entry = { id: Date.now(), email, type, createdAt: new Date().toISOString() };
   subscribers.push(entry);
-  writeJson("subscribers.json", subscribers);
+  await writeJson("subscribers.json", subscribers);
   res.status(201).json(entry);
-});
+}));
 
-app.get("/api/orders", authMiddleware, (_req, res) => {
-  res.json(readJson("orders.json", []));
-});
+app.get("/api/orders", authMiddleware, wrap(async (_req, res) => {
+  res.json(await readJson("orders.json", []));
+}));
 
-app.post("/api/orders", (req, res) => {
+app.post("/api/orders", wrap(async (req, res) => {
   const { items, total, customer } = req.body || {};
   if (!Array.isArray(items) || !items.length) {
     return res.status(400).json({ error: "Order items required" });
   }
-  const orders = readJson("orders.json", []);
+  const orders = await readJson("orders.json", []);
   const order = {
     id: `ORD-${Date.now()}`,
     items,
@@ -325,27 +421,33 @@ app.post("/api/orders", (req, res) => {
     createdAt: new Date().toISOString(),
   };
   orders.push(order);
-  writeJson("orders.json", orders);
+  await writeJson("orders.json", orders);
   res.status(201).json(order);
-});
+}));
 
-app.patch("/api/orders/:id", authMiddleware, (req, res) => {
-  const orders = readJson("orders.json", []);
+app.patch("/api/orders/:id", authMiddleware, wrap(async (req, res) => {
+  const orders = await readJson("orders.json", []);
   const index = orders.findIndex((o) => o.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: "Order not found" });
   orders[index] = { ...orders[index], ...req.body };
-  writeJson("orders.json", orders);
+  await writeJson("orders.json", orders);
   res.json(orders[index]);
-});
+}));
+
+// Unknown /api routes always answer JSON — never empty bodies or HTML.
+// Registered before the error handler so it runs after all route matches.
+app.use("/api", (_req, res) => res.status(404).json({ error: "Not found" }));
 
 app.use((err, _req, res, _next) => {
   res.status(400).json({ error: err.message || "Request failed" });
 });
 
-// Unknown /api routes always answer JSON — never empty bodies or HTML
-app.use("/api", (_req, res) => res.status(404).json({ error: "Not found" }));
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Neatify running at http://localhost:${PORT}`);
+    console.log(`Admin dashboard: http://localhost:${PORT}/admin/`);
+  });
+}
 
-app.listen(PORT, () => {
-  console.log(`Neatify running at http://localhost:${PORT}`);
-  console.log(`Admin dashboard: http://localhost:${PORT}/admin/`);
-});
+// Exported for serverless platforms (Vercel: api/index.js re-exports this app)
+module.exports = app;
