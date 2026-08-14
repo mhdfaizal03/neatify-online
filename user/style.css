@@ -800,16 +800,17 @@ body.no-scroll { overflow: hidden; }
 .marquee-track {
   display: flex;
   align-items: center;
-  gap: 1.8rem;
   white-space: nowrap;
   min-width: max-content;
-  animation: marquee-roll 28s linear infinite;
+  animation: marquee-roll 32s linear infinite;  /* endless belt — two identical halves */
   font-family: "Space Grotesk", sans-serif;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.15em;
   color: rgba(255,255,255,0.35);
 }
+/* identical halves with matching trailing gap → the -50% loop never shows a seam */
+.marquee-group { display: flex; align-items: center; gap: 1.8rem; padding-right: 1.8rem; }
 .marquee-strip:hover .marquee-track { animation-play-state: paused; }
 .marquee-track .dot { color: var(--lime); font-size: 0.5rem; }
 @keyframes marquee-roll { to { transform: translateX(-50%); } }
