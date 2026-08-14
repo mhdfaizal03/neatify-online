@@ -446,6 +446,7 @@ function updateActiveNav() {
     if (s.offsetTop <= pos) current = s.id;
   });
   links.forEach(a => a.classList.toggle("active", a.getAttribute("href") === `#${current}`));
+  document.querySelectorAll(".drawer-link").forEach(a => a.classList.toggle("active", a.getAttribute("href") === `#${current}`));
 }
 
 /* ── REVEAL OBSERVER ────────────────────────────────────── */
@@ -944,6 +945,33 @@ function initRipple() {
   });
 }
 
+/* ── MOBILE DRAWER ─────────────────────────────────────── */
+function initDrawer() {
+  const drawer = $("navDrawer");
+  const scrim  = $("navScrim");
+  const burger = $("navBurger");
+  if (!drawer || !scrim || !burger) return;
+  const open = () => {
+    drawer.classList.add("open");
+    scrim.classList.add("show");
+    drawer.setAttribute("aria-hidden", "false");
+    burger.setAttribute("aria-expanded", "true");
+    document.body.classList.add("no-scroll");
+  };
+  const close = () => {
+    drawer.classList.remove("open");
+    scrim.classList.remove("show");
+    drawer.setAttribute("aria-hidden", "true");
+    burger.setAttribute("aria-expanded", "false");
+    document.body.classList.remove("no-scroll");
+  };
+  burger.addEventListener("click", () => (drawer.classList.contains("open") ? close() : open()));
+  $("navDrawerClose")?.addEventListener("click", close);
+  scrim.addEventListener("click", close);
+  drawer.querySelectorAll("a").forEach(a => a.addEventListener("click", close));
+  window.addEventListener("resize", () => { if (innerWidth >= 992) close(); });
+}
+
 /* ── ANNOUNCE POPUP ─────────────────────────────────────── */
 function initAnnouncePop() {
   const pop = $("annPop");
@@ -963,6 +991,7 @@ async function boot() {
   }
   const step = fn => Promise.resolve().then(fn).catch(err => console.warn("Boot step failed:", err));
   await step(updateHeaderHeight);
+  await step(initDrawer);
   await step(initAnnouncePop);
   await step(initRipple);
   await step(initReveal);
