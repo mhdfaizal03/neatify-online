@@ -564,6 +564,12 @@ window.addEventListener("scroll", () => {
 }, { passive: true });
 
 window.addEventListener("resize", updateHeaderHeight);
+updateHeaderHeight();  /* sync --header-height at boot so navbar + hero = exactly one screen */
+window.addEventListener("load", updateHeaderHeight);
+if (document.fonts && document.fonts.ready) {
+  /* re-measure once webfonts settle, then let the hero canvas re-fit */
+  document.fonts.ready.then(() => { updateHeaderHeight(); window.dispatchEvent(new Event("resize")); });
+}
 
 $("retryProducts").addEventListener("click", () => loadProducts());
 
