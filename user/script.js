@@ -840,10 +840,10 @@ function initHero3D() {
     /* Desktop: model sits on right half, converges to centre at stage 3 */
     const blend = smoothstep(p, 0.6, 1.0);
     if (mb) {
-      /* Mobile: large bottle, anchored in the upper zone */
+      /* Mobile: large bottle, anchored high above the copy */
       productGroup.position.x = 0;
-      productGroup.position.y = 1.7 + p * 0.2;
-      productGroup.scale.setScalar(0.85);
+      productGroup.position.y = 1.9 + p * 0.2;
+      productGroup.scale.setScalar(0.92);
     } else {
       /* Desktop: right-side showcase */
       productGroup.position.x = 1.8 - blend * 1.8; /* moves left as we reach stage 3 */
@@ -868,8 +868,8 @@ function initHero3D() {
     /* ── Camera ── */
     if (mb) {
       /* Mobile: tight lens aimed high */
-      camera.position.set(0, 0.5, 7.6);
-      camera.lookAt(0, 1.1, 0);
+      camera.position.set(0, 0.5, 7.5);
+      camera.lookAt(0, 1.25, 0);
     } else {
       /* Desktop: slightly left of centre so model on right is in view */
       const camX = -1.2 + blend * 1.2;  /* moves right as page scrolls */
@@ -903,7 +903,7 @@ function initHero3D() {
       el.style.width = `${Math.min(1, Math.max(0, p * 2 - i)) * 100}%`;
     });
     if (cueEl) cueEl.classList.toggle("hide", p > 0.02);
-    setStage(p < 0.36 ? 0 : p < 0.72 ? 1 : 2);
+    setStage(p < 0.33 ? 0 : p < 0.66 ? 1 : 2);  /* one stage per scroll on the 3-scroll journey */
 
     renderer.render(scene, camera);
   }

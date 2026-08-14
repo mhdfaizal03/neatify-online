@@ -1526,7 +1526,7 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   .nav-end .btn-primary-sm { display: inline-flex !important; width: 100%; justify-content: center; margin-top: 0.6rem; }
 
   /* Hero */
-  .hero-scroll-space { height: 300vh; }
+  .hero-scroll-space { height: 400vh; }  /* 3 stage scrolls + exit scroll */
   .hero-stages-wrap > .container { align-items: flex-end; padding-bottom: 6rem; }
   .hero-stages-inner { padding: 4rem 0 2rem; }
   .hero-stage { max-width: 100%; }
@@ -1536,9 +1536,9 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   .hero-rail { display: none; }
   .scroll-hint { display: none; }
   .hero-vignette {
+    /* fade only behind the copy zone — keep the 3D bottle clear */
     background:
-      linear-gradient(to top, rgba(4,7,9,0.96) 0%, rgba(4,7,9,0.7) 35%, rgba(4,7,9,0.2) 60%, transparent 75%),
-      linear-gradient(90deg, rgba(4,7,9,0.82) 0%, rgba(4,7,9,0.4) 55%, transparent 78%);
+      linear-gradient(to top, rgba(4,7,9,0.96) 0%, rgba(4,7,9,0.8) 20%, rgba(4,7,9,0.3) 32%, transparent 44%);
   }
 
   /* Sections */
@@ -1586,7 +1586,7 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   .sec-title { font-size: clamp(2rem, 8vw, 3.2rem); }
 
   /* Hero */
-  .hero-scroll-space { height: 280vh; }
+  .hero-scroll-space { height: 400vh; }
   .hero-stages-inner { padding: 3.5rem 0 2rem; }
   .hero-h1 { font-size: clamp(2.3rem, 9vw, 3.8rem); line-height: 0.94; }
   .hero-sub { font-size: 0.88rem; }
@@ -1636,7 +1636,7 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   :root { --header-height: 88px; }
 
   /* Hero — copy sits low, 3D owns the upper space */
-  .hero-scroll-space { height: 270vh; }
+  .hero-scroll-space { height: 400vh; }
   .hero-stages-wrap > .container { padding-bottom: 4.5rem; }
   .hero-stages-inner { padding: 2.5rem 0 0; }
   .hero-h1 { font-size: clamp(2rem, 11vw, 3.2rem); letter-spacing: -0.04em; }
@@ -1691,7 +1691,7 @@ button:disabled { opacity: 0.5; pointer-events: none; }
 
 /* ── Very small screens (≤380px) ── */
 @media (max-width: 380px) {
-  .hero-scroll-space { height: 250vh; }
+  .hero-scroll-space { height: 360vh; }
   .sec { padding: 3rem 0; }
   .hero-h1 { font-size: 1.9rem; }
   .hero-sub { font-size: 0.8rem; }
