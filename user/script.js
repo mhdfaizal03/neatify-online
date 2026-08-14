@@ -927,12 +927,16 @@ function initHero3D() {
   const loaderTxt = $("modelLoaderText");
   if (loaderEl) loaderEl.classList.remove("d-none");
 
-  /* ── Load GLB (v11 — webp-textured model, no Draco needed) ── */
+  /* ── Load GLB (3dimage — draco-compressed, webp textures) ── */
   if (THREE.GLTFLoader) {
+    const dracoLoader = new THREE.DRACOLoader();
+    dracoLoader.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/draco/gltf/");
+    dracoLoader.preload();
     const gltfLoader = new THREE.GLTFLoader();
+    gltfLoader.setDRACOLoader(dracoLoader);
     const tryLoad = (attempt) => {
       gltfLoader.load(
-        "assets/3dmodel.glb?v=11",
+        "assets/3dimage.glb?v=1",
         (gltf) => {
           const model = gltf.scene;
 
@@ -1090,7 +1094,7 @@ function initHero3D() {
     /* ── Model: scroll is the controller; idle adds life ── */
     const idleY  = Math.sin(t * 0.6) * 0.12;  /* gentle bob */
     const idleRZ = Math.sin(t * 0.4) * 0.04;  /* gentle lean */
-    productGroup.rotation.y  = p * Math.PI * 2.5 + Math.sin(t * 0.5) * 0.06; /* 2.5 rounds over scroll */
+    productGroup.rotation.y  = p * Math.PI * 3 + Math.sin(t * 0.5) * 0.06; /* 1.5 full rounds over the 3-page scroll */
     productGroup.rotation.z  = idleRZ + Math.sin(p * Math.PI) * 0.05;
     productGroup.position.y  = idleY + p * 0.3;
 
