@@ -106,7 +106,7 @@ button, .btn-hero-primary, .btn-hero-ghost, .btn-primary-sm, .f-pill, .socials a
   box-shadow: 0 24px 64px rgba(0,0,0,0.5);
   padding: 0.85rem 0.9rem;
   z-index: 1080;
-  transition: transform 0.5s var(--ease-decel);
+  transition: transform 0.5s var(--ease-decel), opacity 0.4s ease;
 }
 .ann-pop.show { transform: translate(-50%, 0); }
 .ann-pop .ann-dot { background: var(--lime); flex-shrink: 0; }
@@ -128,15 +128,17 @@ button, .btn-hero-primary, .btn-hero-ghost, .btn-primary-sm, .f-pill, .socials a
 }
 .ann-pop-x:hover { background: var(--lime); color: #111; }
 @media (min-width: 992px) {
-  /* desktop: dock the announcement top-right under the nav */
+  /* desktop: docked top-right under the nav — fades in place, never clipped */
   .ann-pop {
     left: auto; right: 18px;
-    top: calc(var(--header-height) + 12px);
+    top: calc(var(--header-height) + 14px);  /* safe gap below the sticky nav */
     bottom: auto;
-    transform: translateY(-180%);
-    width: 380px;
+    width: min(380px, calc(100vw - 36px));
+    transform: translateY(-10px);
+    opacity: 0;
+    pointer-events: none;
   }
-  .ann-pop.show { transform: translateY(0); }
+  .ann-pop.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
 }
 .ann-dot {
   display: inline-block;
@@ -369,7 +371,7 @@ body.no-scroll { overflow: hidden; }
   color: #fff;
   position: relative;
 }
-.hero-scroll-space { height: 340vh; position: relative; }
+.hero-scroll-space { height: 300vh; position: relative; }  /* sticky screen + 2 stage scrolls; next scroll exits */
 .hero-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
 
 /* Canvas */
