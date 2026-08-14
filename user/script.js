@@ -624,7 +624,7 @@ function initHero3D() {
   if (typeof THREE.sRGBEncoding !== "undefined") renderer.outputEncoding = THREE.sRGBEncoding;
   if (typeof THREE.ACESFilmicToneMapping !== "undefined") {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 1.25;
   }
   renderer.shadowMap.enabled = false;
 
@@ -634,9 +634,9 @@ function initHero3D() {
   camera.position.set(0, 0, 7);
 
   /* ── Lighting — warm key + cool fill + white rim ── */
-  scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+  scene.add(new THREE.AmbientLight(0xffffff, 1.0));
 
-  const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.6);
   keyLight.position.set(3, 5, 5);
   scene.add(keyLight);
 
@@ -736,7 +736,7 @@ function initHero3D() {
     new THREE.MeshStandardMaterial({
       color: 0xc8f53c,
       emissive: 0xc8f53c,
-      emissiveIntensity: 1.2,
+      emissiveIntensity: 0.9,
       metalness: 0.2,
       roughness: 0.15,
       transparent: true,
@@ -839,9 +839,10 @@ function initHero3D() {
     /* Desktop: model sits on right half, converges to centre at stage 3 */
     const blend = smoothstep(p, 0.6, 1.0);
     if (mb) {
-      /* Mobile: model is behind text, centred, smaller */
+      /* Mobile: float in the open upper space, clear of the copy */
       productGroup.position.x = 0;
-      productGroup.scale.setScalar(0.55);
+      productGroup.position.y = 1.25 + p * 0.2;
+      productGroup.scale.setScalar(0.5);
     } else {
       /* Desktop: right-side showcase */
       productGroup.position.x = 1.8 - blend * 1.8; /* moves left as we reach stage 3 */
@@ -865,9 +866,9 @@ function initHero3D() {
 
     /* ── Camera ── */
     if (mb) {
-      /* Mobile: camera straight-on, pull back a bit */
-      camera.position.set(0, 0.3, 8.5);
-      camera.lookAt(0, productGroup.position.y, 0);
+      /* Mobile: frame the upper showcase zone */
+      camera.position.set(0, 0.35, 8.5);
+      camera.lookAt(0, 0.7, 0);
     } else {
       /* Desktop: slightly left of centre so model on right is in view */
       const camX = -1.2 + blend * 1.2;  /* moves right as page scrolls */
