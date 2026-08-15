@@ -173,6 +173,18 @@ export default function Modals() {
       </div>
     </div>
   </div>
+
+  <div className="modal fade" id="orderSuccessModal" tabIndex="-1" aria-hidden="true">
+    <div className="modal-dialog modal-dialog-centered modal-sm">
+      <div className="modal-content info-modal">
+        <div className="info-icon success"><i className="bi bi-check-lg"></i></div>
+        <h3>Order placed!</h3>
+        <p>Thanks for choosing Neatify. Your order has been received.</p>
+        <div className="order-chip" id="orderIdChip">ORD-000000</div>
+        <button className="btn-dark w-100 mt-3" data-bs-dismiss="modal">Keep browsing</button>
+      </div>
+    </div>
+  </div>
     </>
   );
 }
