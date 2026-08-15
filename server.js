@@ -17,8 +17,8 @@ const ASSETS_DIR = path.join(ROOT, "assets");
 const UPLOAD_DIR = path.join(ROOT, "assets", "uploads");
 const SESSION_SECRET = process.env.SESSION_SECRET || "neatify-dev-secret-change-me";
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "neatify2026";
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin@neatify.com";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Neatify2002";
 
 const sessions = new Map();
 
@@ -72,8 +72,11 @@ app.get("/assets/uploads/:name", (req, res, next) => {
    /admin   → admin dashboard  (admin/ folder)
    /assets  → shared images and uploads */
 app.use("/assets", express.static(ASSETS_DIR));
-app.use("/admin", express.static(ADMIN_DIR));
 app.get("/admin", (_req, res) => res.redirect("/admin/"));
+app.use("/admin", express.static(ADMIN_DIR));
+app.get("/admin/*", (_req, res) => {
+  res.sendFile(path.join(ADMIN_DIR, "index.html"));
+});
 app.use(express.static(USER_DIR));
 
 async function readJson(file, fallback) {
