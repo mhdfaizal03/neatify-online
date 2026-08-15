@@ -9,12 +9,11 @@ const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const ROOT = __dirname;
-const DATA_DIR = path.join(ROOT, "data");
-const USER_DIR = path.join(ROOT, "user");
-const ADMIN_DIR = path.join(ROOT, "admin");
+const ROOT = path.join(__dirname, "../");
+const FRONTEND_DIR = path.join(ROOT, "frontend/dist");
 const ASSETS_DIR = path.join(ROOT, "assets");
-const UPLOAD_DIR = path.join(ROOT, "assets", "uploads");
+const UPLOAD_DIR = path.join(ASSETS_DIR, "uploads");
+const DATA_DIR = path.join(__dirname, "data");
 const SESSION_SECRET = process.env.SESSION_SECRET || "neatify-dev-secret-change-me";
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin@neatify.com";
@@ -67,17 +66,11 @@ app.get("/assets/uploads/:name", (req, res, next) => {
   res.send(m.buffer);
 });
 
-/* Route structure:
-   /        → user storefront  (user/ folder)
-   /admin   → admin dashboard  (admin/ folder)
-   /assets  → shared images and uploads */
+// Serve React Frontend (Production)
+app.use(express.static(FRONTEND_DIR));
 app.use("/assets", express.static(ASSETS_DIR));
-app.get("/admin", (_req, res) => res.redirect("/admin/"));
-app.use("/admin", express.static(ADMIN_DIR));
-app.get("/admin/*", (_req, res) => {
-  res.sendFile(path.join(ADMIN_DIR, "index.html"));
-});
-app.use(express.static(USER_DIR));
+
+
 
 async function readJson(file, fallback) {
   if (kv) {
@@ -556,6 +549,11 @@ app.patch("/api/orders/:id", authMiddleware, wrap(async (req, res) => {
   await writeJson("orders.json", orders);
   res.json(orders[index]);
 }));
+
+// Fallback all other routes to React Router
+app.get("*", (_req, res) => {
+  res.sendFile(path.join(FRONTEND_DIR, "index.html"));
+});
 
 // Unknown /api routes always answer JSON — never empty bodies or HTML.
 // Registered before the error handler so it runs after all route matches.
