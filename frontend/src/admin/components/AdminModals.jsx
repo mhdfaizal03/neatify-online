@@ -84,7 +84,7 @@ export default function AdminModals() {
         <input type="hidden" id="orderId" />
         <div className="form-grid">
           <label className="full">Order Info
-            <div id="orderInfoDisplay" style="padding: 10px; background: var(--bg-alt); border-radius: 6px; font-size: 0.9em;">
+            <div id="orderInfoDisplay" style={{ padding: '10px', background: 'var(--bg-alt)', borderRadius: '6px', fontSize: '0.9em' }}>
               
             </div>
           </label>
