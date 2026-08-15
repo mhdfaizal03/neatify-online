@@ -204,6 +204,11 @@ export function useAdminLogic() {
       return matchesFilter && matchesCat && matchesSearch;
     });
 
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="admin-empty-state"><i class="bi bi-box-seam"></i><h4>No products found</h4><p>Try adjusting your search or filters.</p></div></td></tr>`;
+      return;
+    }
+
     tbody.innerHTML = list.map(p => `
       <tr>
         <td><div class="product-cell"><img src="/${esc(p.image)}" class="product-thumb" alt=""><div><div class="product-name">${esc(p.name)}</div></div></div></td>
@@ -279,8 +284,8 @@ export function useAdminLogic() {
         </div>
       </div>`;
 
-    grid.innerHTML = list.length ? list.map(renderItem).join("") : `<div class="panel-empty">No media found.</div>`;
-    if (picker) picker.innerHTML = list.length ? list.map(renderItem).join("") : `<div class="panel-empty">No media found.</div>`;
+    grid.innerHTML = list.length ? list.map(renderItem).join("") : `<div class="admin-empty-state"><i class="bi bi-images"></i><h4>No media found</h4><p>Upload new images or adjust your search.</p></div>`;
+    if (picker) picker.innerHTML = list.length ? list.map(renderItem).join("") : `<div class="admin-empty-state"><i class="bi bi-images"></i><h4>No media found</h4><p>Upload new images or adjust your search.</p></div>`;
   }
 
   async function uploadMedia(file) {
@@ -322,6 +327,11 @@ export function useAdminLogic() {
       .filter(o => o.id.toLowerCase().includes(search) || (o.customer.name || "").toLowerCase().includes(search) || (o.customer.email || "").toLowerCase().includes(search))
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="admin-empty-state"><i class="bi bi-receipt"></i><h4>No orders found</h4><p>There are no orders matching your search.</p></div></td></tr>`;
+      return;
+    }
+
     tbody.innerHTML = list.map(o => `
       <tr>
         <td>${esc(o.id)}</td>
@@ -352,6 +362,11 @@ export function useAdminLogic() {
     const search = $("#globalSearch").value.toLowerCase().trim();
     const list = state.subscribers.filter(s => s.email.toLowerCase().includes(search))
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="3"><div class="admin-empty-state"><i class="bi bi-envelope-heart"></i><h4>No subscribers found</h4><p>There are no subscribers matching your search.</p></div></td></tr>`;
+      return;
+    }
 
     tbody.innerHTML = list.map(s => `
       <tr>

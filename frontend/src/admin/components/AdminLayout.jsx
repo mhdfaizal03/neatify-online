@@ -10,6 +10,7 @@ import AdminSubscribers from './AdminSubscribers';
 import AdminSettings from './AdminSettings';
 import AdminModals from './AdminModals';
 import { useAdminLogic } from '../hooks/useAdminLogic';
+import '../admin.css';
 
 export default function AdminLayout() {
   useAdminLogic();
