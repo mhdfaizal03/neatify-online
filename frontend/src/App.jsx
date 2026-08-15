@@ -1,7 +1,7 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
-import Storefront from './pages/Storefront'
-import Admin from './pages/Admin'
+import Storefront from './user/pages/Storefront'
+import Admin from './admin/pages/Admin'
 
 function App() {
   return (
