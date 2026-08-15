@@ -1,8 +1,10 @@
 import React from 'react';
 
-export default function Hero() {
+export default function Process() {
   return (
     <>
+      
+      
       
       
     </>

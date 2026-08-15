@@ -1,38 +1,54 @@
-import React from "react";
-import { ShoppingCart } from "lucide-react";
-import { useCartStore } from "../../store/useCartStore";
+import React from 'react';
+import { useCartStore } from '../../store/useCartStore';
 
 export default function Header() {
   const cartItems = useCartStore((state) => state.items);
   const cartCount = cartItems.reduce((acc, item) => acc + item.qty, 0);
 
   const openCart = () => {
-    // We will handle drawer state locally or via Zustand, for now let's dispatch a custom event
-    window.dispatchEvent(new Event("openCart"));
+    window.dispatchEvent(new Event('openCart'));
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <img src="/assets/hero.png" alt="Logo" className="h-8 w-8 object-contain" />
-          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Neatify
-          </h1>
-        </div>
-        
-        <button
-          onClick={openCart}
-          className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors rounded-full hover:bg-gray-100"
-        >
-          <ShoppingCart className="w-6 h-6" />
-          {cartCount > 0 && (
-            <span className="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full border-2 border-white transform translate-x-1 -translate-y-1">
-              {cartCount}
-            </span>
-          )}
-        </button>
+    <>
+      
+      <nav className="navbar navbar-expand-lg" id="mainNav">
+    <div className="container">
+      <a className="nav-brand" href="#home" aria-label="Neatify">
+        <span className="brand-text">Neatify</span>
+        <span className="brand-accent">.</span>
+      </a>
+
+      <div className="collapse navbar-collapse" id="navMenu">
+        <ul className="navbar-nav mx-auto gap-1">
+          <li className="nav-item"><a className="nav-link active" href="#home">Home</a></li>
+          <li className="nav-item"><a className="nav-link" href="#shop">Shop</a></li>
+          <li className="nav-item"><a className="nav-link" href="#how-it-works">Process</a></li>
+          <li className="nav-item"><a className="nav-link" href="#story">About</a></li>
+          <li className="nav-item"><a className="nav-link" href="#faq">FAQ</a></li>
+        </ul>
       </div>
-    </header>
+
+      <div className="nav-end d-flex align-items-center gap-2">
+        <button className="icon-btn" id="searchToggle" aria-label="Search">
+          <i className="bi bi-search"></i>
+        </button>
+        <button className="icon-btn" id="accountBtn" aria-label="Account">
+          <i className="bi bi-person-circle" id="accountIcon"></i>
+        </button>
+        <button className="icon-btn cart-btn" id="cartToggle" aria-label="Cart">
+          <i className="bi bi-bag"></i>
+          <span className="cart-badge" id="cartCount">0</span>
+        </button>
+        <a className="btn-primary-sm d-none d-lg-inline-flex" href="#shop">Shop Now</a>
+      </div>
+
+      <button className="nav-burger" type="button" id="navBurger" aria-controls="navDrawer" aria-expanded="false"
+        aria-label="Open menu">
+        <i className="bi bi-list"></i>
+      </button>
+    </div>
+  </nav>
+    </>
   );
 }

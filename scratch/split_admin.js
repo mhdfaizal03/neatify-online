@@ -1,4 +1,52 @@
-import React from 'react';
+const fs = require('fs');
+
+const content = fs.readFileSync('frontend/src/admin/pages/Admin.jsx', 'utf8');
+
+function extractBetween(str, startStr, endStr) {
+  const startIdx = str.indexOf(startStr);
+  if (startIdx === -1) return null;
+  const endIdx = str.indexOf(endStr, startIdx + startStr.length);
+  if (endIdx === -1) return null;
+  return str.substring(startIdx, endIdx + endStr.length);
+}
+
+const sidebar = extractBetween(content, '<aside className="sidebar"', '</aside>');
+const header = extractBetween(content, '<header className="topbar">', '</header>');
+const overview = extractBetween(content, '<!-- Dashboard Overview -->', '</div>\n          </section>\n\n          {/* Products Management */}');
+const products = extractBetween(content, '{/* Products Management */}', '</section>\n\n          {/* Order Management */}');
+const orders = extractBetween(content, '{/* Order Management */}', '</section>\n        </main>');
+
+fs.writeFileSync('frontend/src/admin/components/Sidebar.jsx', `import React from 'react';
+import { NavLink } from 'react-router-dom';
+
+export default function Sidebar() {
+  return (
+    ${sidebar ? sidebar.replace(/<li.*?<a href="#([^"]+)".*?>([^<]+)<.*?<\/li>/g, '<li><NavLink to="/admin/$1" className={({isActive}) => isActive ? "active" : ""}>$2</NavLink></li>') : '<aside className="sidebar"></aside>'}
+  );
+}
+`);
+
+fs.writeFileSync('frontend/src/admin/components/Topbar.jsx', `import React from 'react';
+
+export default function Topbar() {
+  return (
+    ${header || '<header className="topbar"></header>'}
+  );
+}
+`);
+
+fs.writeFileSync('frontend/src/admin/pages/Dashboard.jsx', `import React from 'react';
+
+export default function Dashboard() {
+  return (
+    <>
+      ${overview || ''}
+    </>
+  );
+}
+`);
+
+fs.writeFileSync('frontend/src/admin/pages/ProductsManager.jsx', `import React from 'react';
 import { useProducts } from '../../hooks/useProducts';
 
 export default function ProductsManager() {
@@ -46,7 +94,7 @@ export default function ProductsManager() {
                       <td>₹{product.price}</td>
                       <td>{product.stock || 'In Stock'}</td>
                       <td>
-                        <span className={`badge ${product.active ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'}`}>
+                        <span className={\`badge \${product.active ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'}\`}>
                           {product.active ? 'Active' : 'Inactive'}
                         </span>
                       </td>
@@ -67,3 +115,17 @@ export default function ProductsManager() {
     </section>
   );
 }
+`);
+
+fs.writeFileSync('frontend/src/admin/pages/OrdersManager.jsx', `import React from 'react';
+
+export default function OrdersManager() {
+  return (
+    <>
+      ${orders || ''}
+    </>
+  );
+}
+`);
+
+console.log("Admin splitting complete!");
