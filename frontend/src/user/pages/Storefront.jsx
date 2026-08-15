@@ -14,9 +14,11 @@ export default function Storefront() {
   return (
     <>
       <Header />
-      <Hero />
-      <ProductGrid />
-      <Process />
+      <main id="home">
+        <Hero />
+        <ProductGrid />
+        <Process />
+      </main>
       <Footer />
       <Modals />
     </>
