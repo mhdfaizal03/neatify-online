@@ -1,13 +1,13 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Storefront from './user/pages/Storefront'
-import Admin from './admin/pages/Admin'
+import AdminLayout from './admin/components/AdminLayout'
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Storefront />} />
-      <Route path="/admin/*" element={<Admin />} />
+      <Route path="/admin/*" element={<AdminLayout />} />
     </Routes>
   )
 }

@@ -1,131 +1,113 @@
 const fs = require('fs');
 
-const content = fs.readFileSync('frontend/src/admin/pages/Admin.jsx', 'utf8');
+const html = fs.readFileSync('scratch/old_code/admin/index.html', 'utf8');
 
-function extractBetween(str, startStr, endStr) {
-  const startIdx = str.indexOf(startStr);
-  if (startIdx === -1) return null;
-  const endIdx = str.indexOf(endStr, startIdx + startStr.length);
-  if (endIdx === -1) return null;
-  return str.substring(startIdx, endIdx + endStr.length);
+function extractBetween(str, startToken, endToken) {
+  const start = str.indexOf(startToken);
+  if (start === -1) return '';
+  const end = str.indexOf(endToken, start);
+  if (end === -1) return str.substring(start);
+  return str.substring(start, end);
 }
 
-const sidebar = extractBetween(content, '<aside className="sidebar"', '</aside>');
-const header = extractBetween(content, '<header className="topbar">', '</header>');
-const overview = extractBetween(content, '<!-- Dashboard Overview -->', '</div>\n          </section>\n\n          {/* Products Management */}');
-const products = extractBetween(content, '{/* Products Management */}', '</section>\n\n          {/* Order Management */}');
-const orders = extractBetween(content, '{/* Order Management */}', '</section>\n        </main>');
+const loginHtml = extractBetween(html, '<!-- Login View -->', '<!-- Main Application View -->');
+const sidebarHtml = extractBetween(html, '<!-- Sidebar Navigation -->', '<!-- Top Header Bar -->');
+const topbarHtml = extractBetween(html, '<!-- Top Header Bar -->', '<!-- Main Scrollable Content -->');
+const dashboardHtml = extractBetween(html, '<!-- View: Dashboard -->', '<!-- View: Products -->');
+const productsHtml = extractBetween(html, '<!-- View: Products -->', '<!-- View: Media -->');
+const mediaHtml = extractBetween(html, '<!-- View: Media -->', '<!-- View: Orders -->');
+const ordersHtml = extractBetween(html, '<!-- View: Orders -->', '<!-- View: Subscribers -->');
+const subscribersHtml = extractBetween(html, '<!-- View: Subscribers -->', '<!-- View: Settings -->');
+const settingsHtml = extractBetween(html, '<!-- View: Settings -->', '</main>');
+const modalsHtml = extractBetween(html, '<!-- MODAL: Add/Edit Product -->', '<!-- Global Snackbar -->') + 
+                   extractBetween(html, '<!-- Global Snackbar -->', '<!-- Admin Application Scripts -->');
 
-fs.writeFileSync('frontend/src/admin/components/Sidebar.jsx', `import React from 'react';
-import { NavLink } from 'react-router-dom';
 
-export default function Sidebar() {
-  return (
-    ${sidebar ? sidebar.replace(/<li.*?<a href="#([^"]+)".*?>([^<]+)<.*?<\/li>/g, '<li><NavLink to="/admin/$1" className={({isActive}) => isActive ? "active" : ""}>$2</NavLink></li>') : '<aside className="sidebar"></aside>'}
-  );
+function toJSX(str) {
+  return str
+    .replace(/class=/g, 'className=')
+    .replace(/for=/g, 'htmlFor=')
+    .replace(/tabindex=/g, 'tabIndex=')
+    .replace(/autocomplete=/g, 'autoComplete=')
+    .replace(/aria-hidden=/g, 'aria-hidden=')
+    .replace(/aria-label=/g, 'aria-label=')
+    .replace(/aria-live=/g, 'aria-live=')
+    .replace(/aria-atomic=/g, 'aria-atomic=')
+    .replace(/aria-pressed=/g, 'aria-pressed=')
+    .replace(/aria-controls=/g, 'aria-controls=')
+    .replace(/aria-labelledby=/g, 'aria-labelledby=')
+    .replace(/<!--[\s\S]*?-->/g, '') // remove comments
+    .replace(/<(input|img|br|hr|meta|link)([^>]*?)(?<!\/)>/g, '<$1$2 />'); // self close
 }
-`);
 
-fs.writeFileSync('frontend/src/admin/components/Topbar.jsx', `import React from 'react';
+function createComponent(name, content) {
+  const jsxContent = toJSX(content);
+  const code = `import React from 'react';
 
-export default function Topbar() {
-  return (
-    ${header || '<header className="topbar"></header>'}
-  );
-}
-`);
-
-fs.writeFileSync('frontend/src/admin/pages/Dashboard.jsx', `import React from 'react';
-
-export default function Dashboard() {
+export default function ${name}() {
   return (
     <>
-      ${overview || ''}
+      ${jsxContent.trim()}
     </>
   );
 }
-`);
+`;
+  fs.writeFileSync(`frontend/src/admin/components/${name}.jsx`, code);
+}
 
-fs.writeFileSync('frontend/src/admin/pages/ProductsManager.jsx', `import React from 'react';
-import { useProducts } from '../../hooks/useProducts';
+createComponent('AdminLogin', loginHtml);
+createComponent('AdminSidebar', sidebarHtml);
+createComponent('AdminTopbar', topbarHtml);
+createComponent('AdminDashboard', dashboardHtml);
+createComponent('AdminProducts', productsHtml);
+createComponent('AdminMedia', mediaHtml);
+createComponent('AdminOrders', ordersHtml);
+createComponent('AdminSubscribers', subscribersHtml);
+createComponent('AdminSettings', settingsHtml);
+createComponent('AdminModals', modalsHtml);
 
-export default function ProductsManager() {
-  const { data: response, isLoading } = useProducts();
-  const products = response?.data || [];
+const layoutCode = `import React from 'react';
+import AdminLogin from './AdminLogin';
+import AdminSidebar from './AdminSidebar';
+import AdminTopbar from './AdminTopbar';
+import AdminDashboard from './AdminDashboard';
+import AdminProducts from './AdminProducts';
+import AdminMedia from './AdminMedia';
+import AdminOrders from './AdminOrders';
+import AdminSubscribers from './AdminSubscribers';
+import AdminSettings from './AdminSettings';
+import AdminModals from './AdminModals';
+import { useAdminLogic } from '../hooks/useAdminLogic';
+
+export default function AdminLayout() {
+  useAdminLogic();
 
   return (
-    <section id="products" className="view-section active">
-      <div className="section-header">
-        <h2>Product Management</h2>
-        <button className="btn btn-primary" id="addProductBtn">
-          <i className="bi bi-plus-lg"></i> Add New Product
-        </button>
-      </div>
-
-      <div className="card">
-        <div className="card-body p-0">
-          <div className="table-responsive">
-            <table className="table table-hover mb-0" id="productsTable">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Category</th>
-                  <th>Price</th>
-                  <th>Stock</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoading ? (
-                  <tr><td colSpan="6" className="text-center py-4">Loading products...</td></tr>
-                ) : products.length === 0 ? (
-                  <tr><td colSpan="6" className="text-center py-4">No products found.</td></tr>
-                ) : (
-                  products.map(product => (
-                    <tr key={product._id}>
-                      <td>
-                        <div className="d-flex align-items-center gap-3">
-                          <img src={product.image || "/assets/placeholder.png"} alt={product.name} className="rounded" style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
-                          <div className="fw-semibold">{product.name}</div>
-                        </div>
-                      </td>
-                      <td>{product.category}</td>
-                      <td>₹{product.price}</td>
-                      <td>{product.stock || 'In Stock'}</td>
-                      <td>
-                        <span className={\`badge \${product.active ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'}\`}>
-                          {product.active ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="btn-group">
-                          <button className="btn btn-sm btn-outline-secondary" title="Edit"><i className="bi bi-pencil"></i></button>
-                          <button className="btn btn-sm btn-outline-danger" title="Delete"><i className="bi bi-trash"></i></button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+    <>
+      <div className="sidebar-overlay" id="sidebarOverlay"></div>
+      <AdminLogin />
+      
+      <div id="mainApp" className="app-layout hidden">
+        <AdminSidebar />
+        
+        <div className="main-content">
+          <AdminTopbar />
+          
+          <main className="admin-main">
+            <AdminDashboard />
+            <AdminProducts />
+            <AdminMedia />
+            <AdminOrders />
+            <AdminSubscribers />
+            <AdminSettings />
+          </main>
         </div>
       </div>
-    </section>
-  );
-}
-`);
-
-fs.writeFileSync('frontend/src/admin/pages/OrdersManager.jsx', `import React from 'react';
-
-export default function OrdersManager() {
-  return (
-    <>
-      ${orders || ''}
+      
+      <AdminModals />
     </>
   );
 }
-`);
-
-console.log("Admin splitting complete!");
+`;
+fs.writeFileSync('frontend/src/admin/components/AdminLayout.jsx', layoutCode);
+console.log("Admin components generated!");
