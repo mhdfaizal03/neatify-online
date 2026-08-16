@@ -11,19 +11,21 @@ export default function AdminSubscribers() {
             </div>
           </div>
           <div className="panel">
-            <div className="table-wrap animate-fade">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Email Address</th>
-                    <th>Type</th>
-                    <th>Signup Date</th>
-                  </tr>
-                </thead>
-                <tbody id="subscribersTable">
-                  
-                </tbody>
-              </table>
+            <div className="panel-body">
+              <div className="table-wrap animate-fade">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Email Address</th>
+                      <th>Type</th>
+                      <th>Signup Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="subscribersTable">
+                    
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </section>

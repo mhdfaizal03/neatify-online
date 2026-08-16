@@ -479,7 +479,7 @@ label > textarea {
 
 .content {
   flex-grow: 1;
-  padding: 32px;
+  padding: 32px 32px 56px 32px; /* Bottom padding buffer for scroll clearance */
   overflow-y: auto;
 }
 
@@ -567,6 +567,15 @@ label > textarea {
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
+  margin-bottom: 32px; /* Spacing at bottom of panel cards */
+}
+
+/* Remove double card outline styling when table-wrap is nested inside a panel */
+.panel-body .table-wrap {
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  background: transparent;
 }
 
 .panel-head {

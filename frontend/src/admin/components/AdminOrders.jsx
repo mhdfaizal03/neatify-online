@@ -11,22 +11,24 @@ export default function AdminOrders() {
             </div>
           </div>
           <div className="panel">
-            <div className="table-wrap animate-fade">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Order ID</th>
-                    <th>Items</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="ordersTable">
-                  
-                </tbody>
-              </table>
+            <div className="panel-body">
+              <div className="table-wrap animate-fade">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Items</th>
+                      <th>Total</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ordersTable">
+                    
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </section>

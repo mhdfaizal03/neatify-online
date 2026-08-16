@@ -14,34 +14,36 @@ export default function AdminProducts() {
         
         {/* Full Width Panel Card */}
         <div className="panel">
-          <div className="toolbar">
-            <select id="productFilter" aria-label="Filter Status">
-              <option value="active">Active products</option>
-              <option value="all">All products</option>
-              <option value="inactive">Inactive only</option>
-            </select>
-            <select id="productCategoryFilter" aria-label="Filter Category">
-              <option value="">All categories</option>
-              {/* Dynamic Categories populated here */}
-            </select>
-          </div>
-          
-          <div className="table-wrap animate-fade">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Category</th>
-                  <th>Price</th>
-                  <th>Featured</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="productsTable">
-                {/* Dynamic Product rows populated here */}
-              </tbody>
-            </table>
+          <div className="panel-body">
+            <div className="toolbar">
+              <select id="productFilter" aria-label="Filter Status">
+                <option value="active">Active products</option>
+                <option value="all">All products</option>
+                <option value="inactive">Inactive only</option>
+              </select>
+              <select id="productCategoryFilter" aria-label="Filter Category">
+                <option value="">All categories</option>
+                {/* Dynamic Categories populated here */}
+              </select>
+            </div>
+            
+            <div className="table-wrap animate-fade">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Featured</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="productsTable">
+                  {/* Dynamic Product rows populated here */}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
