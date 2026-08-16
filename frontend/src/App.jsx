@@ -1,13 +1,31 @@
 import React from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import Storefront from './user/pages/Storefront'
 import AdminLayout from './admin/components/AdminLayout'
+
+// If Admin is logged in, they can't go to storefront (redirect to /admin)
+function StorefrontGuard({ children }) {
+  const isAdminLoggedIn = !!localStorage.getItem("neatify_token");
+  if (isAdminLoggedIn) {
+    return <Navigate to="/admin" replace />;
+  }
+  return children;
+}
+
+// If User/Customer is logged in, they can't go to admin (redirect to /)
+function AdminGuard({ children }) {
+  const isUserLoggedIn = !!localStorage.getItem("neatify-token");
+  if (isUserLoggedIn) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+}
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Storefront />} />
-      <Route path="/admin/*" element={<AdminLayout />} />
+      <Route path="/" element={<StorefrontGuard><Storefront /></StorefrontGuard>} />
+      <Route path="/admin/*" element={<AdminGuard><AdminLayout /></AdminGuard>} />
     </Routes>
   )
 }
