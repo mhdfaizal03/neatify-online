@@ -20,13 +20,13 @@ export default function AdminLayout() {
       <div className="sidebar-overlay" id="sidebarOverlay"></div>
       <AdminLogin />
       
-      <div id="mainApp" className="app-layout hidden">
+      <div id="mainApp" className="admin-app hidden">
         <AdminSidebar />
         
-        <div className="main-content">
+        <div className="main-wrap">
           <AdminTopbar />
           
-          <main className="admin-main">
+          <main className="content">
             <AdminDashboard />
             <AdminProducts />
             <AdminMedia />
