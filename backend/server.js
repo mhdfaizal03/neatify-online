@@ -1,4 +1,5 @@
 const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 const express = require("express");
 const app = require("./src/app");
 const logger = require("./src/config/logger");
@@ -8,7 +9,7 @@ const FRONTEND_DIR = path.join(__dirname, "../frontend/dist");
 
 // Serve React Frontend (Production)
 app.use(express.static(FRONTEND_DIR));
-app.use("/assets", express.static(path.join(__dirname, "../assets")));
+app.use("/assets", express.static(path.join(__dirname, "../frontend/public/assets")));
 
 // Fallback all other non-API routes to React Router
 app.get("*", (req, res, next) => {

@@ -63,7 +63,7 @@ class MediaController {
 
       // Delete from filesystem if it was uploaded
       if (media.source === "upload") {
-        const filePath = path.join(__dirname, "../../../", url);
+        const filePath = path.join(__dirname, "../../../frontend/public/", url);
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);
         }

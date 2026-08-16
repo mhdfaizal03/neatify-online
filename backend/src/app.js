@@ -3,6 +3,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "../.env") });
 const logger = require("./config/logger");
 const errorHandler = require("./middleware/error");
 const connectDB = require("./config/db");
@@ -30,7 +31,7 @@ app.use(
 );
 
 // Serve uploads / assets statically (redundancy for direct app runs)
-app.use("/assets", express.static(path.join(__dirname, "../../assets")));
+app.use("/assets", express.static(path.join(__dirname, "../../frontend/public/assets")));
 
 // Health check route
 app.get("/api/health", (req, res) => {
