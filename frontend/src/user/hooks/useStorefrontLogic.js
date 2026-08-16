@@ -495,10 +495,19 @@ function updateAccountUi() {
 function showAuthNotice(show) { $("authNotice").classList.toggle("d-none", !show); }
 
 function authSwitch(tab) {
-  $("authTabLogin").classList.toggle("active", tab === "login");
-  $("authTabRegister").classList.toggle("active", tab === "register");
-  $("loginForm").classList.toggle("d-none", tab !== "login");
-  $("registerForm").classList.toggle("d-none", tab !== "register");
+  const isLogin    = tab === "login";
+  const isRegister = tab === "register";
+  const isForgot   = tab === "forgot";
+
+  $("authTabLogin").classList.toggle("active", isLogin);
+  $("authTabRegister").classList.toggle("active", isRegister);
+
+  // hide/show tab strip itself when on forgot
+  $("authTabLogin").closest(".auth-tabs").style.display = isForgot ? "none" : "";
+
+  $("loginForm").classList.toggle("d-none", !isLogin);
+  $("registerForm").classList.toggle("d-none", !isRegister);
+  $("forgotForm").classList.toggle("d-none", !isForgot);
   $("authError").classList.add("d-none");
 }
 
@@ -691,6 +700,28 @@ function initAccount() {
 
   $("authTabLogin").addEventListener("click", () => authSwitch("login"));
   $("authTabRegister").addEventListener("click", () => authSwitch("register"));
+
+  // Forgot password flow
+  $("forgotLink").addEventListener("click", () => authSwitch("forgot"));
+  $("forgotBackBtn").addEventListener("click", () => authSwitch("login"));
+  $("forgotForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = $("forgotEmail").value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      authFail("Please enter a valid email address.");
+      return;
+    }
+    const btn = $("forgotBtn");
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="loader-spin" style="width:14px;height:14px;border-width:1.5px;margin-right:0.4rem;"></span>Sending…`;
+    // Simulate a brief delay — no backend endpoint exists yet
+    await new Promise(r => setTimeout(r, 1200));
+    btn.disabled = false;
+    btn.innerHTML = orig;
+    authSwitch("login");
+    showToast("If that email is registered, a reset link has been sent.");
+  });
   document.querySelectorAll(".pw-eye").forEach((btn) => {
     btn.addEventListener("click", () => {
       const input = $(btn.dataset.eye);

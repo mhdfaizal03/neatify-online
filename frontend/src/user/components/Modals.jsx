@@ -66,34 +66,84 @@ export default function Modals() {
       <div className="modal-content auth-modal p-0">
         <button type="button" className="modal-x" data-bs-dismiss="modal" aria-label="Close"><i className="bi bi-x-lg"></i></button>
         <div className="row g-0">
+
+          {/* ── Visual pane ── */}
           <div className="col-md-5 d-none d-md-flex auth-visual-panel">
             <div className="auth-visual-content">
               <span className="brand-text">Neatify<span className="brand-accent">.</span></span>
               <p className="auth-visual-tagline">Engineered for ultimate automotive protection.</p>
+              <ul className="auth-visual-perks">
+                <li><i className="bi bi-check-circle-fill"></i> Order history & tracking</li>
+                <li><i className="bi bi-check-circle-fill"></i> Faster repeat checkout</li>
+                <li><i className="bi bi-check-circle-fill"></i> Exclusive member offers</li>
+              </ul>
               <div className="auth-visual-glow"></div>
             </div>
           </div>
+
+          {/* ── Form pane ── */}
           <div className="col-md-7 auth-form-panel">
-            <div className="auth-head">
-              <p id="authNotice" className="auth-notice d-none"><i className="bi bi-shield-lock"></i> Sign in to complete your purchase.</p>
-            </div>
+            <p id="authNotice" className="auth-notice d-none"><i className="bi bi-shield-lock"></i> Sign in to complete your purchase.</p>
+
+            {/* Tabs — Login / Register */}
             <div className="auth-tabs" role="tablist">
               <button className="auth-tab active" id="authTabLogin" type="button">Sign in</button>
-              <button className="auth-tab" id="authTabRegister" type="button">Create account</button>
+              <button className="auth-tab" id="authTabRegister" type="button">Register</button>
             </div>
+
             <p className="auth-error d-none" id="authError"></p>
-            <form id="loginForm" novalidate>
-              <label>Email<input type="email" id="liEmail" placeholder="you@example.com" autoComplete="email" required /></label>
-              <label>Password<span className="pw-wrap"><input type="password" id="liPassword" placeholder="••••••••" autoComplete="current-password" required /><button type="button" className="pw-eye" data-eye="liPassword" aria-label="Show password"><i className="bi bi-eye"></i></button></span></label>
-              <button className="btn-lime w-100" type="submit" id="loginBtn">Sign in <i className="bi bi-box-arrow-in-right"></i></button>
+
+            {/* ── Sign in form ── */}
+            <form id="loginForm" noValidate>
+              <div className="af-group">
+                <label className="af-label" htmlFor="liEmail">Email address</label>
+                <input className="af-input" type="email" id="liEmail" placeholder="you@example.com" autoComplete="email" required />
+              </div>
+              <div className="af-group">
+                <div className="af-label-row">
+                  <label className="af-label" htmlFor="liPassword">Password</label>
+                  <button type="button" className="af-forgot-link" id="forgotLink">Forgot password?</button>
+                </div>
+                <div className="pw-wrap">
+                  <input className="af-input" type="password" id="liPassword" placeholder="••••••••" autoComplete="current-password" required />
+                  <button type="button" className="pw-eye" data-eye="liPassword" aria-label="Toggle password"><i className="bi bi-eye"></i></button>
+                </div>
+              </div>
+              <button className="btn-lime w-100 mt-1" type="submit" id="loginBtn">Sign in <i className="bi bi-box-arrow-in-right"></i></button>
             </form>
-            <form id="registerForm" className="d-none" novalidate>
-              <label>Full name<input type="text" id="rgName" placeholder="Your name" autoComplete="name" required /></label>
-              <label>Email<input type="email" id="rgEmail" placeholder="you@example.com" autoComplete="email" required /></label>
-              <label>Password<span className="pw-wrap"><input type="password" id="rgPassword" placeholder="Min. 6 characters" autoComplete="new-password" required /><button type="button" className="pw-eye" data-eye="rgPassword" aria-label="Show password"><i className="bi bi-eye"></i></button></span></label>
-              <button className="btn-lime w-100" type="submit" id="registerBtn">Create account <i className="bi bi-person-plus"></i></button>
+
+            {/* ── Register form ── */}
+            <form id="registerForm" className="d-none" noValidate>
+              <div className="af-group">
+                <label className="af-label" htmlFor="rgName">Full name</label>
+                <input className="af-input" type="text" id="rgName" placeholder="Your name" autoComplete="name" required />
+              </div>
+              <div className="af-group">
+                <label className="af-label" htmlFor="rgEmail">Email address</label>
+                <input className="af-input" type="email" id="rgEmail" placeholder="you@example.com" autoComplete="email" required />
+              </div>
+              <div className="af-group">
+                <label className="af-label" htmlFor="rgPassword">Password</label>
+                <div className="pw-wrap">
+                  <input className="af-input" type="password" id="rgPassword" placeholder="Min. 6 characters" autoComplete="new-password" required />
+                  <button type="button" className="pw-eye" data-eye="rgPassword" aria-label="Toggle password"><i className="bi bi-eye"></i></button>
+                </div>
+              </div>
+              <button className="btn-lime w-100 mt-1" type="submit" id="registerBtn">Create account <i className="bi bi-person-plus"></i></button>
               <p className="auth-fine">One account for checkout, order tracking and faster repeats.</p>
             </form>
+
+            {/* ── Forgot password form ── */}
+            <form id="forgotForm" className="d-none" noValidate>
+              <p className="af-forgot-intro">Enter your email and we'll send a reset link.</p>
+              <div className="af-group">
+                <label className="af-label" htmlFor="forgotEmail">Email address</label>
+                <input className="af-input" type="email" id="forgotEmail" placeholder="you@example.com" autoComplete="email" required />
+              </div>
+              <button className="btn-lime w-100 mt-1" type="submit" id="forgotBtn">Send reset link <i className="bi bi-envelope"></i></button>
+              <button type="button" className="af-back-link" id="forgotBackBtn"><i className="bi bi-arrow-left"></i> Back to sign in</button>
+            </form>
+
           </div>
         </div>
       </div>
