@@ -1,22 +1,20 @@
+const mongoose = require("mongoose");
 const Settings = require("../models/Settings");
-
-const formatSettings = (s) => ({
-  freeShippingThreshold: s.freeShippingThreshold || 999,
-  weekendKitIds: s.weekendKitIds || [1, 2, 4, 7],
-  highlightProductId: s.highlightProductId || 3,
-  storeName: s.storeName || "Neatify",
-  announcement: s.announcement || "Premium vehicle care, made simple.",
-  announcementSub: s.announcementSub || "Free shipping on orders above ₹999.",
-});
+const { defaultSettings } = require("../config/constants");
 
 class SettingsController {
   async getSettings(req, res, next) {
     try {
+      if (mongoose.connection.readyState !== 1) {
+        console.warn("Database not connected, returning fallback settings.");
+        return res.status(200).json(defaultSettings);
+      }
+
       let settings = await Settings.findOne();
       if (!settings) {
         settings = new Settings();
       }
-      res.status(200).json(formatSettings(settings));
+      res.status(200).json(settings);
     } catch (error) {
       next(error);
     }
@@ -24,6 +22,10 @@ class SettingsController {
 
   async updateSettings(req, res, next) {
     try {
+      if (mongoose.connection.readyState !== 1) {
+        return res.status(400).json({ error: "Database not connected. Cannot perform write operations." });
+      }
+
       let settings = await Settings.findOne();
       if (!settings) {
         settings = new Settings();
@@ -46,7 +48,7 @@ class SettingsController {
       if (announcementSub !== undefined) settings.announcementSub = announcementSub;
 
       await settings.save();
-      res.status(200).json(formatSettings(settings));
+      res.status(200).json(settings);
     } catch (error) {
       next(error);
     }

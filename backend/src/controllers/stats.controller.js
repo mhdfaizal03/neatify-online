@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const Subscriber = require("../models/Subscriber");
@@ -5,6 +6,20 @@ const Subscriber = require("../models/Subscriber");
 class StatsController {
   async getStats(req, res, next) {
     try {
+      // Check database connection
+      if (mongoose.connection.readyState !== 1) {
+        console.warn("Database not connected, returning mock fallback statistics.");
+        return res.status(200).json({
+          totalProducts: 10,
+          totalOrders: 0,
+          totalRevenue: 0,
+          totalSubscribers: 0,
+          categoryCounts: { wash: 3, tools: 3, kit: 1, finish: 3 },
+          recentOrders: [],
+          dbConnected: false,
+        });
+      }
+
       const totalProducts = await Product.countDocuments({ isDeleted: false });
       const totalOrders = await Order.countDocuments({ isDeleted: false });
       const totalSubscribers = await Subscriber.countDocuments();
@@ -58,6 +73,7 @@ class StatsController {
         totalSubscribers,
         categoryCounts,
         recentOrders: formattedRecentOrders,
+        dbConnected: true,
       });
     } catch (error) {
       next(error);

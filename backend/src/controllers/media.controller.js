@@ -1,10 +1,24 @@
 const fs = require("fs");
 const path = require("path");
+const mongoose = require("mongoose");
 const Media = require("../models/Media");
+const { defaultProducts } = require("../config/constants");
 
 class MediaController {
   async getMedia(req, res, next) {
     try {
+      if (mongoose.connection.readyState !== 1) {
+        console.warn("Database not connected, returning fallback media list.");
+        const fallbackMedia = defaultProducts.map((p) => ({
+          id: String(p.id),
+          name: p.name + " Image",
+          url: p.image,
+          size: 102400,
+          source: "system",
+        }));
+        return res.status(200).json(fallbackMedia);
+      }
+
       const mediaList = await Media.find().sort("-createdAt");
       res.status(200).json(
         mediaList.map((m) => ({
@@ -22,12 +36,14 @@ class MediaController {
 
   async uploadMedia(req, res, next) {
     try {
+      if (mongoose.connection.readyState !== 1) {
+        return res.status(400).json({ error: "Database not connected. Cannot perform upload operations." });
+      }
+
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
       }
 
-      // Multer saves file to assets/uploads/
-      // The relative path is assets/uploads/filename
       const urlPath = `assets/uploads/${req.file.filename}`;
 
       const media = await Media.create({
@@ -51,6 +67,10 @@ class MediaController {
 
   async deleteMedia(req, res, next) {
     try {
+      if (mongoose.connection.readyState !== 1) {
+        return res.status(400).json({ error: "Database not connected. Cannot perform write operations." });
+      }
+
       const { url } = req.body;
       if (!url) {
         return res.status(400).json({ error: "URL is required" });
@@ -61,7 +81,6 @@ class MediaController {
         return res.status(404).json({ error: "Media entry not found in database" });
       }
 
-      // Delete from filesystem if it was uploaded
       if (media.source === "upload") {
         const filePath = path.join(__dirname, "../../../frontend/public/", url);
         if (fs.existsSync(filePath)) {

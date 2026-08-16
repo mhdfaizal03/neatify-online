@@ -1,4 +1,6 @@
+const mongoose = require("mongoose");
 const productService = require("../services/product.service");
+const { defaultProducts } = require("../config/constants");
 
 const formatProduct = (p) => {
   if (!p) return null;
@@ -22,6 +24,12 @@ const formatProduct = (p) => {
 class ProductController {
   async getProducts(req, res, next) {
     try {
+      // Check database connection
+      if (mongoose.connection.readyState !== 1) {
+        console.warn("Database not connected, returning fallback products.");
+        return res.status(200).json(defaultProducts.filter(p => p.active !== false));
+      }
+
       // Storefront: only show active products
       const products = await productService.getProducts({ active: true });
       res.status(200).json(products.map(formatProduct));
@@ -32,6 +40,11 @@ class ProductController {
 
   async getAllProducts(req, res, next) {
     try {
+      if (mongoose.connection.readyState !== 1) {
+        console.warn("Database not connected, returning fallback products.");
+        return res.status(200).json(defaultProducts);
+      }
+
       // Admin: show all products
       const products = await productService.getProducts({});
       res.status(200).json(products.map(formatProduct));
@@ -42,6 +55,12 @@ class ProductController {
 
   async getProduct(req, res, next) {
     try {
+      if (mongoose.connection.readyState !== 1) {
+        const product = defaultProducts.find(p => String(p.id) === String(req.params.id));
+        if (!product) return res.status(404).json({ error: "Product not found" });
+        return res.status(200).json(product);
+      }
+
       const product = await productService.getProductById(req.params.id);
       res.status(200).json(formatProduct(product));
     } catch (error) {
@@ -51,6 +70,10 @@ class ProductController {
 
   async createProduct(req, res, next) {
     try {
+      if (mongoose.connection.readyState !== 1) {
+        return res.status(400).json({ error: "Database not connected. Cannot perform write operations." });
+      }
+
       const product = await productService.createProduct(req.body);
       res.status(201).json(formatProduct(product));
     } catch (error) {
@@ -60,6 +83,10 @@ class ProductController {
 
   async updateProduct(req, res, next) {
     try {
+      if (mongoose.connection.readyState !== 1) {
+        return res.status(400).json({ error: "Database not connected. Cannot perform write operations." });
+      }
+
       const product = await productService.updateProduct(req.params.id, req.body);
       res.status(200).json(formatProduct(product));
     } catch (error) {
@@ -69,6 +96,10 @@ class ProductController {
 
   async deleteProduct(req, res, next) {
     try {
+      if (mongoose.connection.readyState !== 1) {
+        return res.status(400).json({ error: "Database not connected. Cannot perform write operations." });
+      }
+
       await productService.deleteProduct(req.params.id);
       res.status(200).json({ success: true });
     } catch (error) {
@@ -78,6 +109,10 @@ class ProductController {
 
   async restoreProduct(req, res, next) {
     try {
+      if (mongoose.connection.readyState !== 1) {
+        return res.status(400).json({ error: "Database not connected. Cannot perform write operations." });
+      }
+
       const product = await productService.restoreProduct(req.params.id);
       res.status(200).json(formatProduct(product));
     } catch (error) {
