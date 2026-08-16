@@ -158,20 +158,20 @@ button, .btn-hero-primary, .btn-hero-ghost, .btn-primary-sm, .f-pill, .socials a
    NAVBAR
    ════════════════════════════════════════════════════════ */
 .navbar {
-  background: rgba(4,7,9,0.78);
+  background: #000;
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
   border-bottom: 1px solid rgba(255,255,255,0.06);
-  padding: 1.25rem 0;
+  padding: 0.65rem 0;
   position: sticky;
   top: 0;
   z-index: 1040;
   transition: all var(--dur-med) var(--ease);
 }
 .navbar.scrolled {
-  padding: 0.75rem 0;
-  background: rgba(4,7,9,0.95);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4), inset 0 -1px 0 rgba(255,255,255,0.06);
+  padding: 0.5rem 0;
+  background: #000;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), inset 0 -1px 0 rgba(255,255,255,0.06);
 }
 
 /* Brand — text only */
@@ -1507,17 +1507,18 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   position: absolute;
   right: 14px; top: 14px;
   z-index: 4;
-  width: 38px; height: 38px;
+  width: 36px; height: 36px;
   border: 0;
-  border-radius: var(--r-sm);
-  background: rgba(255,255,255,0.85);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
   backdrop-filter: blur(8px);
   display: grid;
   place-items: center;
   transition: all var(--dur-fast);
-  box-shadow: var(--elev-1);
+  cursor: pointer;
 }
-.modal-x:hover { background: #111; color: #fff; }
+.modal-x:hover { background: rgba(0, 0, 0, 0.9); color: var(--lime); }
 .modal-prod-img { aspect-ratio: 3 / 4; max-height: 80vh; background: #eeefec; }
 .modal-prod-img img { width: 100%; height: 100%; object-fit: cover; }
 .modal-prod-copy { padding: 2.5rem; }
@@ -2259,4 +2260,18 @@ button, .btn-hero-primary, .btn-hero-ghost, .btn-primary-sm, .f-pill { overflow:
 .stepper.is-cancelled .stepper-progress {
   background: #ef4444;
   box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
+/* ── Modal backdrop — near black ── */
+.modal-backdrop {
+  background-color: #000 !important;
+}
+.modal-backdrop.show {
+  opacity: 0.88 !important;
+}
+
+/* ── Lock background scroll when any modal is open ── */
+body.modal-open {
+  overflow: hidden !important;
+  padding-right: 0 !important;  /* suppress Bootstrap's scrollbar compensation */
 }
