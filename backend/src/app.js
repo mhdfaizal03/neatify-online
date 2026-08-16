@@ -50,7 +50,7 @@ app.use("/api/media", require("./routes/media.routes"));
 app.use("/api/stats", require("./routes/stats.routes"));
 
 // 404 handler for API routes
-app.use("/api/*", (req, res) => {
+app.use("/api", (req, res) => {
   res.status(404).json({ success: false, message: "API endpoint not found" });
 });
 

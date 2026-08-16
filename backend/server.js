@@ -12,7 +12,7 @@ app.use(express.static(FRONTEND_DIR));
 app.use("/assets", express.static(path.join(__dirname, "../frontend/public/assets")));
 
 // Fallback all other non-API routes to React Router
-app.get("*", (req, res, next) => {
+app.get(/.*/, (req, res, next) => {
   if (req.originalUrl.startsWith("/api")) {
     return next();
   }
