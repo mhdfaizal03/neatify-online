@@ -389,7 +389,11 @@ export function useAdminLogic() {
       const form = $("#settingsForm");
       Object.entries(state.settings).forEach(([key, value]) => {
         const input = form.elements[key];
-        if (input) input.value = Array.isArray(value) ? value.join(", ") : value;
+        if (input) {
+          input.value = Array.isArray(value)
+            ? value.join(", ")
+            : (value !== null && value !== undefined ? value : "");
+        }
       });
     } catch (err) { showSnack("Failed to load settings", "error"); }
   }
