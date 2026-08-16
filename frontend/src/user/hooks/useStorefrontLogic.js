@@ -554,6 +554,55 @@ function openAccount() {
   accountModal.show();
 }
 
+function getOrderStepper(status) {
+  const steps = [
+    { label: "Pending", val: "pending", index: 0 },
+    { label: "Processing", val: "processing", index: 1 },
+    { label: "Shipped", val: "shipped", index: 2 },
+    { label: "Delivered", val: "delivered", index: 3 }
+  ];
+
+  const currentStatus = String(status || "pending").toLowerCase();
+  
+  if (currentStatus === "cancelled") {
+    return `<div class="stepper is-cancelled">
+      <div class="stepper-progress" style="width: 100%;"></div>
+      <div class="step cancelled" style="width: 100%;">
+        <div class="step-dot"><i class="bi bi-x-lg"></i></div>
+        <div class="step-label">Order Cancelled</div>
+      </div>
+    </div>`;
+  }
+
+  const activeIdx = steps.findIndex(s => s.val === currentStatus);
+  const progressPercent = activeIdx >= 0 ? (activeIdx / (steps.length - 1)) * 100 : 0;
+
+  const stepsHtml = steps.map((s, idx) => {
+    let stateClass = "";
+    let dotContent = idx + 1;
+    if (idx < activeIdx) {
+      stateClass = "completed";
+      dotContent = '<i class="bi bi-check-lg"></i>';
+    } else if (idx === activeIdx) {
+      if (currentStatus === "delivered") {
+        stateClass = "completed";
+        dotContent = '<i class="bi bi-check-lg"></i>';
+      } else {
+        stateClass = "active";
+      }
+    }
+    return `<div class="step ${stateClass}">
+      <div class="step-dot">${dotContent}</div>
+      <div class="step-label">${s.label}</div>
+    </div>`;
+  }).join("");
+
+  return `<div class="stepper">
+    <div class="stepper-progress" style="width: ${progressPercent}%;"></div>
+    ${stepsHtml}
+  </div>`;
+}
+
 async function loadAccountOrders() {
   const box = $("accOrders");
   box.innerHTML = `<div class="acc-empty"><div class="spin-ring"></div></div>`;
@@ -577,10 +626,10 @@ async function loadAccountOrders() {
       <div class="acc-order-head">
         <span class="acc-order-id">${esc(o.id)}</span>
         <span class="acc-order-date">${date}</span>
-        <span class="acc-status ${esc(status)}">${esc(status)}</span>
       </div>
       <div class="acc-order-items">${lines}</div>
-      <div class="acc-order-total"><span>Total</span><strong>${money(o.total || 0)}</strong></div>
+      ${getOrderStepper(status)}
+      <div class="acc-order-total" style="margin-top: 1.2rem;"><span>Total</span><strong>${money(o.total || 0)}</strong></div>
     </div>`;
   }).join("");
 }

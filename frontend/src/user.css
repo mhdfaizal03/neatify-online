@@ -1108,7 +1108,7 @@ button:disabled { opacity: 0.5; pointer-events: none; }
 }
 .step-icon {
   width: 60px; height: 60px;
-  border-radius: var(--r-md);
+  border-radius: 50%;
   background: #f2f3ee;
   display: grid;
   place-items: center;
@@ -1218,7 +1218,7 @@ button:disabled { opacity: 0.5; pointer-events: none; }
 .feat-row:hover { background: rgba(0,0,0,0.02); padding-left: 0.9rem; border-radius: var(--r-sm); }
 .feat-icon {
   width: 42px; height: 42px;
-  border-radius: var(--r-sm);
+  border-radius: 50%;
   background: #fff;
   display: grid;
   place-items: center;
@@ -1997,4 +1997,266 @@ button, .btn-hero-primary, .btn-hero-ghost, .btn-primary-sm, .f-pill { overflow:
     display: flex !important;
     visibility: visible !important;
   }
+}
+
+/* ── Premium Modal Redesigns (Auth, Account, Checkout, Success) ── */
+
+/* Dual-Pane Split Auth Modal */
+.auth-modal.p-0 {
+  background: rgba(20, 20, 22, 0.95) !important;
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7);
+}
+.auth-visual-panel {
+  background: linear-gradient(135deg, #16161a 0%, #0a0a0c 100%);
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+}
+.auth-visual-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+.auth-visual-content .brand-text {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.03em;
+  display: block;
+}
+.auth-visual-content .brand-accent {
+  color: var(--lime);
+}
+.auth-visual-tagline {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 1rem;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.auth-visual-glow {
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(200, 245, 60, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  pointer-events: none;
+  animation: orb-pulse 8s ease-in-out infinite alternate;
+}
+@keyframes orb-pulse {
+  0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.9); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+}
+.auth-form-panel {
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Avatar Glow in Profile Modal */
+.acc-avatar-glow {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 0.9rem;
+}
+.acc-avatar-glow::before {
+  content: '';
+  position: absolute;
+  top: -4px; left: -4px; right: -4px; bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(200, 245, 60, 0.4);
+  animation: avatar-pulse 3s linear infinite;
+  pointer-events: none;
+}
+@keyframes avatar-pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.06); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+/* Checkout Receipt Container */
+.co-summary-receipt {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--r-md);
+  padding: 1.5rem;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+}
+.co-summary-receipt h4 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.88rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 1.2rem;
+  color: var(--lime);
+}
+
+/* Success Checkmark Animation */
+.success-modal-content {
+  padding: 2.5rem 1.8rem !important;
+  text-align: center;
+}
+.success-icon-wrap {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 1.5rem;
+}
+.success-checkmark {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: block;
+  stroke-width: 3;
+  stroke: var(--lime);
+  stroke-miterlimit: 10;
+  box-shadow: inset 0px 0px 0px var(--lime);
+  animation: fill-checkmark .4s ease-in-out .4s forwards, scale-checkmark .3s ease-in-out .9s forwards;
+}
+.success-checkmark-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 3;
+  stroke-miterlimit: 10;
+  stroke: var(--lime);
+  fill: none;
+  animation: stroke-checkmark .6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+.success-checkmark-check {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: stroke-checkmark .3s cubic-bezier(0.65, 0, 0.45, 1) .8s forwards;
+}
+@keyframes stroke-checkmark {
+  100% { stroke-dashoffset: 0; }
+}
+@keyframes fill-checkmark {
+  100% { box-shadow: inset 0px 0px 0px 30px rgba(200, 245, 60, 0.05); }
+}
+@keyframes scale-checkmark {
+  0%, 100% { transform: none; }
+  50% { transform: scale3d(1.1, 1.1, 1); }
+}
+
+.order-chip-premium {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--lime);
+  background: rgba(200, 245, 60, 0.08);
+  border: 1px solid rgba(200, 245, 60, 0.25);
+  border-radius: 20px;
+  padding: 0.4rem 1.1rem;
+  display: inline-block;
+  letter-spacing: 0.05em;
+  margin-top: 0.5rem;
+}
+
+/* ── Interactive Order Progress Stepper Timeline ── */
+.stepper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1.4rem 0 0.8rem;
+  position: relative;
+  padding: 0 10px;
+}
+.stepper::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  z-index: 1;
+}
+.stepper-progress {
+  position: absolute;
+  top: 14px;
+  left: 20px;
+  height: 2px;
+  background: var(--lime);
+  z-index: 2;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 8px rgba(200, 245, 60, 0.5);
+}
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 3;
+  width: 60px;
+}
+.step-dot {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #1d1d22;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  display: grid;
+  place-items: center;
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.35);
+  transition: all 0.4s ease;
+}
+.step-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 0.5rem;
+  text-align: center;
+  transition: color 0.4s ease;
+  white-space: nowrap;
+}
+
+/* Completed and Active Stepper states */
+.step.completed .step-dot {
+  background: var(--lime);
+  border-color: var(--lime);
+  color: #111;
+  box-shadow: 0 0 12px rgba(200, 245, 60, 0.3);
+}
+.step.completed .step-label {
+  color: #fff;
+}
+.step.active .step-dot {
+  background: #1d1d22;
+  border-color: var(--lime);
+  color: var(--lime);
+  box-shadow: 0 0 14px rgba(200, 245, 60, 0.4);
+  font-weight: 800;
+}
+.step.active .step-label {
+  color: var(--lime);
+  font-weight: 800;
+}
+
+/* Cancelled State */
+.step.cancelled .step-dot {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+}
+.step.cancelled .step-label {
+  color: #ef4444;
+}
+.stepper.is-cancelled .stepper-progress {
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
 }

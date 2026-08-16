@@ -62,30 +62,40 @@ export default function Modals() {
 
   
   <div className="modal fade" id="authModal" tabIndex="-1" aria-hidden="true">
-    <div className="modal-dialog modal-dialog-centered modal-sm">
-      <div className="modal-content auth-modal">
+    <div className="modal-dialog modal-dialog-centered modal-lg">
+      <div className="modal-content auth-modal p-0">
         <button type="button" className="modal-x" data-bs-dismiss="modal" aria-label="Close"><i className="bi bi-x-lg"></i></button>
-        <div className="auth-head">
-          <span className="brand-text">Neatify</span><span className="brand-accent">.</span>
-          <p id="authNotice" className="auth-notice d-none"><i className="bi bi-shield-lock"></i> Sign in to complete your purchase.</p>
+        <div className="row g-0">
+          <div className="col-md-5 d-none d-md-flex auth-visual-panel">
+            <div className="auth-visual-content">
+              <span className="brand-text">Neatify<span className="brand-accent">.</span></span>
+              <p className="auth-visual-tagline">Engineered for ultimate automotive protection.</p>
+              <div className="auth-visual-glow"></div>
+            </div>
+          </div>
+          <div className="col-md-7 auth-form-panel">
+            <div className="auth-head">
+              <p id="authNotice" className="auth-notice d-none"><i className="bi bi-shield-lock"></i> Sign in to complete your purchase.</p>
+            </div>
+            <div className="auth-tabs" role="tablist">
+              <button className="auth-tab active" id="authTabLogin" type="button">Sign in</button>
+              <button className="auth-tab" id="authTabRegister" type="button">Create account</button>
+            </div>
+            <p className="auth-error d-none" id="authError"></p>
+            <form id="loginForm" novalidate>
+              <label>Email<input type="email" id="liEmail" placeholder="you@example.com" autoComplete="email" required /></label>
+              <label>Password<span className="pw-wrap"><input type="password" id="liPassword" placeholder="••••••••" autoComplete="current-password" required /><button type="button" className="pw-eye" data-eye="liPassword" aria-label="Show password"><i className="bi bi-eye"></i></button></span></label>
+              <button className="btn-lime w-100" type="submit" id="loginBtn">Sign in <i className="bi bi-box-arrow-in-right"></i></button>
+            </form>
+            <form id="registerForm" className="d-none" novalidate>
+              <label>Full name<input type="text" id="rgName" placeholder="Your name" autoComplete="name" required /></label>
+              <label>Email<input type="email" id="rgEmail" placeholder="you@example.com" autoComplete="email" required /></label>
+              <label>Password<span className="pw-wrap"><input type="password" id="rgPassword" placeholder="Min. 6 characters" autoComplete="new-password" required /><button type="button" className="pw-eye" data-eye="rgPassword" aria-label="Show password"><i className="bi bi-eye"></i></button></span></label>
+              <button className="btn-lime w-100" type="submit" id="registerBtn">Create account <i className="bi bi-person-plus"></i></button>
+              <p className="auth-fine">One account for checkout, order tracking and faster repeats.</p>
+            </form>
+          </div>
         </div>
-        <div className="auth-tabs" role="tablist">
-          <button className="auth-tab active" id="authTabLogin" type="button">Sign in</button>
-          <button className="auth-tab" id="authTabRegister" type="button">Create account</button>
-        </div>
-        <p className="auth-error d-none" id="authError"></p>
-        <form id="loginForm" novalidate>
-          <label>Email<input type="email" id="liEmail" placeholder="you@example.com" autoComplete="email" required /></label>
-          <label>Password<span className="pw-wrap"><input type="password" id="liPassword" placeholder="••••••••" autoComplete="current-password" required /><button type="button" className="pw-eye" data-eye="liPassword" aria-label="Show password"><i className="bi bi-eye"></i></button></span></label>
-          <button className="btn-lime w-100" type="submit" id="loginBtn">Sign in <i className="bi bi-box-arrow-in-right"></i></button>
-        </form>
-        <form id="registerForm" className="d-none" novalidate>
-          <label>Full name<input type="text" id="rgName" placeholder="Your name" autoComplete="name" required /></label>
-          <label>Email<input type="email" id="rgEmail" placeholder="you@example.com" autoComplete="email" required /></label>
-          <label>Password<span className="pw-wrap"><input type="password" id="rgPassword" placeholder="Min. 6 characters" autoComplete="new-password" required /><button type="button" className="pw-eye" data-eye="rgPassword" aria-label="Show password"><i className="bi bi-eye"></i></button></span></label>
-          <button className="btn-lime w-100" type="submit" id="registerBtn">Create account <i className="bi bi-person-plus"></i></button>
-          <p className="auth-fine">One account for checkout, order tracking and faster repeats.</p>
-        </form>
       </div>
     </div>
   </div>
@@ -97,7 +107,9 @@ export default function Modals() {
         <button type="button" className="modal-x" data-bs-dismiss="modal" aria-label="Close"><i className="bi bi-x-lg"></i></button>
         <div className="row g-0">
           <div className="col-md-4 acc-side">
-            <div className="acc-avatar" id="accAvatar">N</div>
+            <div className="acc-avatar-glow">
+              <div className="acc-avatar" id="accAvatar">N</div>
+            </div>
             <h3 id="accName">—</h3>
             <p id="accEmail" className="acc-email">—</p>
             <p className="acc-since" id="accSince"></p>
@@ -159,15 +171,17 @@ export default function Modals() {
             </form>
           </div>
           <div className="col-md-5 co-summary-side">
-            <h4>Order summary</h4>
-            <div id="checkoutItems" className="co-items"></div>
-            <div className="co-lines">
-              <div><span>Subtotal</span><span id="coSubtotal">₹0</span></div>
-              <div><span>Shipping</span><span id="coShipping">₹0</span></div>
-              <div className="co-grand"><span>Total</span><strong id="coTotal">₹0</strong></div>
+            <div className="co-summary-receipt">
+              <h4>Order summary</h4>
+              <div id="checkoutItems" className="co-items"></div>
+              <div className="co-lines">
+                <div><span>Subtotal</span><span id="coSubtotal">₹0</span></div>
+                <div><span>Shipping</span><span id="coShipping">₹0</span></div>
+                <div className="co-grand"><span>Total</span><strong id="coTotal">₹0</strong></div>
+              </div>
+              <button className="btn-lime w-100" id="placeOrderBtn" form="checkoutForm" type="submit">Place order <i className="bi bi-check2-circle"></i></button>
+              <p className="co-note"><i className="bi bi-shield-lock"></i> Demo — no payment charged.</p>
             </div>
-            <button className="btn-lime w-100" id="placeOrderBtn" form="checkoutForm" type="submit">Place order <i className="bi bi-check2-circle"></i></button>
-            <p className="co-note"><i className="bi bi-shield-lock"></i> Demo — no payment charged.</p>
           </div>
         </div>
       </div>
@@ -176,12 +190,17 @@ export default function Modals() {
 
   <div className="modal fade" id="orderSuccessModal" tabIndex="-1" aria-hidden="true">
     <div className="modal-dialog modal-dialog-centered modal-sm">
-      <div className="modal-content info-modal">
-        <div className="info-icon success"><i className="bi bi-check-lg"></i></div>
+      <div className="modal-content info-modal success-modal-content">
+        <div className="success-icon-wrap">
+          <svg className="success-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle className="success-checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+            <path className="success-checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+          </svg>
+        </div>
         <h3>Order placed!</h3>
         <p>Thanks for choosing Neatify. Your order has been received.</p>
-        <div className="order-chip" id="orderIdChip">ORD-000000</div>
-        <button className="btn-dark w-100 mt-3" data-bs-dismiss="modal">Keep browsing</button>
+        <div className="order-chip-premium" id="orderIdChip">ORD-000000</div>
+        <button className="btn-dark w-100 mt-4" data-bs-dismiss="modal">Keep browsing</button>
       </div>
     </div>
   </div>
