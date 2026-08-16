@@ -21,6 +21,9 @@ export default function AdminLogin() {
 
         <button type="submit" className="btn-primary">Sign in</button>
         <p className="login-error" id="loginError"></p>
+        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+          <a href="/" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textDecoration: 'none' }}><i className="bi bi-arrow-left"></i> Back to Storefront</a>
+        </div>
       </form>
     </div>
   </div>
