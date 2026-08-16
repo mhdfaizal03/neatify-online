@@ -24,7 +24,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.get("/", protect, adminOnly, mediaController.getMedia);
-router.post("/upload", protect, adminOnly, upload.single("file"), mediaController.uploadMedia);
+router.post("/upload", protect, adminOnly, upload.single("image"), mediaController.uploadMedia);
 router.delete("/", protect, adminOnly, mediaController.deleteMedia);
 
 module.exports = router;
