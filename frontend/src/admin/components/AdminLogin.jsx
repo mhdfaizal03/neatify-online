@@ -12,18 +12,16 @@ export default function AdminLogin() {
           <p>Sign in to manage your store</p>
         </div>
       </div>
-      <form id="loginForm" novalidate>
+      <form id="loginForm" noValidate>
         <label htmlFor="loginUser">Username</label>
         <input type="text" id="loginUser" placeholder="Enter username" autoComplete="username" required />
 
         <label htmlFor="loginPass">Password</label>
         <input type="password" id="loginPass" placeholder="••••••••" autoComplete="current-password" required />
 
-        <button type="submit" className="btn-primary">Sign in</button>
-        <p className="login-error" id="loginError"></p>
-        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-          <a href="/" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textDecoration: 'none' }}><i className="bi bi-arrow-left"></i> Back to Storefront</a>
-        </div>
+        <p className="login-error" id="loginError" style={{ display: 'none' }}></p>
+
+        <button type="submit" className="btn-primary">Sign in <i className="bi bi-arrow-right"></i></button>
       </form>
     </div>
   </div>

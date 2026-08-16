@@ -641,9 +641,21 @@ export function useAdminLogic() {
   if (state.token) showApp();
   else {
     // Only login listener is needed initially
-    $("#loginForm").addEventListener("submit", e => {
+    $("#loginForm").addEventListener("submit", async e => {
       e.preventDefault();
-      login($("#loginUser").value, $("#loginPass").value);
+      const errEl = $("#loginError");
+      if (errEl) {
+        errEl.style.display = "none";
+        errEl.textContent = "";
+      }
+      try {
+        await login($("#loginUser").value, $("#loginPass").value);
+      } catch (err) {
+        if (errEl) {
+          errEl.textContent = err.message || "Invalid credentials";
+          errEl.style.display = "block";
+        }
+      }
     });
   }
 
