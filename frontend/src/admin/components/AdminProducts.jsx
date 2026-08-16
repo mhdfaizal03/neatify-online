@@ -34,6 +34,7 @@ export default function AdminProducts() {
                     <th>Product</th>
                     <th>Category</th>
                     <th>Price</th>
+                    <th>Stock</th>
                     <th>Featured</th>
                     <th>Status</th>
                     <th>Actions</th>

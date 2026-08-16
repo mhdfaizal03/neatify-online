@@ -947,6 +947,8 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   z-index: 2;
 }
 .prod-badge.lime { background: var(--lime); color: #111; }
+.prod-badge.soldout { background: #ef4444; color: #fff; }
+.prod-badge.lowstock { background: #f59e0b; color: #fff; }
 .prod-quick {
   position: absolute;
   right: 12px; top: 12px;

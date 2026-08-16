@@ -48,6 +48,11 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    stock: {
+      type: Number,
+      required: true,
+      default: 20,
+    },
     status: {
       type: String,
       enum: ["Active", "Inactive", "Archived"],

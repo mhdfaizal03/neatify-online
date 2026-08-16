@@ -30,6 +30,9 @@ export default function AdminModals() {
                 <label>Price (₹)
                   <input type="number" id="productPrice" min="0" required />
                 </label>
+                <label>Stock Quantity
+                  <input type="number" id="productStock" min="0" required />
+                </label>
                 <label>Display Order
                   <input type="number" id="productFeatured" min="1" value="1" />
                 </label>

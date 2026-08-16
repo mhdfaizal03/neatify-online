@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Product = require("../models/Product");
 const Order = require("../models/Order");
 
 const formatOrder = (o) => {
@@ -7,6 +8,7 @@ const formatOrder = (o) => {
     id: o._id ? o._id.toString() : o.id,
     customer: o.customer,
     items: o.items.map((it) => ({
+      id: it.id,
       name: it.name,
       price: it.price,
       qty: it.qty,
@@ -39,6 +41,25 @@ class OrderController {
           createdAt: new Date(),
         };
         return res.status(201).json(mockOrder);
+      }
+
+      // Check stock before placing order
+      for (const item of items) {
+        const product = await Product.findOne({ id: item.id, isDeleted: false });
+        if (!product) {
+          return res.status(404).json({ error: `Product "${item.name}" not found.` });
+        }
+        if (product.stock < item.qty) {
+          return res.status(400).json({ error: `Product "${item.name}" is out of stock (only ${product.stock} left).` });
+        }
+      }
+
+      // Decrement stock atomically
+      for (const item of items) {
+        await Product.findOneAndUpdate(
+          { id: item.id },
+          { $inc: { stock: -item.qty } }
+        );
       }
 
       const order = await Order.create({

@@ -182,7 +182,7 @@ function renderProducts() {
     <div class="col-6 col-lg-4 col-xl-3">
       <article class="product-card">
         <div class="prod-img" data-id="${p.id}" role="button" tabindex="0" aria-label="View ${esc(p.name)}">
-          <span class="prod-badge${p.id === settings.highlightProductId ? " lime" : ""}">${esc(p.badge)}</span>
+          ${p.stock === 0 ? '<span class="prod-badge soldout">Sold Out</span>' : (p.stock < 5 ? `<span class="prod-badge lowstock">Only ${p.stock} left</span>` : (p.badge ? `<span class="prod-badge${p.id === settings.highlightProductId ? " lime" : ""}">${esc(p.badge)}</span>` : ''))}
           <button class="prod-quick" data-view="${p.id}" aria-label="Quick view ${esc(p.name)}">
             <i class="bi bi-eye"></i>
           </button>
@@ -194,9 +194,15 @@ function renderProducts() {
           <p>${esc(p.description)}</p>
           <div class="prod-foot">
             <span class="prod-price">${money(p.price)}</span>
+            ${p.stock === 0 ? `
+            <button class="add-btn disabled" disabled style="background:#333;color:#666;cursor:not-allowed;" aria-label="${esc(p.name)} is sold out">
+              <i class="bi bi-slash-circle"></i>
+            </button>
+            ` : `
             <button class="add-btn" data-add="${p.id}" aria-label="Add ${esc(p.name)} to cart">
               <i class="bi bi-plus-lg"></i>
             </button>
+            `}
           </div>
         </div>
       </article>
@@ -232,9 +238,20 @@ function shippingFor(subtotal) {
 function addToCart(id, openDrawer = false) {
   const p = getProduct(id);
   if (!p) return;
+  if (p.stock === 0) {
+    showToast(`${p.name} is currently out of stock`, true);
+    return;
+  }
   const found = state.cart.find(i => i.id === id);
-  if (found) found.qty++;
-  else state.cart.push({ id, qty: 1 });
+  if (found) {
+    if (found.qty >= p.stock) {
+      showToast(`Only ${p.stock} units of ${p.name} are available`, true);
+      return;
+    }
+    found.qty++;
+  } else {
+    state.cart.push({ id, qty: 1 });
+  }
   saveCart();
   renderCart();
   bumpBadge();
@@ -245,10 +262,18 @@ function addToCart(id, openDrawer = false) {
 function addBundle(ids) {
   const added = ids.map(getProduct).filter(Boolean);
   if (!added.length) return;
+  const outOfStock = added.filter(p => p.stock === 0);
+  if (outOfStock.length > 0) {
+    showToast(`Some items in this kit are out of stock.`, true);
+    return;
+  }
   added.forEach(p => {
     const found = state.cart.find(i => i.id === p.id);
-    if (found) found.qty++;
-    else state.cart.push({ id: p.id, qty: 1 });
+    if (found) {
+      if (found.qty < p.stock) found.qty++;
+    } else {
+      state.cart.push({ id: p.id, qty: 1 });
+    }
   });
   saveCart();
   renderCart();
@@ -691,9 +716,14 @@ function openProduct(id) {
       <span class="prod-kicker">${esc(p.type)} / Exterior</span>
       <h2 id="productModalTitle">${esc(p.name)}</h2>
       <div class="modal-price">${money(p.price)}</div>
+      ${p.stock === 0 ? '<span class="badge bg-danger mb-3">Sold Out</span>' : (p.stock < 5 ? `<span class="badge bg-warning text-dark mb-3">Only ${p.stock} remaining!</span>` : '')}
       <p>${esc(p.description)}</p>
       <ul class="detail-pts">${(p.points || []).map(x => `<li><i class="bi bi-check2"></i>${esc(x)}</li>`).join("")}</ul>
+      ${p.stock === 0 ? `
+      <button class="btn-lime w-100 disabled" disabled style="background:#444;color:#888;cursor:not-allowed;border:none;">Sold Out <i class="bi bi-slash-circle ms-1"></i></button>
+      ` : `
       <button class="btn-lime w-100" data-modal-add="${p.id}">Add to cart <i class="bi bi-bag ms-1"></i></button>
+      `}
     </div>`;
   $("productModal").setAttribute("aria-labelledby", "productModalTitle");
   productModal.show();
@@ -770,7 +800,13 @@ document.addEventListener("click", e => {
     const id   = Number(qty.dataset.qty);
     const item = state.cart.find(i => i.id === id);
     if (!item) return;
-    item.qty += Number(qty.dataset.delta);
+    const p = getProduct(id);
+    const delta = Number(qty.dataset.delta);
+    if (delta > 0 && item.qty >= p.stock) {
+      showToast(`Only ${p.stock} units of ${p.name} are available`, true);
+      return;
+    }
+    item.qty += delta;
     if (item.qty <= 0) state.cart = state.cart.filter(i => i.id !== id);
     saveCart(); renderCart(); return;
   }

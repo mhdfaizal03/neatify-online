@@ -220,6 +220,7 @@ export function useAdminLogic() {
         <td><div class="product-cell"><img src="/${esc(p.image)}" class="product-thumb" alt=""><div><div class="product-name">${esc(p.name)}</div></div></div></td>
         <td>${esc(p.category)}</td>
         <td class="price-cell">${currency(p.price)}</td>
+        <td>${p.stock === 0 ? '<span class="status-badge cancelled">Sold Out</span>' : (p.stock < 5 ? `<span class="status-badge pending">Low: ${p.stock}</span>` : p.stock)}</td>
         <td>${p.featured || 0}</td>
         <td><span class="status-badge ${p.active !== false ? 'active' : 'inactive'}">${p.active !== false ? 'Active' : 'Inactive'}</span></td>
         <td>
@@ -243,6 +244,7 @@ export function useAdminLogic() {
       category: $("#productCategory").value,
       type: $("#productType").value,
       price: Number($("#productPrice").value),
+      stock: Number($("#productStock").value),
       featured: Number($("#productFeatured").value),
       image: $("#productImage").value,
       badge: $("#productBadge").value,
@@ -529,6 +531,7 @@ export function useAdminLogic() {
       $("#productCategory").value = p.category;
       $("#productType").value = p.type || "";
       $("#productPrice").value = p.price;
+      $("#productStock").value = p.stock !== undefined ? p.stock : 20;
       $("#productFeatured").value = p.featured || p.id;
       $("#productBadge").value = p.badge || "";
       $("#productImage").value = p.image;
@@ -598,6 +601,7 @@ export function useAdminLogic() {
     $("#addProductBtn").addEventListener("click", () => {
       $("#productForm").reset();
       $("#productId").value = "";
+      $("#productStock").value = 20;
       $("#productModalTitle").textContent = "Add Product";
       $("#productModal").classList.remove("hidden");
     });
