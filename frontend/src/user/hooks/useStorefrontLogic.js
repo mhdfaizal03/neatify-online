@@ -733,6 +733,7 @@ function updateActiveNav() {
   document.querySelectorAll("main > section[id]").forEach(s => {
     if (s.offsetTop <= pos) current = s.id;
   });
+  if (current === "heroSection") current = "home";
   links.forEach(a => a.classList.toggle("active", a.getAttribute("href") === `#${current}`));
   document.querySelectorAll(".drawer-link").forEach(a => a.classList.toggle("active", a.getAttribute("href") === `#${current}`));
 }
