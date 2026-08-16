@@ -85,12 +85,12 @@ export function useAdminLogic() {
     state.token = null;
     localStorage.removeItem("neatify_token");
     $("#loginScreen").classList.remove("hidden");
-    $("#adminApp").classList.add("hidden");
+    $("#mainApp").classList.add("hidden");
   }
 
   function showApp(username) {
     $("#loginScreen").classList.add("hidden");
-    $("#adminApp").classList.remove("hidden");
+    $("#mainApp").classList.remove("hidden");
     $("#adminUser").textContent = username || "admin";
     initAppEventListeners();
     switchView("dashboard");
