@@ -1027,3 +1027,28 @@ label > textarea {
   font-weight: 600;
   color: #334155; /* slate-700 */
 }
+
+/* Categories View Layout */
+.categories-grid {
+  display: grid;
+  grid-template-columns: 1fr 2.2fr;
+  gap: 32px;
+}
+
+.categories-form-pane {
+  border-right: 1px solid var(--border);
+  padding-right: 32px;
+}
+
+@media (max-width: 991px) {
+  .categories-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .categories-form-pane {
+    border-right: none;
+    padding-right: 0;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 32px;
+  }
+}
