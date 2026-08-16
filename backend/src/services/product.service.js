@@ -1,8 +1,8 @@
 const productRepository = require("../repositories/product.repository");
 
 class ProductService {
-  async getProducts() {
-    return await productRepository.findAll();
+  async getProducts(filter = {}) {
+    return await productRepository.findAll(filter);
   }
 
   async getProductById(id) {
@@ -31,6 +31,16 @@ class ProductService {
 
   async deleteProduct(id) {
     const product = await productRepository.softDelete(id);
+    if (!product) {
+      const error = new Error("Product not found");
+      error.statusCode = 404;
+      throw error;
+    }
+    return product;
+  }
+
+  async restoreProduct(id) {
+    const product = await productRepository.restore(id);
     if (!product) {
       const error = new Error("Product not found");
       error.statusCode = 404;

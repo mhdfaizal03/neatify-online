@@ -1,8 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const orderController = require("../controllers/order.controller");
+const { protect, adminOnly } = require("../middleware/auth");
 
-router.get("/", (req, res) => {
-  res.json({ success: true, message: "Orders endpoint" });
-});
+router.post("/", orderController.createOrder);
+router.get("/", protect, adminOnly, orderController.getOrders);
+router.patch("/:id", protect, adminOnly, orderController.updateOrderStatus);
 
 module.exports = router;

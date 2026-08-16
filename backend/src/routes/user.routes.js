@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
-// const { validateUser } = require("../validators/user.validator");
-// const userController = require("../controllers/user.controller");
-// const { protect, authorize } = require("../middleware/auth");
+const userController = require("../controllers/user.controller");
+const { protect } = require("../middleware/auth");
 
-router.get("/", (req, res) => {
-  res.json({ success: true, message: "Users endpoint" });
-});
+router.post("/register", userController.register);
+router.post("/login", userController.login);
+router.get("/me", protect, userController.getMe);
+router.put("/profile", protect, userController.updateProfile);
+router.put("/password", protect, userController.updatePassword);
+router.get("/orders", protect, userController.getMyOrders);
 
 module.exports = router;
