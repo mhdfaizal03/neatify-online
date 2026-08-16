@@ -896,10 +896,18 @@ label > textarea {
   font-size: 1.25rem;
 }
 
-.modal-card form,
+.modal-body,
 .modal-card .media-grid {
   padding: 24px;
   overflow-y: auto;
+  flex-grow: 1;
+}
+
+.modal-card form {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin: 0;
 }
 
 .modal-actions {

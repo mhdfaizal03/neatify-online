@@ -10,47 +10,49 @@ export default function AdminModals() {
         <button className="icon-btn" id="closeProductModal" aria-label="Close modal"><i className="bi bi-x-lg"></i></button>
       </div>
       <form id="productForm">
-        <input type="hidden" id="productId" />
-        <div className="form-grid">
-          <label className="full">Product Name
-            <input type="text" id="productName" required />
-          </label>
-          <label>Category
-            <select id="productCategory">
-              <option value="wash">Wash</option>
-              <option value="tools">Tools</option>
-              <option value="kit">Kit</option>
-              <option value="finish">Finish</option>
-            </select>
-          </label>
-          <label>Short Type (Label)
-            <input type="text" id="productType" placeholder="e.g. SHAMPOO" />
-          </label>
-          <label>Price (₹)
-            <input type="number" id="productPrice" min="0" required />
-          </label>
-          <label>Display Order
-            <input type="number" id="productFeatured" min="1" value="1" />
-          </label>
-          <label>Display Badge
-            <input type="text" id="productBadge" placeholder="e.g. NEW" />
-          </label>
-          <label className="full">Main Image
-            <div className="image-picker">
-              <input type="text" id="productImage" placeholder="Upload or enter URL" required />
-              <button type="button" className="btn-secondary" id="pickImageBtn">Browse</button>
-            </div>
-          </label>
-          <label className="full">Long Description
-            <textarea id="productDescription" rows="3"></textarea>
-          </label>
-          <label className="full">Bullet Points (One per line)
-            <textarea id="productPoints" rows="4" placeholder="Deep cleaning formula&#10;pH Neutral"></textarea>
-          </label>
-          <label className="checkbox-label">
-            <input type="checkbox" id="productActive" checked />
-            <span>Show on Storefront</span>
-          </label>
+        <div className="modal-body">
+          <input type="hidden" id="productId" />
+          <div className="form-grid">
+            <label className="full">Product Name
+              <input type="text" id="productName" required />
+            </label>
+            <label>Category
+              <select id="productCategory">
+                <option value="wash">Wash</option>
+                <option value="tools">Tools</option>
+                <option value="kit">Kit</option>
+                <option value="finish">Finish</option>
+              </select>
+            </label>
+            <label>Short Type (Label)
+              <input type="text" id="productType" placeholder="e.g. SHAMPOO" />
+            </label>
+            <label>Price (₹)
+              <input type="number" id="productPrice" min="0" required />
+            </label>
+            <label>Display Order
+              <input type="number" id="productFeatured" min="1" value="1" />
+            </label>
+            <label>Display Badge
+              <input type="text" id="productBadge" placeholder="e.g. NEW" />
+            </label>
+            <label className="full">Main Image
+              <div className="image-picker">
+                <input type="text" id="productImage" placeholder="Upload or enter URL" required />
+                <button type="button" className="btn-secondary" id="pickImageBtn">Browse</button>
+              </div>
+            </label>
+            <label className="full">Long Description
+              <textarea id="productDescription" rows="3"></textarea>
+            </label>
+            <label className="full">Bullet Points (One per line)
+              <textarea id="productPoints" rows="4" placeholder="Deep cleaning formula&#10;pH Neutral"></textarea>
+            </label>
+            <label className="checkbox-label">
+              <input type="checkbox" id="productActive" checked />
+              <span>Show on Storefront</span>
+            </label>
+          </div>
         </div>
         <div className="modal-actions">
           <button type="button" className="btn-secondary" id="cancelProductModal">Cancel</button>
@@ -81,22 +83,24 @@ export default function AdminModals() {
         <button className="icon-btn" id="closeOrderModal" aria-label="Close modal"><i className="bi bi-x-lg"></i></button>
       </div>
       <form id="orderForm">
-        <input type="hidden" id="orderId" />
-        <div className="form-grid">
-          <label className="full">Order Info
-            <div id="orderInfoDisplay" style={{ padding: '10px', background: 'var(--bg-alt)', borderRadius: '6px', fontSize: '0.9em' }}>
-              
-            </div>
-          </label>
-          <label>Status
-            <select id="orderStatus">
-              <option value="pending">Pending</option>
-              <option value="processing">Processing</option>
-              <option value="shipped">Shipped</option>
-              <option value="delivered">Delivered</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </label>
+        <div className="modal-body">
+          <input type="hidden" id="orderId" />
+          <div className="form-grid">
+            <label className="full">Order Info
+              <div id="orderInfoDisplay" style={{ padding: '10px', background: 'var(--bg-alt)', borderRadius: '6px', fontSize: '0.9em' }}>
+                
+              </div>
+            </label>
+            <label>Status
+              <select id="orderStatus">
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </label>
+          </div>
         </div>
         <div className="modal-actions">
           <button type="button" className="btn-secondary" id="cancelOrderModal">Cancel</button>
