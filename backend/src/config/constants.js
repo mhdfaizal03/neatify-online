@@ -20,4 +20,11 @@ const defaultSettings = {
   announcementSub: "Free shipping on orders above ₹999.",
 };
 
-module.exports = { defaultProducts, defaultSettings };
+const defaultCategories = [
+  { id: "wash", name: "Wash" },
+  { id: "tools", name: "Tools" },
+  { id: "kit", name: "Kits" },
+  { id: "finish", name: "Finish" }
+];
+
+module.exports = { defaultProducts, defaultSettings, defaultCategories };

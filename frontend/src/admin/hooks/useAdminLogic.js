@@ -16,6 +16,7 @@ export function useAdminLogic() {
     token: localStorage.getItem("neatify_token") || null,
     currentView: "dashboard",
     allProducts: [],
+    categories: [],
     orders: [],
     subscribers: [],
     media: [],
@@ -108,6 +109,7 @@ export function useAdminLogic() {
     // Update search placeholder
     const placeholders = {
       products: "Search products...",
+      categories: "Search categories...",
       orders: "Search by order ID, customer name, or email...",
       subscribers: "Search by email address...",
       media: "Search by filename...",
@@ -135,6 +137,7 @@ export function useAdminLogic() {
     const loaders = {
       dashboard: loadDashboard,
       products: loadProducts,
+      categories: loadCategories,
       media: loadMedia,
       orders: loadOrders,
       subscribers: loadSubscribers,
@@ -186,6 +189,9 @@ export function useAdminLogic() {
     const tbody = $("#productsTable");
     tbody.innerHTML = `<tr><td colspan="6" class="loading-overlay"><span class="spinner"></span> Loading...</td></tr>`;
     try {
+      if (state.categories.length === 0) {
+        await loadCategories();
+      }
       state.allProducts = await api("/api/products/all");
       renderProductsTable();
     } catch (err) { showSnack("Failed to load products", "error"); }
@@ -404,6 +410,95 @@ export function useAdminLogic() {
     } catch (err) { showSnack("Save failed", "error"); }
   }
 
+  /* ── VIEW LOGIC: CATEGORIES ── */
+  async function loadCategories() {
+    try {
+      state.categories = await api("/api/categories");
+      renderCategoriesTable();
+
+      // Populate Product Form Category selector
+      const select = $("#productCategory");
+      if (select) {
+        select.innerHTML = state.categories.map(c => `
+          <option value="${c.id}">${c.name}</option>
+        `).join("");
+      }
+
+      // Populate Product Filter category selector
+      const filterSelect = $("#productCategoryFilter");
+      if (filterSelect) {
+        const val = filterSelect.value;
+        filterSelect.innerHTML = `
+          <option value="">All categories</option>
+          ${state.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join("")}
+        `;
+        filterSelect.value = val;
+      }
+    } catch (err) {
+      showSnack("Failed to load categories", "error");
+    }
+  }
+
+  async function createCategory(e) {
+    e.preventDefault();
+    const id = $("#categoryId").value;
+    const name = $("#categoryName").value;
+    try {
+      await api("/api/categories", {
+        method: "POST",
+        body: JSON.stringify({ id, name }),
+      });
+      showSnack("Category created");
+      $("#categoryForm").reset();
+      await loadCategories();
+    } catch (err) {
+      showSnack(err.message || "Failed to create category", "error");
+    }
+  }
+
+  async function deleteCategory(id) {
+    if (!confirm(`Are you sure you want to delete category "${id}"?`)) return;
+    try {
+      await api(`/api/categories/${id}`, { method: "DELETE" });
+      showSnack("Category deleted");
+      await loadCategories();
+    } catch (err) {
+      showSnack(err.message || "Failed to delete category", "error");
+    }
+  }
+
+  function renderCategoriesTable() {
+    const tbody = $("#categoriesTable");
+    if (!tbody) return;
+
+    const query = $("#globalSearch")?.value?.toLowerCase() || "";
+    const filtered = state.categories.filter(c => 
+      c.id.toLowerCase().includes(query) || 
+      c.name.toLowerCase().includes(query)
+    );
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="3" class="text-center">No categories found</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(c => `
+      <tr>
+        <td><code>${c.id}</code></td>
+        <td><strong>${c.name}</strong></td>
+        <td>
+          <button class="icon-btn delete-btn" data-id="${c.id}" aria-label="Delete category">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `).join("");
+
+    tbody.querySelectorAll(".delete-btn").forEach(btn => {
+      btn.addEventListener("click", () => deleteCategory(btn.dataset.id));
+    });
+  }
+
   /* ── EXPOSE GLOBALS ── */
   window.__admin = {
     switchView,
@@ -488,6 +583,7 @@ export function useAdminLogic() {
     $("#globalSearch").addEventListener("input", () => {
       const view = state.currentView;
       if (view === 'products') renderProductsTable();
+      else if (view === 'categories') renderCategoriesTable();
       else if (view === 'orders') renderOrdersTable();
       else if (view === 'subscribers') renderSubscribersTable();
       else if (view === 'media') renderMediaGrid();
@@ -528,6 +624,11 @@ export function useAdminLogic() {
 
     $("#saveSettingsBtn").addEventListener("click", saveSettings);
     $("#settingsForm").addEventListener("submit", saveSettings);
+
+    const catForm = $("#categoryForm");
+    if (catForm) {
+      catForm.addEventListener("submit", createCategory);
+    }
 
     listenersInitialized = true;
   }

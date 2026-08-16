@@ -21,6 +21,7 @@ try {
 let pendingCheckout = false;
 
 let products = [];
+let categories = [];
 let settings = { freeShippingThreshold: 999, weekendKitIds: [1, 2, 4, 7], highlightProductId: 3 };
 let state = { filter: "all", search: "", sort: "featured", cart: [] };
 
@@ -78,6 +79,37 @@ async function loadSettings() {
   const heroS = $("heroShipNote");
   if (heroS) heroS.textContent = money(settings.freeShippingThreshold);
   document.title = `${settings.storeName || "Neatify"} — Clean. Shine. Protect.`;
+}
+
+/* ── CATEGORIES ────────────────────────────────────────── */
+async function loadCategories() {
+  try {
+    categories = await api("/api/categories");
+    renderFilterPills();
+  } catch (err) {
+    console.error("Failed to load categories", err);
+    categories = [
+      { id: "wash", name: "Wash" },
+      { id: "tools", name: "Tools" },
+      { id: "kit", name: "Kits" },
+      { id: "finish", name: "Finish" }
+    ];
+    renderFilterPills();
+  }
+}
+
+function renderFilterPills() {
+  const container = $("filterPills");
+  if (!container) return;
+  
+  const activeFilter = state.filter || "all";
+  container.innerHTML = `
+    <button class="f-pill ${activeFilter === 'all' ? 'active' : ''}" data-filter="all" aria-pressed="${activeFilter === 'all' ? 'true' : 'false'}">All</button>
+    ${categories.map(c => `
+      <button class="f-pill ${activeFilter === c.id ? 'active' : ''}" data-filter="${c.id}" aria-pressed="${activeFilter === c.id ? 'true' : 'false'}">${esc(c.name)}</button>
+    `).join("")}
+  `;
+  renderPillCounts();
 }
 
 /* ── PRODUCTS ───────────────────────────────────────────── */
@@ -749,15 +781,18 @@ document.addEventListener("click", e => {
   }
 });
 
-document.querySelectorAll(".f-pill").forEach(btn => {
-  btn.addEventListener("click", () => {
+const filterPills = $("filterPills");
+if (filterPills) {
+  filterPills.addEventListener("click", (e) => {
+    const btn = e.target.closest(".f-pill");
+    if (!btn) return;
     document.querySelectorAll(".f-pill").forEach(x => { x.classList.remove("active"); x.setAttribute("aria-pressed", "false"); });
     btn.classList.add("active");
     btn.setAttribute("aria-pressed", "true");
     state.filter = btn.dataset.filter;
     renderProducts();
   });
-});
+}
 
 $("sortSelect").addEventListener("change", e => { state.sort = e.target.value; renderProducts(); });
 $("cartToggle").addEventListener("click", () => cartDrawer.show());
@@ -1266,6 +1301,7 @@ async function boot() {
   await step(initReveal);
   await step(initHero3D);
   await step(loadSettings);
+  await step(loadCategories);
   await step(loadProducts);
   await step(loadCart);
   await step(renderCart);

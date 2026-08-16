@@ -3,10 +3,19 @@ const logger = require("./logger");
 const Product = require("../models/Product");
 const Settings = require("../models/Settings");
 const Media = require("../models/Media");
-const { defaultProducts, defaultSettings } = require("./constants");
+const Category = require("../models/Category");
+const { defaultProducts, defaultSettings, defaultCategories } = require("./constants");
 
 const seedDatabase = async () => {
   try {
+    // Check and seed Categories
+    const categoryCount = await Category.countDocuments();
+    if (categoryCount === 0) {
+      logger.info("Categories collection empty, seeding default categories...");
+      await Category.insertMany(defaultCategories);
+      logger.info("Categories seeded successfully.");
+    }
+
     // Check and seed Products
     const productCount = await Product.countDocuments({ isDeleted: false });
     if (productCount === 0) {

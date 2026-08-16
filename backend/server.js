@@ -16,6 +16,10 @@ app.get("*", (req, res, next) => {
   if (req.originalUrl.startsWith("/api")) {
     return next();
   }
+  // Prevent serving index.html for missing static files/assets (prevents MIME type errors)
+  if (req.path.includes(".") || req.path.startsWith("/assets/")) {
+    return res.status(404).send("Not Found");
+  }
   res.sendFile(path.join(FRONTEND_DIR, "index.html"));
 });
 
