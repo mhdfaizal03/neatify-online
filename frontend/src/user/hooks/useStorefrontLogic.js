@@ -902,6 +902,25 @@ function makeStudioEnv(renderer) {
   return env;
 }
 
+async function getCachedGLB(url) {
+  try {
+    const cache = await caches.open("neatify-assets-cache");
+    let cachedResponse = await cache.match(url);
+    if (!cachedResponse) {
+      console.log("GLB not in cache, fetching and caching...");
+      await cache.add(url);
+      cachedResponse = await cache.match(url);
+    } else {
+      console.log("GLB served from browser CacheStorage!");
+    }
+    const blob = await cachedResponse.blob();
+    return URL.createObjectURL(blob);
+  } catch (err) {
+    console.error("Cache API failed, returning original URL", err);
+    return url;
+  }
+}
+
 function initHero3D() {
   const section = $("heroSection");
   const canvas  = $("heroCanvas");
@@ -974,9 +993,15 @@ function initHero3D() {
     dracoLoader.preload();
     const gltfLoader = new THREE.GLTFLoader();
     gltfLoader.setDRACOLoader(dracoLoader);
-    const tryLoad = (attempt) => {
+    const tryLoad = async (attempt) => {
+      let modelUrl = "assets/3dimage.glb";
+      try {
+        modelUrl = await getCachedGLB("assets/3dimage.glb");
+      } catch (e) {
+        console.warn("GLB cache check failed:", e);
+      }
       gltfLoader.load(
-        "assets/3dimage.glb?v=1",
+        modelUrl,
         (gltf) => {
           const model = gltf.scene;
 

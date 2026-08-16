@@ -1738,8 +1738,8 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   .hero-scroll-space { height: 400vh; }  /* 3 stage scrolls + exit scroll */
   .snap-mark   { top: calc(150vh + 1.5 * var(--header-height)); }
   .snap-mark-2 { top: calc(240vh + 1.8 * var(--header-height)); }
-  .hero-stages-wrap > .container { align-items: flex-end; padding-bottom: 6rem; }
-  .hero-stages-inner { padding: 4rem 0 2rem; }
+  .hero-stages-wrap > .container { align-items: flex-end; padding-bottom: 2.5rem; }
+  .hero-stages-inner { padding: 2rem 0 1rem; }
   .hero-stage { max-width: 100%; }
   .hero-h1 { font-size: clamp(2.6rem, 8.5vw, 5rem); }
   .hero-sub { font-size: 0.92rem; max-width: 520px; }
@@ -1801,7 +1801,7 @@ button:disabled { opacity: 0.5; pointer-events: none; }
 
   /* Hero */
   .hero-scroll-space { height: 400vh; }
-  .hero-stages-inner { padding: 3.5rem 0 2rem; }
+  .hero-stages-inner { padding: 1.5rem 0 0.5rem; }
   .hero-h1 { font-size: clamp(2.3rem, 9vw, 3.8rem); line-height: 0.94; }
   .hero-sub { font-size: 0.88rem; }
   .hero-actions { gap: 0.5rem; }
@@ -1851,8 +1851,8 @@ button:disabled { opacity: 0.5; pointer-events: none; }
 
   /* Hero — copy sits low, 3D owns the upper space */
   .hero-scroll-space { height: 400vh; }
-  .hero-stages-wrap > .container { padding-bottom: 4.5rem; }
-  .hero-stages-inner { padding: 2.5rem 0 0; }
+  .hero-stages-wrap > .container { padding-bottom: 1.5rem; }
+  .hero-stages-inner { padding: 1rem 0 0; }
   .hero-h1 { font-size: clamp(2rem, 11vw, 3.2rem); letter-spacing: -0.04em; }
   .hero-sub { font-size: 0.84rem; line-height: 1.65; margin-bottom: 1.25rem; }
   .hero-actions { gap: 0.6rem; margin-bottom: 0; }
