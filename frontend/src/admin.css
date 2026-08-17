@@ -925,7 +925,9 @@ label > textarea {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1116,4 +1118,54 @@ label > textarea {
     border-bottom: 1px solid var(--border);
     padding-bottom: 32px;
   }
+}
+/* Pill Input */
+.pill-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+}
+.pill-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pill-wrap:empty {
+  display: none;
+}
+.pill-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 0.85rem;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.pill-item button {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pill-item button:hover {
+  color: #fff;
+}
+.pill-input-container input[type="text"] {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  font-size: 0.95rem;
 }

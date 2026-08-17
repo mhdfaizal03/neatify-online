@@ -27,6 +27,8 @@ export const clearSession = () => {
   } catch { /* storage unavailable */ }
 };
 
+const BASE_URL = import.meta.env.VITE_API_URL || "";
+
 export async function api(path, opts = {}) {
   const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
   if (session.token && !headers.Authorization) headers.Authorization = `Bearer ${session.token}`;
@@ -35,7 +37,7 @@ export async function api(path, opts = {}) {
     delete headers["Content-Type"];
   }
 
-  const res = await fetch(path, { ...opts, headers });
+  const res = await fetch(BASE_URL + path, { ...opts, headers });
   const text = await res.text();
   const data = text ? JSON.parse(text) : {};
   if (!res.ok) {

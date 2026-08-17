@@ -25,8 +25,12 @@ export default function AdminSettings() {
               <label className="full">Announcement Subtext
                 <input type="text" name="announcementSub" placeholder="Smaller banner text" />
               </label>
-              <label className="full">Marquee Keywords (comma separated)
-                <textarea name="marqueeKeywords" placeholder="DEEP DIRT LIFT, PAINT-SAFE FORMULA..." rows="3"></textarea>
+              <label className="full">Marquee Keywords
+                <div className="pill-input-container">
+                  <div id="marqueePillsWrap" className="pill-wrap"></div>
+                  <input type="text" id="marqueeKeywordInput" placeholder="Type a keyword and press Enter..." />
+                  <input type="hidden" name="marqueeKeywords" id="marqueeKeywordsHidden" />
+                </div>
               </label>
               <label>Weekend Kit IDs (CSV)
                 <input type="text" name="weekendKitIds" placeholder="1, 2, 4, 7" />

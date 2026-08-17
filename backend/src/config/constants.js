@@ -8,7 +8,7 @@ const defaultProducts = [
   { id: 7, name: "InteriorRefresh Cleaner", category: "wash", type: "DETAILER", price: 499, featured: 7, image: "assets/product-7.jpeg", badge: "", description: "Multi-surface interior detailer spray.", points: ["Matte factory finish", "UV blockers built-in", "Anti-static dust guard"] },
   { id: 8, name: "FoamCannon Pro", category: "tools", type: "CANNON", price: 1499, featured: 8, image: "assets/product-8.jpeg", badge: "PRO CHOICE", description: "Adjustable snow foam lance for pressure washers.", points: ["Brass connection", "Variable spray pattern", "Thick foam generation"] },
   { id: 9, name: "DetailBrush Trio", category: "tools", type: "BRUSH", price: 399, featured: 9, image: "assets/product-9.jpeg", badge: "", description: "Soft boar hair detailing brushes.", points: ["Scratch-free bristles", "Ergonomic handles", "Chemical resistant construct"] },
-  { id: 10, name: "Weekend Wash Kit", category: "kit", type: "KIT", price: 2499, featured: 10, image: "assets/product-10.jpeg", badge: "COMBO DEALS", description: "Complete routine kit for weekend detailing.", points: ["Includes HydroWash, GlossGuard & Towel", "Step-by-step wash manual", "Bonus application sponge"] }
+  { id: 10, name: "Wash it. Own the shine.", category: "kit", type: "KIT", price: 2496, featured: 10, image: "assets/bundle.jpg", badge: "THE WEEKEND KIT", description: "One focused setup for your weekend detail. Foam, tools and premium microfiber essentials in one kit.", points: ["Includes HydroWash, GlossGuard & Towel", "Step-by-step wash manual", "Bonus application sponge"], isKit: true }
 ];
 
 const defaultSettings = {

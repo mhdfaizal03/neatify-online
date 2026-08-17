@@ -31,13 +31,14 @@ export function useAdminLogic() {
   const snackbar = $("#snackbar");
 
   /* ── API HELPER ── */
+  const BASE_URL = import.meta.env.VITE_API_URL || "";
   async function api(path, opts = {}) {
     const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
     if (state.token) headers.Authorization = `Bearer ${state.token}`;
     if (opts.body instanceof FormData) delete headers["Content-Type"];
 
     try {
-      const res = await fetch(path, { ...opts, headers });
+      const res = await fetch(BASE_URL + path, { ...opts, headers });
 
       if (res.status === 401) {
         logout();
@@ -255,7 +256,7 @@ export function useAdminLogic() {
     };
 
     try {
-      const method = id ? "PUT" : "POST";
+      const method = id ? "PATCH" : "POST";
       const url = id ? `/api/products/${id}` : "/api/products";
       await api(url, { method, body: JSON.stringify(payload) });
       showSnack(id ? "Product updated" : "Product created");
@@ -386,6 +387,30 @@ export function useAdminLogic() {
   }
 
   /* ── VIEW LOGIC: SETTINGS ── */
+  function renderMarqueePills() {
+    const hiddenInput = $("#marqueeKeywordsHidden");
+    const wrap = $("#marqueePillsWrap");
+    if (!hiddenInput || !wrap) return;
+    
+    const keywords = hiddenInput.value ? hiddenInput.value.split(",").map(s => s.trim()).filter(Boolean) : [];
+    wrap.innerHTML = keywords.map((kw, i) => `
+      <span class="pill-item">
+        ${esc(kw)}
+        <button type="button" data-index="${i}" aria-label="Remove ${esc(kw)}"><i class="bi bi-x"></i></button>
+      </span>
+    `).join("");
+
+    wrap.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const index = Number(btn.getAttribute("data-index"));
+        keywords.splice(index, 1);
+        hiddenInput.value = keywords.join(", ");
+        renderMarqueePills();
+      });
+    });
+  }
+
   async function loadSettings() {
     try {
       state.settings = await api("/api/settings");
@@ -398,6 +423,7 @@ export function useAdminLogic() {
             : (value !== null && value !== undefined ? value : "");
         }
       });
+      renderMarqueePills();
     } catch (err) { showSnack("Failed to load settings", "error"); }
   }
 
@@ -635,6 +661,26 @@ export function useAdminLogic() {
 
     $("#saveSettingsBtn").addEventListener("click", saveSettings);
     $("#settingsForm").addEventListener("submit", saveSettings);
+
+    const kwInput = $("#marqueeKeywordInput");
+    if (kwInput) {
+      kwInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === ",") {
+          e.preventDefault();
+          const val = kwInput.value.trim().replace(/,/g, "");
+          if (val) {
+            const hiddenInput = $("#marqueeKeywordsHidden");
+            const keywords = hiddenInput.value ? hiddenInput.value.split(",").map(s => s.trim()).filter(Boolean) : [];
+            if (!keywords.includes(val)) {
+              keywords.push(val);
+              hiddenInput.value = keywords.join(", ");
+              renderMarqueePills();
+            }
+            kwInput.value = "";
+          }
+        }
+      });
+    }
 
     const catForm = $("#categoryForm");
     if (catForm) {

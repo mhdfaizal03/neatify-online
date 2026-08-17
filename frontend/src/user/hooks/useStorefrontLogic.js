@@ -55,10 +55,11 @@ function esc(str) {
   return d.innerHTML;
 }
 
+const BASE_URL = import.meta.env.VITE_API_URL || "";
 async function api(path, opts = {}) {
   const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
   if (session.token && !headers.Authorization) headers.Authorization = `Bearer ${session.token}`;
-  const res = await fetch(path, { ...opts, headers });
+  const res = await fetch(BASE_URL + path, { ...opts, headers });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || "Request failed");
   return data;
@@ -167,15 +168,26 @@ function renderBundle() {
   if (list) {
     list.innerHTML = kitProducts.map(kit => {
       const itemCount = kit.points ? kit.points.length : 1;
-      // Extract first word for highlight, or just show name
-      const nameParts = kit.name.split(" ");
-      const firstPart = nameParts.shift();
-      const restPart = nameParts.join(" ");
+      
+      let firstPart = "";
+      let restPart = "";
+      
+      // If the name contains a period (e.g., "Wash it. Own the shine."), split by period.
+      // Otherwise fallback to splitting by space.
+      if (kit.name.includes('.')) {
+        const parts = kit.name.split('.');
+        firstPart = parts[0].trim() + '.';
+        restPart = parts.slice(1).join('.').trim();
+      } else {
+        const parts = kit.name.split(" ");
+        firstPart = parts.shift() || "";
+        restPart = parts.join(" ");
+      }
       
       return `
       <div class="bundle-card reveal">
         <div class="bundle-copy">
-          <p class="sec-eyebrow">${esc(kit.badge || "KIT OFFER")}</p>
+          <p class="sec-eyebrow">— ${esc(kit.badge || "KIT OFFER")}</p>
           <h2 class="bundle-title">${esc(firstPart)}<br /><em>${esc(restPart)}</em></h2>
           <p class="bundle-desc">${esc(kit.description)}</p>
           <div class="bundle-foot">
