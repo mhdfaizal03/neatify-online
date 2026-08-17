@@ -18,6 +18,7 @@ const formatProduct = (p) => {
     points: p.points || [],
     active: p.active !== false,
     isKit: p.isKit === true,
+    includedProducts: p.includedProducts || [],
     stock: p.stock !== undefined ? p.stock : 20,
     status: p.status || "Active",
   };
@@ -27,7 +28,7 @@ class ProductController {
   async getProducts(req, res, next) {
     try {
       // Check database connection
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         console.warn("Database not connected, returning fallback products.");
         return res.status(200).json(defaultProducts.filter(p => p.active !== false));
       }
@@ -42,7 +43,7 @@ class ProductController {
 
   async getAllProducts(req, res, next) {
     try {
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         console.warn("Database not connected, returning fallback products.");
         return res.status(200).json(defaultProducts);
       }
@@ -57,7 +58,7 @@ class ProductController {
 
   async getProduct(req, res, next) {
     try {
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         const product = defaultProducts.find(p => String(p.id) === String(req.params.id));
         if (!product) return res.status(404).json({ error: "Product not found" });
         return res.status(200).json(product);
@@ -72,7 +73,7 @@ class ProductController {
 
   async createProduct(req, res, next) {
     try {
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         return res.status(400).json({ error: "Database not connected. Cannot perform write operations." });
       }
 
@@ -85,7 +86,7 @@ class ProductController {
 
   async updateProduct(req, res, next) {
     try {
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         return res.status(400).json({ error: "Database not connected. Cannot perform write operations." });
       }
 
@@ -98,7 +99,7 @@ class ProductController {
 
   async deleteProduct(req, res, next) {
     try {
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         return res.status(400).json({ error: "Database not connected. Cannot perform write operations." });
       }
 
@@ -111,7 +112,7 @@ class ProductController {
 
   async restoreProduct(req, res, next) {
     try {
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         return res.status(400).json({ error: "Database not connected. Cannot perform write operations." });
       }
 

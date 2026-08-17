@@ -8,6 +8,7 @@ import AdminMedia from './AdminMedia';
 import AdminOrders from './AdminOrders';
 import AdminSubscribers from './AdminSubscribers';
 import AdminSettings from './AdminSettings';
+import AdminKits from './AdminKits';
 import AdminCategories from './AdminCategories';
 import AdminModals from './AdminModals';
 import { useAdminLogic } from '../hooks/useAdminLogic';
@@ -30,6 +31,7 @@ export default function AdminLayout() {
           <main className="content">
             <AdminDashboard />
             <AdminProducts />
+            <AdminKits />
             <AdminCategories />
             <AdminMedia />
             <AdminOrders />

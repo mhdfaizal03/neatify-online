@@ -7,7 +7,7 @@ class StatsController {
   async getStats(req, res, next) {
     try {
       // Check database connection
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         console.warn("Database not connected, returning mock fallback statistics.");
         return res.status(200).json({
           totalProducts: 10,

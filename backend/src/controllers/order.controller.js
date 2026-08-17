@@ -29,7 +29,7 @@ class OrderController {
         return res.status(400).json({ error: "Invalid order data" });
       }
 
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         console.warn("Database not connected, returning mock success for order placement.");
         const mockOrder = {
           id: "ORD-" + Math.floor(100000 + Math.random() * 900000),
@@ -78,7 +78,7 @@ class OrderController {
 
   async getOrders(req, res, next) {
     try {
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         console.warn("Database not connected, returning empty orders list.");
         return res.status(200).json([]);
       }
@@ -92,7 +92,7 @@ class OrderController {
 
   async updateOrderStatus(req, res, next) {
     try {
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         return res.status(400).json({ error: "Database not connected. Cannot perform write operations." });
       }
 

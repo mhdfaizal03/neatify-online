@@ -5,7 +5,7 @@ const { defaultSettings } = require("../config/constants");
 class SettingsController {
   async getSettings(req, res, next) {
     try {
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         console.warn("Database not connected, returning fallback settings.");
         return res.status(200).json(defaultSettings);
       }
@@ -22,7 +22,7 @@ class SettingsController {
 
   async updateSettings(req, res, next) {
     try {
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         return res.status(400).json({ error: "Database not connected. Cannot perform write operations." });
       }
 

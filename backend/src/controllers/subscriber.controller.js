@@ -10,7 +10,7 @@ class SubscriberController {
         return res.status(400).json({ error: "Email is required" });
       }
 
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         console.warn("Database not connected, returning mock success for subscription.");
         return res.status(201).json({ success: true, message: "Demo mode: Subscribed successfully" });
       }
@@ -30,7 +30,7 @@ class SubscriberController {
 
   async getSubscribers(req, res, next) {
     try {
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         console.warn("Database not connected, returning empty subscribers list.");
         return res.status(200).json([]);
       }

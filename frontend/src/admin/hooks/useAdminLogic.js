@@ -110,6 +110,7 @@ export function useAdminLogic() {
     // Update search placeholder
     const placeholders = {
       products: "Search products...",
+      kits: "Search kits...",
       categories: "Search categories...",
       orders: "Search by order ID, customer name, or email...",
       subscribers: "Search by email address...",
@@ -138,6 +139,7 @@ export function useAdminLogic() {
     const loaders = {
       dashboard: loadDashboard,
       products: loadProducts,
+      kits: loadProducts, // loadProducts populates allProducts and then renders both tables
       categories: loadCategories,
       media: loadMedia,
       orders: loadOrders,
@@ -195,6 +197,7 @@ export function useAdminLogic() {
       }
       state.allProducts = await api("/api/products/all");
       renderProductsTable();
+      renderKitsTable();
     } catch (err) { showSnack("Failed to load products", "error"); }
   }
 
@@ -205,10 +208,11 @@ export function useAdminLogic() {
     const search = $("#globalSearch").value.toLowerCase().trim();
 
     let list = state.allProducts.filter(p => {
+      const isNotKit = p.isKit !== true;
       const matchesFilter = filter === 'all' || (filter === 'active' && p.active !== false) || (filter === 'inactive' && p.active === false);
       const matchesCat = !cat || p.category === cat;
       const matchesSearch = p.name.toLowerCase().includes(search);
-      return matchesFilter && matchesCat && matchesSearch;
+      return isNotKit && matchesFilter && matchesCat && matchesSearch;
     });
 
     if (!list.length) {
@@ -227,6 +231,36 @@ export function useAdminLogic() {
         <td>
           <div class="row-actions">
             <button class="icon-action" onclick="window.__admin.editProduct(${p.id})"><i class="bi bi-pencil"></i></button>
+            ${p.active !== false
+              ? `<button class="icon-action danger" onclick="window.__admin.deleteProduct(${p.id})"><i class="bi bi-trash"></i></button>`
+              : `<button class="icon-action restore" onclick="window.__admin.restoreProduct(${p.id})"><i class="bi bi-arrow-counterclockwise"></i></button>`}
+          </div>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  function renderKitsTable() {
+    const tbody = $("#kitsTbody");
+    if (!tbody) return;
+    
+    let list = state.allProducts.filter(p => p.isKit === true);
+
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="admin-empty-state"><i class="bi bi-gift"></i><h4>No kits found</h4><p>Create a bundle to offer to your customers.</p></div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map(p => `
+      <tr>
+        <td><div class="product-cell"><img src="/${esc(p.image)}" class="product-thumb" alt=""><div><div class="product-name">${esc(p.name)}</div></div></div></td>
+        <td>${esc(p.name)}</td>
+        <td class="price-cell">${currency(p.price)}</td>
+        <td>${esc(p.badge || '-')}</td>
+        <td><span class="status-badge ${p.active !== false ? 'active' : 'inactive'}">${p.active !== false ? 'Active' : 'Inactive'}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-action" onclick="window.__admin.editKit(${p.id})"><i class="bi bi-pencil"></i></button>
             ${p.active !== false
               ? `<button class="icon-action danger" onclick="window.__admin.deleteProduct(${p.id})"><i class="bi bi-trash"></i></button>`
               : `<button class="icon-action restore" onclick="window.__admin.restoreProduct(${p.id})"><i class="bi bi-arrow-counterclockwise"></i></button>`}
@@ -261,6 +295,107 @@ export function useAdminLogic() {
       await api(url, { method, body: JSON.stringify(payload) });
       showSnack(id ? "Product updated" : "Product created");
       $("#productModal").classList.add("hidden");
+      loadProducts();
+    } catch (err) { showSnack("Save failed", "error"); }
+  }
+
+  /* ── KIT MODAL LOGIC ── */
+  function renderKitChecklist(selectedIds = []) {
+    const wrap = $("#kitProductsChecklist");
+    if (!wrap) return;
+    const regularProducts = state.allProducts.filter(p => p.isKit !== true);
+    
+    if (!regularProducts.length) {
+      wrap.innerHTML = `<div class="admin-empty-state"><p>No standard products available to include.</p></div>`;
+      return;
+    }
+
+    wrap.innerHTML = regularProducts.map(p => `
+      <label class="checkbox-label" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <input type="checkbox" name="includedProducts" value="${p.id}" ${selectedIds.includes(Number(p.id)) ? 'checked' : ''} />
+        <img src="/${esc(p.image)}" style="width: 24px; height: 24px; border-radius: 4px; object-fit: cover;" />
+        <span>${esc(p.name)} (${currency(p.price)})</span>
+      </label>
+    `).join("");
+  }
+
+  function renderKitPills() {
+    const hiddenInput = $("#kitPointsHidden");
+    const wrap = $("#kitPointsWrap");
+    if (!hiddenInput || !wrap) return;
+    
+    const points = hiddenInput.value ? hiddenInput.value.split("||").map(s => s.trim()).filter(Boolean) : [];
+    wrap.innerHTML = points.map((pt, i) => `
+      <span class="pill-item">
+        ${esc(pt)}
+        <button type="button" data-index="${i}" aria-label="Remove point"><i class="bi bi-x"></i></button>
+      </span>
+    `).join("");
+
+    wrap.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const index = Number(btn.getAttribute("data-index"));
+        points.splice(index, 1);
+        hiddenInput.value = points.join("||");
+        renderKitPills();
+      });
+    });
+  }
+
+  window.__admin.editKit = (id) => {
+    const kit = state.allProducts.find(p => p.id === id);
+    if (!kit) return;
+    
+    $("#kitId").value = kit.id;
+    $("#kitName").value = kit.name;
+    $("#kitPrice").value = kit.price;
+    $("#kitStock").value = kit.stock;
+    $("#kitBadge").value = kit.badge || "";
+    $("#kitFeatured").value = kit.featured || 1;
+    $("#kitImage").value = kit.image || "";
+    $("#kitDescription").value = kit.description || "";
+    $("#kitActive").checked = kit.active !== false;
+    
+    $("#kitPointsHidden").value = (kit.points || []).join("||");
+    renderKitPills();
+    renderKitChecklist(kit.includedProducts || []);
+    
+    $("#kitModalTitle").textContent = "Edit Kit";
+    $("#kitModal").classList.remove("hidden");
+  };
+
+  async function saveKit(e) {
+    e.preventDefault();
+    const id = $("#kitId").value;
+    
+    const includedProducts = Array.from(document.querySelectorAll('#kitProductsChecklist input[name="includedProducts"]:checked'))
+      .map(cb => Number(cb.value));
+
+    const points = $("#kitPointsHidden").value ? $("#kitPointsHidden").value.split("||").filter(Boolean) : [];
+
+    const payload = {
+      name: $("#kitName").value,
+      category: "kit",
+      type: "KIT",
+      price: Number($("#kitPrice").value),
+      stock: Number($("#kitStock").value),
+      featured: Number($("#kitFeatured").value),
+      image: $("#kitImage").value,
+      badge: $("#kitBadge").value,
+      description: $("#kitDescription").value,
+      active: $("#kitActive").checked,
+      isKit: true,
+      points,
+      includedProducts
+    };
+
+    try {
+      const method = id ? "PATCH" : "POST";
+      const url = id ? `/api/products/${id}` : "/api/products";
+      await api(url, { method, body: JSON.stringify(payload) });
+      showSnack(id ? "Kit updated" : "Kit created");
+      $("#kitModal").classList.add("hidden");
       loadProducts();
     } catch (err) { showSnack("Save failed", "error"); }
   }
@@ -583,8 +718,11 @@ export function useAdminLogic() {
       showSnack("Product restored", "success");
     },
     pickImage: (url) => {
-      $("#productImage").value = url;
+      const target = window.__admin._currentImageTarget || "#productImage";
+      const el = $(target);
+      if (el) el.value = url;
       $("#imagePickerModal").classList.add("hidden");
+      window.__admin._currentImageTarget = null;
     },
     deleteMedia: async (url) => {
       if (!confirm("Are you sure you want to permanently delete this file? This cannot be undone.")) return;
@@ -637,6 +775,46 @@ export function useAdminLogic() {
 
     $("#productForm").addEventListener("submit", saveProduct);
 
+    // Kits
+    $("#addKitBtn")?.addEventListener("click", () => {
+      $("#kitForm").reset();
+      $("#kitId").value = "";
+      $("#kitStock").value = 20;
+      $("#kitPointsHidden").value = "";
+      renderKitPills();
+      renderKitChecklist([]);
+      $("#kitModalTitle").textContent = "Add Kit";
+      $("#kitModal").classList.remove("hidden");
+    });
+    $("#kitForm")?.addEventListener("submit", saveKit);
+    $("#closeKitModal, #cancelKitModal")?.addEventListener("click", () => $("#kitModal").classList.add("hidden"));
+    
+    $("#pickKitImageBtn")?.addEventListener("click", () => {
+      loadMedia(); // Ensure picker is up-to-date
+      // Hack: tell the picker where to put the image
+      window.__admin._currentImageTarget = "#kitImage";
+      $("#imagePickerModal").classList.remove("hidden");
+    });
+
+    const kitPointInput = $("#kitPointInput");
+    if (kitPointInput) {
+      kitPointInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === ",") {
+          e.preventDefault();
+          const val = kitPointInput.value.trim().replace(/,/g, "");
+          if (val) {
+            const hiddenInput = $("#kitPointsHidden");
+            const points = hiddenInput.value ? hiddenInput.value.split("||").map(s => s.trim()).filter(Boolean) : [];
+            if (!points.includes(val)) {
+              points.push(val);
+              hiddenInput.value = points.join("||");
+              renderKitPills();
+            }
+            kitPointInput.value = "";
+          }
+        }
+      });
+    }
     $("#orderForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const id = $("#orderId").value;
@@ -651,6 +829,7 @@ export function useAdminLogic() {
 
     $("#pickImageBtn").addEventListener("click", () => {
       loadMedia(); // Ensure picker is up-to-date
+      window.__admin._currentImageTarget = "#productImage";
       $("#imagePickerModal").classList.remove("hidden");
     });
     $("#closeProductModal, #cancelProductModal").addEventListener("click", () => $("#productModal").classList.add("hidden"));

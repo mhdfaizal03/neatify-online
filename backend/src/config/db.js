@@ -1,9 +1,19 @@
 const mongoose = require("mongoose");
 const logger = require("./logger");
 
+let isConnected = false;
+
 const connectDB = async () => {
+  if (isConnected) {
+    logger.info("Using existing MongoDB connection");
+    return;
+  }
+
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/neatify");
+    const conn = await mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/neatify", {
+      serverSelectionTimeoutMS: 5000 // Fails fast if no DB
+    });
+    isConnected = conn.connections[0].readyState === 1;
     logger.info(`MongoDB Connected: ${conn.connection.host}`);
     
     // Seed initial collections if empty

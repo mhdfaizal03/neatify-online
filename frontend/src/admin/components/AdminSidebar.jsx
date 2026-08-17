@@ -11,6 +11,7 @@ export default function AdminSidebar() {
       <nav className="sidebar-nav" role="navigation">
         <button className="nav-item active" data-view="dashboard"><i className="bi bi-grid-1x2-fill"></i> Dashboard</button>
         <button className="nav-item" data-view="products"><i className="bi bi-box-seam"></i> Products</button>
+        <button className="nav-item" data-view="kits"><i className="bi bi-gift"></i> Kits</button>
         <button className="nav-item" data-view="categories"><i className="bi bi-tags"></i> Categories</button>
         <button className="nav-item" data-view="media"><i className="bi bi-images"></i> Media</button>
         <button className="nav-item" data-view="orders"><i className="bi bi-receipt"></i> Orders</button>

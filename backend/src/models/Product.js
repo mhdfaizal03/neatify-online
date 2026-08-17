@@ -52,6 +52,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    includedProducts: {
+      type: [Number],
+      default: [],
+    },
     stock: {
       type: Number,
       required: true,

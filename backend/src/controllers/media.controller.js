@@ -7,7 +7,7 @@ const { defaultProducts } = require("../config/constants");
 class MediaController {
   async getMedia(req, res, next) {
     try {
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         console.warn("Database not connected, returning fallback media list.");
         const fallbackMedia = defaultProducts.map((p) => ({
           id: String(p.id),
@@ -36,7 +36,7 @@ class MediaController {
 
   async uploadMedia(req, res, next) {
     try {
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         return res.status(400).json({ error: "Database not connected. Cannot perform upload operations." });
       }
 
@@ -67,7 +67,7 @@ class MediaController {
 
   async deleteMedia(req, res, next) {
     try {
-      if (mongoose.connection.readyState !== 1) {
+      if (mongoose.connection.readyState === 0) {
         return res.status(400).json({ error: "Database not connected. Cannot perform write operations." });
       }
 
