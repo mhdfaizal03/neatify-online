@@ -48,6 +48,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isKit: {
+      type: Boolean,
+      default: false,
+    },
     stock: {
       type: Number,
       required: true,

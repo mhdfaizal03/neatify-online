@@ -147,14 +147,42 @@ function renderPillCounts() {
 }
 
 function renderBundle() {
-  const ids = Array.isArray(settings.weekendKitIds) ? settings.weekendKitIds : [];
-  const kits = ids.map(getProduct).filter(Boolean);
-  const total = kits.reduce((s, p) => s + p.price, 0);
-  const bp = $("bundlePrice");
-  if (bp) bp.textContent = kits.length ? `${kits.length} items · ${money(total)}` : "";
-  const h = getProduct(settings.highlightProductId);
-  const bi = $("bundleImage");
-  if (h && bi) bi.src = h.image;
+  const kitProducts = products.filter(p => p.isKit);
+  const wrap = document.getElementById("kitOffersContainer");
+  const list = document.getElementById("kitOffersList");
+  
+  if (!kitProducts.length) {
+    if (wrap) wrap.style.display = "none";
+    return;
+  }
+  
+  if (wrap) wrap.style.display = "block";
+  if (list) {
+    list.innerHTML = kitProducts.map(kit => {
+      const itemCount = kit.points ? kit.points.length : 1;
+      // Extract first word for highlight, or just show name
+      const nameParts = kit.name.split(" ");
+      const firstPart = nameParts.shift();
+      const restPart = nameParts.join(" ");
+      
+      return `
+      <div class="bundle-card reveal">
+        <div class="bundle-copy">
+          <p class="sec-eyebrow">${esc(kit.badge || "KIT OFFER")}</p>
+          <h2 class="bundle-title">${esc(firstPart)}<br /><em>${esc(restPart)}</em></h2>
+          <p class="bundle-desc">${esc(kit.description)}</p>
+          <div class="bundle-foot">
+            <button class="btn-lime bundleBtn" data-kit-id="${kit.id}">Add the kit <i class="bi bi-plus"></i></button>
+            <span class="bundle-price">${itemCount} items · ${money(kit.price)}</span>
+          </div>
+        </div>
+        <div class="bundle-img-wrap">
+          <img src="/${esc(kit.image)}" alt="${esc(kit.name)}" />
+        </div>
+      </div>
+      `;
+    }).join("");
+  }
 }
 
 function filteredProducts() {
@@ -915,7 +943,13 @@ $("sortSelect").addEventListener("change", e => { state.sort = e.target.value; r
 $("cartToggle").addEventListener("click", () => cartDrawer.show());
 $("checkoutBtn").addEventListener("click", openCheckout);
 $("checkoutForm").addEventListener("submit", placeOrder);
-$("bundleBtn").addEventListener("click", () => addBundle(settings.weekendKitIds || []));
+document.addEventListener("click", function(e) {
+  const bundleBtn = e.target.closest(".bundleBtn");
+  if (bundleBtn) {
+    const kitId = bundleBtn.dataset.kitId;
+    if (kitId) addToCart(Number(kitId), true);
+  }
+});
 
 $("searchToggle").addEventListener("click", () => {
   $("searchPanel").classList.add("open");
@@ -1131,6 +1165,8 @@ function initHero3D() {
             const mats = Array.isArray(child.material) ? child.material : [child.material];
             mats.forEach((m) => {
               if (!m) return;
+              m.transparent = false;
+              m.depthWrite = true;
               if ("envMapIntensity" in m) m.envMapIntensity = 1;
               if (m.map) m.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
               m.needsUpdate = true;
@@ -1283,10 +1319,10 @@ function initHero3D() {
     /* Desktop: model sits on right half, converges to centre at stage 3 */
     const blend = smoothstep(p, 0.6, 1.0);
     if (mb) {
-      /* Mobile: large bottle, anchored high above the copy */
+      /* Mobile: Center the bottle, eye level, appropriate scale */
       productGroup.position.x = 0;
-      productGroup.position.y = 2.1 + p * 0.2;
-      productGroup.scale.setScalar(0.92);
+      productGroup.position.y = 0.5 + p * 0.2; // Adjusted for a better center
+      productGroup.scale.setScalar(1.2);
     } else {
       /* Desktop/TV: right-side showcase, tablet-and-up sits a touch further right */
       const wideBias = Math.min(0.8, Math.max(0, camera.aspect - 1.45) * 1.4);
@@ -1311,15 +1347,15 @@ function initHero3D() {
 
     /* ── Camera ── */
     if (mb) {
-      /* Mobile: tight lens aimed high */
-      camera.position.set(0, 0.5, 7.5);
-      camera.lookAt(0, 1.4, 0);
+      /* Mobile: Straight-on lens at product height */
+      camera.position.set(0, 0.5, 6.0);
+      camera.lookAt(0, 0.5, 0);
     } else {
       /* Desktop: slightly left of centre so model on right is in view */
       const camX = -1.2 + blend * 1.2;  /* moves right as page scrolls */
       const camZ = 6.5 - Math.sin(p * Math.PI) * 0.5;
-      camera.position.set(camX, 0.2 + idleY * 0.3, camZ);
-      camera.lookAt(productGroup.position.x * 0.45, productGroup.position.y * 0.5, 0);
+      camera.position.set(camX, 0.5 + idleY * 0.3, camZ);
+      camera.lookAt(productGroup.position.x * 0.45, 0.5, 0);
     }
 
     /* ── Key light orbits model ── */

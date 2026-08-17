@@ -17,6 +17,7 @@ const formatProduct = (p) => {
     description: p.description || "",
     points: p.points || [],
     active: p.active !== false,
+    isKit: p.isKit === true,
     stock: p.stock !== undefined ? p.stock : 20,
     status: p.status || "Active",
   };

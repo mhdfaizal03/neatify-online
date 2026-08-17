@@ -199,10 +199,12 @@ button, .btn-hero-primary, .btn-hero-ghost, .btn-primary-sm, .f-pill, .socials a
   color: var(--t-secondary) !important;
   font-size: 0.88rem;
   font-weight: 600;
-  padding: 0.55rem 1.1rem !important;
+  padding: 0.25rem 0.5rem !important;
+  margin: 0 0.3rem;
   border-radius: var(--r-sm);
   transition: all var(--dur-fast) var(--ease);
   letter-spacing: 0.02em;
+  text-decoration: none !important;
 }
 .navbar-nav .nav-link::after {
   content: "";
@@ -218,11 +220,11 @@ button, .btn-hero-primary, .btn-hero-ghost, .btn-primary-sm, .f-pill, .socials a
 }
 .navbar-nav .nav-link:hover::after,
 .navbar-nav .nav-link.active::after {
-  width: 50%;
+  width: 100%;
 }
 .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active {
   color: #fff !important;
-  background: rgba(255,255,255,0.04) !important;
+  background-color: transparent !important;
 }
 
 /* Burger */

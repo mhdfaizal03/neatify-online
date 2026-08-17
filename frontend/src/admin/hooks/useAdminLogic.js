@@ -250,6 +250,7 @@ export function useAdminLogic() {
       badge: $("#productBadge").value,
       description: $("#productDescription").value,
       active: $("#productActive").checked,
+      isKit: $("#productIsKit").checked,
       points: $("#productPoints").value.split("\n").filter(l => l.trim() !== "")
     };
 
@@ -538,6 +539,7 @@ export function useAdminLogic() {
       $("#productDescription").value = p.description || "";
       $("#productPoints").value = (p.points || []).join("\n");
       $("#productActive").checked = p.active !== false;
+      $("#productIsKit").checked = p.isKit === true;
       $("#productModalTitle").textContent = "Edit Product";
       $("#productModal").classList.remove("hidden");
     },

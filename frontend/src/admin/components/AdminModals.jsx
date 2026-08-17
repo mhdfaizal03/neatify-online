@@ -55,6 +55,10 @@ export default function AdminModals() {
                   <input type="checkbox" id="productActive" checked />
                   <span>Show on Storefront</span>
                 </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" id="productIsKit" />
+                  <span>Mark as Featured Kit Offer</span>
+                </label>
               </div>
             </div>
             <div className="modal-actions">

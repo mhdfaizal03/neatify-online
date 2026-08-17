@@ -42,22 +42,8 @@ export default function ProductGrid() {
     </section>
 
     
-    <section className="bundle-wrap">
-      <div className="container">
-        <div className="bundle-card reveal">
-          <div className="bundle-copy">
-            <p className="sec-eyebrow">THE WEEKEND KIT</p>
-            <h2 className="bundle-title">Wash it.<br /><em>Own the shine.</em></h2>
-            <p className="bundle-desc">One focused setup for your weekend detail. Foam, tools and premium microfiber essentials in one kit.</p>
-            <div className="bundle-foot">
-              <button className="btn-lime" id="bundleBtn">Add the kit <i className="bi bi-plus"></i></button>
-              <span className="bundle-price" id="bundlePrice"></span>
-            </div>
-          </div>
-          <div className="bundle-img-wrap">
-            <img src="assets/product-3.jpeg" alt="Neatify exterior kit" id="bundleImage" />
-          </div>
-        </div>
+    <section className="bundle-wrap" id="kitOffersContainer" style={{display: 'none'}}>
+      <div className="container d-flex flex-column gap-4" id="kitOffersList">
       </div>
     </section>
     </>
