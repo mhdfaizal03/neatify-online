@@ -26,6 +26,17 @@ const settingsSchema = new mongoose.Schema(
       type: String,
       default: "Free shipping on orders above ₹999.",
     },
+    marqueeKeywords: {
+      type: [String],
+      default: [
+        "DEEP DIRT LIFT",
+        "PAINT-SAFE FORMULA",
+        "THICK CLINGING FOAM",
+        "CRYSTAL GLOSS FINISH",
+        "pH-NEUTRAL & WAX-SAFE",
+        "STREAK-FREE EVERY TIME"
+      ]
+    }
   },
   {
     timestamps: true,

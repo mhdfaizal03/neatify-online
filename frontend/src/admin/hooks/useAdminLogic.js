@@ -408,6 +408,7 @@ export function useAdminLogic() {
     const data = new FormData(form);
     for (const [key, value] of data.entries()) {
       if (key === 'weekendKitIds') payload[key] = value.split(',').map(s => Number(s.trim())).filter(Boolean);
+      else if (key === 'marqueeKeywords') payload[key] = value.split(',').map(s => s.trim()).filter(Boolean);
       else if (form.elements[key].type === 'number') payload[key] = Number(value);
       else payload[key] = value;
     }

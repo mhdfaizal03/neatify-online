@@ -79,6 +79,13 @@ async function loadSettings() {
   const heroS = $("heroShipNote");
   if (heroS) heroS.textContent = money(settings.freeShippingThreshold);
   document.title = `${settings.storeName || "Neatify"} — Clean. Shine. Protect.`;
+
+  const keywords = settings.marqueeKeywords || ["DEEP DIRT LIFT", "PAINT-SAFE FORMULA", "THICK CLINGING FOAM", "CRYSTAL GLOSS FINISH", "pH-NEUTRAL & WAX-SAFE", "STREAK-FREE EVERY TIME"];
+  const marqueeHtml = keywords.map(kw => `<span>${esc(kw)}</span><span class="dot">◆</span>`).join("");
+  const g1 = $("marqueeGroup1");
+  const g2 = $("marqueeGroup2");
+  if (g1) g1.innerHTML = marqueeHtml;
+  if (g2) g2.innerHTML = marqueeHtml;
 }
 
 /* ── CATEGORIES ────────────────────────────────────────── */
@@ -1260,8 +1267,7 @@ function initHero3D() {
   /* Scroll */
   const space    = section.querySelector(".hero-scroll-space");
   const stages   = [...document.querySelectorAll(".hero-stage")];
-  const railDots  = [...document.querySelectorAll(".rail-dot")];
-  const railFills = [...document.querySelectorAll(".rail-track > span")];
+  const railDots  = [...document.querySelectorAll(".rail-dash")];
   const cueEl    = $("scrollCue");
   const statusEl = $("heroStatus");
 
@@ -1299,7 +1305,7 @@ function initHero3D() {
     activeStage = index;
     stages.forEach((s, i) => s.classList.toggle("active", i === index));
     railDots.forEach((d, i) => d.classList.toggle("active", i === index));
-    if (statusEl) statusEl.textContent = `Stage ${index + 1} of ${stages.length}`;
+    if (statusEl) statusEl.textContent = `Stage ${index + 1} of ${railDots.length}`;
   }
 
   function animate() {
@@ -1381,11 +1387,9 @@ function initHero3D() {
     }
 
     /* ── UI sync ── */
-    railFills.forEach((el, i) => {
-      el.style.width = `${Math.min(1, Math.max(0, p * 2 - i)) * 100}%`;
-    });
     if (cueEl) cueEl.classList.toggle("hide", p > 0.02);
-    setStage(p < 0.33 ? 0 : p < 0.66 ? 1 : 2);  /* one stage per scroll on the 3-scroll journey */
+    // 4 stages for 4 dashes
+    setStage(p < 0.25 ? 0 : p < 0.5 ? 1 : p < 0.75 ? 2 : 3);
 
     renderer.render(scene, camera);
   }

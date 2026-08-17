@@ -14,7 +14,14 @@ function StorefrontGuard({ children }) {
 
 // If User/Customer is logged in, they can't go to admin (redirect to /)
 function AdminGuard({ children }) {
+  const isAdminLoggedIn = !!localStorage.getItem("neatify_token");
   const isUserLoggedIn = !!localStorage.getItem("neatify-token");
+  
+  // If they are an admin, allow them in (breaks infinite redirect loop if both tokens exist)
+  if (isAdminLoggedIn) {
+    return children;
+  }
+  
   if (isUserLoggedIn) {
     return <Navigate to="/" replace />;
   }

@@ -69,11 +69,10 @@ export default function Hero() {
 
           
           <nav className="hero-rail" aria-label="Hero stages">
-            <span className="rail-dot active" data-rail="0"></span>
-            <span className="rail-track"><span id="heroProgressFill"></span></span>
-            <span className="rail-dot" data-rail="1"></span>
-            <span className="rail-track"><span></span></span>
-            <span className="rail-dot" data-rail="2"></span>
+            <span className="rail-dash active" data-rail="0"></span>
+            <span className="rail-dash" data-rail="1"></span>
+            <span className="rail-dash" data-rail="2"></span>
+            <span className="rail-dash" data-rail="3"></span>
           </nav>
 
           
@@ -89,28 +88,14 @@ export default function Hero() {
           </div>
         </div>
       </div>
-      <div id="heroStatus" className="sr-only" aria-live="polite" aria-atomic="true">Stage 1 of 3</div>
+      <div id="heroStatus" className="sr-only" aria-live="polite" aria-atomic="true">Stage 1 of 4</div>
     </section>
 
     
     <div className="marquee-strip" role="marquee" aria-label="Key benefits">
       <div className="marquee-track">
-        <div className="marquee-group">
-          <span>DEEP DIRT LIFT</span><span className="dot">◆</span>
-          <span>PAINT-SAFE FORMULA</span><span className="dot">◆</span>
-          <span>THICK CLINGING FOAM</span><span className="dot">◆</span>
-          <span>CRYSTAL GLOSS FINISH</span><span className="dot">◆</span>
-          <span>pH-NEUTRAL &amp; WAX-SAFE</span><span className="dot">◆</span>
-          <span>STREAK-FREE EVERY TIME</span><span className="dot">◆</span>
-        </div>
-        <div className="marquee-group" aria-hidden="true">
-          <span>DEEP DIRT LIFT</span><span className="dot">◆</span>
-          <span>PAINT-SAFE FORMULA</span><span className="dot">◆</span>
-          <span>THICK CLINGING FOAM</span><span className="dot">◆</span>
-          <span>CRYSTAL GLOSS FINISH</span><span className="dot">◆</span>
-          <span>pH-NEUTRAL &amp; WAX-SAFE</span><span className="dot">◆</span>
-          <span>STREAK-FREE EVERY TIME</span><span className="dot">◆</span>
-        </div>
+        <div className="marquee-group" id="marqueeGroup1"></div>
+        <div className="marquee-group" id="marqueeGroup2" aria-hidden="true"></div>
       </div>
     </div>
     </>

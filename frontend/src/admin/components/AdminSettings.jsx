@@ -25,6 +25,9 @@ export default function AdminSettings() {
               <label className="full">Announcement Subtext
                 <input type="text" name="announcementSub" placeholder="Smaller banner text" />
               </label>
+              <label className="full">Marquee Keywords (comma separated)
+                <textarea name="marqueeKeywords" placeholder="DEEP DIRT LIFT, PAINT-SAFE FORMULA..." rows="3"></textarea>
+              </label>
               <label>Weekend Kit IDs (CSV)
                 <input type="text" name="weekendKitIds" placeholder="1, 2, 4, 7" />
               </label>

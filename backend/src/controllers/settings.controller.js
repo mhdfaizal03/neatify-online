@@ -38,6 +38,7 @@ class SettingsController {
         storeName,
         announcement,
         announcementSub,
+        marqueeKeywords,
       } = req.body;
 
       if (freeShippingThreshold !== undefined) settings.freeShippingThreshold = freeShippingThreshold;
@@ -46,6 +47,7 @@ class SettingsController {
       if (storeName !== undefined) settings.storeName = storeName;
       if (announcement !== undefined) settings.announcement = announcement;
       if (announcementSub !== undefined) settings.announcementSub = announcementSub;
+      if (marqueeKeywords !== undefined) settings.marqueeKeywords = marqueeKeywords;
 
       await settings.save();
       res.status(200).json(settings);
