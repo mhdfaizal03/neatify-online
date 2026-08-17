@@ -1421,11 +1421,11 @@ function initDrawer() {
 function initAnnouncePop() {
   const pop = $("annPop");
   if (!pop) return;
-  if (sessionStorage.getItem("neatify-ann-dismissed")) return;
+  if (localStorage.getItem("neatify-ann-dismissed")) return;
   setTimeout(() => pop.classList.add("show"), 1200);
   $("annPopClose")?.addEventListener("click", () => {
     pop.classList.remove("show");
-    sessionStorage.setItem("neatify-ann-dismissed", "1");
+    localStorage.setItem("neatify-ann-dismissed", "1");
   });
 }
 
