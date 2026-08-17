@@ -268,7 +268,7 @@ button, .btn-hero-primary, .btn-hero-ghost, .btn-primary-sm, .f-pill, .socials a
   transition: background var(--dur-fast), color var(--dur-fast);
 }
 .drawer-link:hover { background: rgba(255,255,255,0.06); color: #fff; }
-.drawer-link.active { background: rgba(200,245,60,0.12); color: var(--lime); }
+.drawer-link.active { background: rgba(255,255,255,0.12); color: #fff; }
 .nav-drawer-foot { margin-top: auto; }
 .nav-drawer-foot .btn-primary-sm { width: 100%; justify-content: center; }
 .drawer-note { margin: 0.9rem 0 0; font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
