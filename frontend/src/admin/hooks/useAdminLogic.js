@@ -343,7 +343,7 @@ export function useAdminLogic() {
     });
   }
 
-  window.__admin.editKit = (id) => {
+  function editKit(id) {
     const kit = state.allProducts.find(p => p.id === id);
     if (!kit) return;
     
@@ -363,7 +363,7 @@ export function useAdminLogic() {
     
     $("#kitModalTitle").textContent = "Edit Kit";
     $("#kitModal").classList.remove("hidden");
-  };
+  }
 
   async function saveKit(e) {
     e.preventDefault();
@@ -671,6 +671,7 @@ export function useAdminLogic() {
   /* ── EXPOSE GLOBALS ── */
   window.__admin = {
     switchView,
+    editKit,
     editOrder: (id) => {
       const o = state.orders.find(x => x.id === id);
       if (!o) return;

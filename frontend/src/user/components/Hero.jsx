@@ -37,6 +37,12 @@ export default function Hero() {
                     <div className="meta-divider"></div>
                     <div className="meta-item"><i className="bi bi-truck"></i><span>Free ship <span id="heroShipNote">₹999</span>+</span></div>
                   </div>
+                  <div className="marquee-strip stage-marquee" role="marquee" aria-label="Key benefits">
+                    <div className="marquee-track">
+                      <div className="marquee-group"></div>
+                      <div className="marquee-group" aria-hidden="true"></div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="hero-stage" data-stage="1">
@@ -45,6 +51,12 @@ export default function Hero() {
                   <p className="hero-sub">Clean+ Foam Wash lays down a thick, paint-safe blanket that lifts grit away before your mitt touches the surface.</p>
                   <div className="hero-actions">
                     <a className="btn-hero-primary" href="#shop">Shop foam wash <i className="bi bi-droplet-half"></i></a>
+                  </div>
+                  <div className="marquee-strip stage-marquee" role="marquee" aria-label="Key benefits">
+                    <div className="marquee-track">
+                      <div className="marquee-group"></div>
+                      <div className="marquee-group" aria-hidden="true"></div>
+                    </div>
                   </div>
                 </div>
 
@@ -55,6 +67,12 @@ export default function Hero() {
                   <div className="hero-actions">
                     <a className="btn-hero-primary" href="#shop">Build your routine <i className="bi bi-stars"></i></a>
                     <button className="btn-hero-ghost" id="heroKitBtn">Add weekend kit</button>
+                  </div>
+                  <div className="marquee-strip stage-marquee" role="marquee" aria-label="Key benefits">
+                    <div className="marquee-track">
+                      <div className="marquee-group"></div>
+                      <div className="marquee-group" aria-hidden="true"></div>
+                    </div>
                   </div>
                 </div>
 

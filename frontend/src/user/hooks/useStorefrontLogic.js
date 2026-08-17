@@ -83,10 +83,9 @@ async function loadSettings() {
 
   const keywords = settings.marqueeKeywords || ["DEEP DIRT LIFT", "PAINT-SAFE FORMULA", "THICK CLINGING FOAM", "CRYSTAL GLOSS FINISH", "pH-NEUTRAL & WAX-SAFE", "STREAK-FREE EVERY TIME"];
   const marqueeHtml = keywords.map(kw => `<span>${esc(kw)}</span><span class="dot">◆</span>`).join("");
-  const g1 = $("marqueeGroup1");
-  const g2 = $("marqueeGroup2");
-  if (g1) g1.innerHTML = marqueeHtml;
-  if (g2) g2.innerHTML = marqueeHtml;
+  $$(".marquee-group").forEach(g => {
+    g.innerHTML = marqueeHtml;
+  });
 }
 
 /* ── CATEGORIES ────────────────────────────────────────── */
