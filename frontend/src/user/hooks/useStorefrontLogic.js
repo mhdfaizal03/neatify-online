@@ -2,6 +2,10 @@ import { useEffect } from 'react';
 
 export function useStorefrontLogic() {
   useEffect(() => {
+    const rootEl = document.getElementById("home");
+    if (rootEl && rootEl.dataset.initialized === "true") return;
+    if (rootEl) rootEl.dataset.initialized = "true";
+
     // --- PASTE VANILLA LOGIC ---
     /* ═══════════════════════════════════════════════════════════
    NEATIFY STOREFRONT — script.js v6

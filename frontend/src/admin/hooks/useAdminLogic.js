@@ -2,6 +2,10 @@ import { useEffect } from 'react';
 
 export function useAdminLogic() {
   useEffect(() => {
+    const rootEl = document.getElementById("mainApp");
+    if (rootEl && rootEl.dataset.initialized === "true") return;
+    if (rootEl) rootEl.dataset.initialized = "true";
+
     let rafId = null;
 
     // --- PASTE VANILLA LOGIC ---
