@@ -1974,3 +1974,107 @@ button, .btn-hero-primary, .btn-hero-ghost, .btn-primary-sm, .f-pill { overflow:
 }
 @keyframes ripple-spread { to { transform: scale(1); opacity: 0; } }
 
+/* ════════════════════════════════════════════════════════
+   PRODUCT DETAILS PAGE
+   ════════════════════════════════════════════════════════ */
+.product-detail-sec {
+  padding: 4rem 0 7rem;
+  background: #fdfdfd;
+}
+.detail-img-card {
+  aspect-ratio: 3 / 4;
+  background: #eeefec;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid rgba(0, 0, 0, 0.05);
+  box-shadow: var(--elev-1);
+}
+.detail-img-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--dur-slow) var(--ease);
+}
+.detail-img-card:hover img {
+  transform: scale(1.03);
+}
+.detail-copy {
+  padding-left: 1rem;
+}
+.detail-title {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  color: #111;
+  margin: 0.6rem 0 1rem;
+}
+.detail-price {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+.detail-desc {
+  color: #555;
+  line-height: 1.75;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+.detail-actions {
+  margin-top: 1.8rem;
+}
+.qty-control {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--r-sm);
+  background: #fff;
+  overflow: hidden;
+  height: 52px;
+}
+.qty-btn {
+  border: 0;
+  background: none;
+  width: 44px;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #555;
+  font-size: 1.2rem;
+  transition: background var(--dur-fast);
+}
+.qty-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #111;
+}
+.qty-num {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  width: 36px;
+  text-align: center;
+  font-size: 1rem;
+  color: #111;
+}
+.btn-back {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #6e7872;
+  transition: color var(--dur-fast);
+}
+.btn-back:hover {
+  color: #111;
+}
+
+@media (max-width: 991px) {
+  .detail-copy {
+    padding-left: 0;
+    margin-top: 1.5rem;
+  }
+}
+

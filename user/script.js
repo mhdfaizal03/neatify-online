@@ -101,7 +101,9 @@ async function loadProducts(attempt = 1) {
 }
 
 function renderPillCounts() {
-  document.querySelectorAll(".f-pill").forEach((pill) => {
+  const pills = document.querySelectorAll(".f-pill");
+  if (!pills.length) return;
+  pills.forEach((pill) => {
     const key = pill.dataset.filter;
     const count = key === "all" ? products.length : products.filter(p => {
       const cat = (p.category || "").toLowerCase().trim();
@@ -143,10 +145,11 @@ function renderProducts() {
   const list = filteredProducts();
   const grid = $("productGrid");
   const empty = $("emptyState");
-  empty.classList.toggle("d-none", list.length !== 0);
+  if (!grid) return;
+  if (empty) empty.classList.toggle("d-none", list.length !== 0);
   if (!list.length) {
-    $("emptyStateTitle").textContent = "No products found";
-    $("emptyStateText").textContent = "Try another search or category.";
+    if ($("emptyStateTitle")) $("emptyStateTitle").textContent = "No products found";
+    if ($("emptyStateText")) $("emptyStateText").textContent = "Try another search or category.";
     grid.innerHTML = "";
     return;
   }
@@ -728,10 +731,10 @@ document.addEventListener("click", e => {
   if (add) { addToCart(Number(add.dataset.add)); return; }
 
   const view = e.target.closest("[data-view]");
-  if (view) { openProduct(Number(view.dataset.view)); return; }
+  if (view) { window.location.href = `product.html?id=${view.dataset.view}`; return; }
 
   const prodImg = e.target.closest(".prod-img");
-  if (prodImg && !e.target.closest("button")) { openProduct(Number(prodImg.dataset.id)); return; }
+  if (prodImg && !e.target.closest("button")) { window.location.href = `product.html?id=${prodImg.dataset.id}`; return; }
 
   const modalAdd = e.target.closest("[data-modal-add]");
   if (modalAdd) { addToCart(Number(modalAdd.dataset.modalAdd)); productModal.hide(); cartDrawer.show(); return; }
@@ -783,7 +786,7 @@ $("searchInput").addEventListener("input", () => {
 $("searchResults").addEventListener("click", e => {
   const r = e.target.closest("[data-search-id]");
   if (!r) return;
-  openProduct(Number(r.dataset.searchId));
+  window.location.href = `product.html?id=${r.dataset.searchId}`;
   closeSearch();
 });
 document.addEventListener("keydown", e => {
