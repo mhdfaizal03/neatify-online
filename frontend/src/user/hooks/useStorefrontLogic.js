@@ -746,20 +746,20 @@ function initAccount() {
       .catch(() => clearSession());
   }
 
-  $("accountBtn").addEventListener("click", () => {
+  $("accountBtn")?.addEventListener("click", () => {
     if (isLoggedIn()) { openAccount(); return; }
     showAuthNotice(false);
     authSwitch("login");
     authModal.show();
   });
 
-  $("authTabLogin").addEventListener("click", () => authSwitch("login"));
-  $("authTabRegister").addEventListener("click", () => authSwitch("register"));
+  $("authTabLogin")?.addEventListener("click", () => authSwitch("login"));
+  $("authTabRegister")?.addEventListener("click", () => authSwitch("register"));
 
   // Forgot password flow
-  $("forgotLink").addEventListener("click", () => authSwitch("forgot"));
-  $("forgotBackBtn").addEventListener("click", () => authSwitch("login"));
-  $("forgotForm").addEventListener("submit", async (e) => {
+  $("forgotLink")?.addEventListener("click", () => authSwitch("forgot"));
+  $("forgotBackBtn")?.addEventListener("click", () => authSwitch("login"));
+  $("forgotForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = $("forgotEmail").value.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -786,21 +786,21 @@ function initAccount() {
     });
   });
 
-  $("loginForm").addEventListener("submit", (e) => handleAuth(e, "login"));
-  $("registerForm").addEventListener("submit", (e) => handleAuth(e, "register"));
+  $("loginForm")?.addEventListener("submit", (e) => handleAuth(e, "login"));
+  $("registerForm")?.addEventListener("submit", (e) => handleAuth(e, "register"));
 
   document.querySelectorAll(".acc-tab").forEach((tab) => {
     tab.addEventListener("click", () => {
       document.querySelectorAll(".acc-tab").forEach((t) => t.classList.toggle("active", t === tab));
       document.querySelectorAll(".acc-pane").forEach((p) => p.classList.remove("active"));
-      $(`accPane${tab.dataset.acc.charAt(0).toUpperCase()}${tab.dataset.acc.slice(1)}`).classList.add("active");
+      $(`accPane${tab.dataset.acc.charAt(0).toUpperCase()}${tab.dataset.acc.slice(1)}`)?.classList.add("active");
       if (tab.dataset.acc === "orders") loadAccountOrders();
     });
   });
 
-  $("profileForm").addEventListener("submit", saveProfile);
-  $("passwordForm").addEventListener("submit", savePassword);
-  $("logoutBtn").addEventListener("click", () => {
+  $("profileForm")?.addEventListener("submit", saveProfile);
+  $("passwordForm")?.addEventListener("submit", savePassword);
+  $("logoutBtn")?.addEventListener("click", () => {
     clearSession();
     accountModal.hide();
     showToast("Signed out. See you soon!");
@@ -966,10 +966,10 @@ if (filterPills) {
   });
 }
 
-$("sortSelect").addEventListener("change", e => { state.sort = e.target.value; renderProducts(); });
-$("cartToggle").addEventListener("click", () => cartDrawer.show());
-$("checkoutBtn").addEventListener("click", openCheckout);
-$("checkoutForm").addEventListener("submit", placeOrder);
+$("sortSelect")?.addEventListener("change", e => { state.sort = e.target.value; renderProducts(); });
+$("cartToggle")?.addEventListener("click", () => cartDrawer.show());
+$("checkoutBtn")?.addEventListener("click", openCheckout);
+$("checkoutForm")?.addEventListener("submit", placeOrder);
 document.addEventListener("click", function(e) {
   const bundleBtn = e.target.closest(".bundleBtn");
   if (bundleBtn) {
@@ -978,25 +978,27 @@ document.addEventListener("click", function(e) {
   }
 });
 
-$("searchToggle").addEventListener("click", () => {
-  $("searchPanel").classList.add("open");
+$("searchToggle")?.addEventListener("click", () => {
+  $("searchPanel")?.classList.add("open");
   updateHeaderHeight();
-  $("searchInput").focus();
+  $("searchInput")?.focus();
 });
-$("searchClose").addEventListener("click", closeSearch);
-$("searchInput").addEventListener("input", () => {
-  state.search = $("searchInput").value.trim();
+$("searchClose")?.addEventListener("click", closeSearch);
+$("searchInput")?.addEventListener("input", () => {
+  const inputEl = $("searchInput");
+  if (!inputEl) return;
+  state.search = inputEl.value.trim();
   renderProducts();
   renderSearchResults();
 });
-$("searchResults").addEventListener("click", e => {
+$("searchResults")?.addEventListener("click", e => {
   const r = e.target.closest("[data-search-id]");
   if (!r) return;
   navigate(`/product/${r.dataset.searchId}`);
   closeSearch();
 });
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape" && $("searchPanel").classList.contains("open")) closeSearch();
+  if (e.key === "Escape" && $("searchPanel")?.classList.contains("open")) closeSearch();
 });
 
 document.querySelectorAll("#navMenu .nav-link").forEach(a => {
@@ -1007,28 +1009,30 @@ document.querySelectorAll(".socials a").forEach(a => {
   a.addEventListener("click", e => { e.preventDefault(); showToast("Social profiles coming soon."); });
 });
 
-$("backToTop").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
-$("notifyBtn").addEventListener("click", () => notifyModal.show());
-$("footerNotify").addEventListener("click", () => notifyModal.show());
+$("backToTop")?.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+$("notifyBtn")?.addEventListener("click", () => notifyModal.show());
+$("footerNotify")?.addEventListener("click", () => notifyModal.show());
 
-$("notifyForm").addEventListener("submit", async e => {
+$("notifyForm")?.addEventListener("submit", async e => {
   e.preventDefault();
   const input = e.target.querySelector("input[type=email]");
   const ok = await subscribe(input.value.trim(), "notify", $("notifySubmit"));
   if (ok) { notifyModal.hide(); e.target.reset(); }
 });
 
-$("newsletterForm").addEventListener("submit", async e => {
+$("newsletterForm")?.addEventListener("submit", async e => {
   e.preventDefault();
   const input = $("emailInput");
-  if (!input.checkValidity()) { input.reportValidity(); return; }
-  const ok = await subscribe(input.value.trim(), "newsletter", $("newsletterBtn"));
-  if (ok) e.target.reset();
+  if (input) {
+    if (!input.checkValidity()) { input.reportValidity(); return; }
+    const ok = await subscribe(input.value.trim(), "newsletter", $("newsletterBtn"));
+    if (ok) e.target.reset();
+  }
 });
 
 window.addEventListener("scroll", () => {
-  $("mainNav").classList.toggle("scrolled", scrollY > 20);
-  $("backToTop").classList.toggle("show", scrollY > 700);
+  $("mainNav")?.classList.toggle("scrolled", scrollY > 20);
+  $("backToTop")?.classList.toggle("show", scrollY > 700);
   updateActiveNav();
 }, { passive: true });
 
@@ -1040,7 +1044,7 @@ if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(() => { updateHeaderHeight(); window.dispatchEvent(new Event("resize")); });
 }
 
-$("retryProducts").addEventListener("click", () => loadProducts());
+$("retryProducts")?.addEventListener("click", () => loadProducts());
 
 /* ══════════════════════════════════════════════════════════
    3D SCROLL HERO (Three.js r128)
