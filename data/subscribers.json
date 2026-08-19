@@ -1,0 +1,8 @@
+[
+  { "id": 1755000000001, "email": "rahul@example.com", "type": "newsletter", "createdAt": "2026-07-20T08:00:00.000Z" },
+  { "id": 1755000000002, "email": "car.enthusiast@gmail.com", "type": "newsletter", "createdAt": "2026-07-25T12:30:00.000Z" },
+  { "id": 1755000000003, "email": "priya.n@example.com", "type": "notify", "createdAt": "2026-08-01T09:15:00.000Z" },
+  { "id": 1755000000004, "email": "vikram.s@example.com", "type": "newsletter", "createdAt": "2026-08-05T15:45:00.000Z" },
+  { "id": 1755000000005, "email": "detailer.pro@outlook.com", "type": "notify", "createdAt": "2026-08-10T11:00:00.000Z" },
+  { "id": 1755000000006, "email": "sneha.p@example.com", "type": "newsletter", "createdAt": "2026-08-12T14:20:00.000Z" }
+]
