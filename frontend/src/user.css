@@ -884,6 +884,8 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   overflow-x: auto;
   -ms-overflow-style: none;
   scrollbar-width: none;
+  flex: 1;
+  min-width: 0;
 }
 .filter-row::-webkit-scrollbar {
   display: none;
@@ -897,6 +899,8 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   font-weight: 600;
   color: #555;
   transition: all var(--dur-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .f-pill.active, .f-pill:hover {
   background: #111;
@@ -915,6 +919,8 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   color: #555;
   outline: 0;
   transition: border-color var(--dur-fast);
+  flex-shrink: 0;
+  width: auto;
 }
 .sort-dd:focus { border-color: #111; }
 
