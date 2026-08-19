@@ -5,6 +5,13 @@ import Footer from '../components/Footer';
 import Modals from '../components/Modals';
 import { useStorefrontLogic } from '../hooks/useStorefrontLogic';
 
+const getImageUrl = (img) => {
+  if (!img) return '';
+  if (img.startsWith('http://') || img.startsWith('https://')) return img;
+  if (img.startsWith('/')) return img;
+  return `/${img}`;
+};
+
 export default function ProductDetails() {
   useStorefrontLogic();
   const { id } = useParams();
@@ -12,10 +19,12 @@ export default function ProductDetails() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [includedItems, setIncludedItems] = useState([]);
 
   useEffect(() => {
     // Scroll to top on navigation
     window.scrollTo(0, 0);
+    setIncludedItems([]);
     
     async function fetchProduct() {
       setLoading(true);
@@ -24,6 +33,18 @@ export default function ProductDetails() {
         if (!res.ok) throw new Error('Product not found');
         const data = await res.json();
         setProduct(data);
+        
+        // Fetch included products if it's a kit/set
+        if (data.isKit && data.includedProducts && data.includedProducts.length > 0) {
+          const allRes = await fetch('/api/products');
+          if (allRes.ok) {
+            const allProducts = await allRes.json();
+            const included = allProducts.filter(p => 
+              data.includedProducts.map(String).includes(String(p.id))
+            );
+            setIncludedItems(included);
+          }
+        }
       } catch (err) {
         console.error(err);
         setProduct(null);
@@ -93,10 +114,10 @@ export default function ProductDetails() {
             ) : (
               <div className="row g-5 align-items-start">
                 {/* Left: Image */}
-                <div className="col-lg-6">
+                <div className="col-lg-5">
                   <div className="detail-img-card" style={{ overflow: 'hidden', borderRadius: 'var(--r-md)', aspectRatio: '1 / 1' }}>
                     <img 
-                      src={product.image.startsWith('/') ? product.image : `/${product.image}`} 
+                      src={getImageUrl(product.image)} 
                       alt={product.name} 
                       className="img-fluid w-100 h-100" 
                       style={{ objectFit: 'cover' }}
@@ -105,7 +126,7 @@ export default function ProductDetails() {
                 </div>
                 
                 {/* Right: Info */}
-                <div className="col-lg-6">
+                <div className="col-lg-6 offset-lg-1">
                   <div className="detail-copy">
                     <span className="prod-kicker">
                       {product.type} / Exterior
@@ -131,6 +152,30 @@ export default function ProductDetails() {
                         </li>
                       ))}
                     </ul>
+
+                    {includedItems.length > 0 && (
+                      <div className="mt-4 mb-4">
+                        <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#111', marginBottom: '0.8rem' }}>
+                          Included in this set:
+                        </h3>
+                        <div className="d-flex flex-column gap-2">
+                          {includedItems.map(item => (
+                            <div key={item.id} className="d-flex align-items-center gap-3 p-2" style={{ border: '1px solid rgba(0,0,0,0.06)', borderRadius: 'var(--r-xs)', background: '#fafafa' }}>
+                              <img 
+                                src={getImageUrl(item.image)} 
+                                alt={item.name} 
+                                style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} 
+                              />
+                              <div className="flex-grow-1">
+                                <h4 style={{ fontSize: '0.85rem', fontWeight: 600, margin: 0, color: '#222' }}>{item.name}</h4>
+                                <span style={{ fontSize: '0.72rem', color: '#777' }}>{item.type}</span>
+                              </div>
+                              <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#111' }}>₹{item.price}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     
                     <hr className="my-4" style={{ opacity: 0.08, borderColor: '#000' }} />
                     
