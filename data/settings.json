@@ -1,0 +1,9 @@
+{
+  "announcement": "Premium vehicle care, made simple.",
+  "announcementSub": "Free shipping on orders above ₹999.",
+  "freeShippingThreshold": 999,
+  "weekendKitIds": [1, 2, 4, 7],
+  "highlightProductId": 3,
+  "storeName": "Neatify",
+  "currency": "INR"
+}
