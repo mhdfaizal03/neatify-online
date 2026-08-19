@@ -30,13 +30,6 @@ export default function Hero() {
                     <a className="btn-hero-primary" href="#shop">Explore the range <i className="bi bi-arrow-right"></i></a>
                     <a className="btn-hero-ghost" href="#how-it-works">See the process</a>
                   </div>
-                  <div className="hero-meta">
-                    <div className="meta-item"><div className="meta-stars">★★★★★</div><span>4.9 rating</span></div>
-                    <div className="meta-divider"></div>
-                    <div className="meta-item"><i className="bi bi-people"></i><span>2,300+ washes</span></div>
-                    <div className="meta-divider"></div>
-                    <div className="meta-item"><i className="bi bi-truck"></i><span>Free ship <span id="heroShipNote">₹999</span>+</span></div>
-                  </div>
                   <div className="marquee-strip stage-marquee" role="marquee" aria-label="Key benefits">
                     <div className="marquee-track">
                       <div className="marquee-group"></div>
