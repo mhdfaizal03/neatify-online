@@ -1982,10 +1982,10 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   .hero-scroll-space { height: 400vh; }
   .hero-stages-wrap > .container { padding-bottom: 1.5rem; }
   .hero-stages-inner { padding: 1rem 0 0; }
-  .hero-h1 { font-size: clamp(2rem, 11vw, 3.2rem); letter-spacing: -0.04em; }
-  .hero-sub { font-size: 0.84rem; line-height: 1.65; margin-bottom: 1.25rem; }
+  .hero-h1 { font-size: clamp(1.8rem, 8.5vw, 2.5rem); letter-spacing: -0.04em; }
+  .hero-sub { font-size: 0.82rem; line-height: 1.6; margin-bottom: 1.15rem; }
   .hero-actions { gap: 0.6rem; margin-bottom: 0; }
-  .btn-hero-primary, .btn-hero-ghost { width: 100%; justify-content: center; }
+  .btn-hero-primary, .btn-hero-ghost { width: 100%; justify-content: center; padding: 0.72rem 1.2rem; font-size: 0.82rem; }
 
   /* Rhythm */
   .sec { padding: 3.5rem 0; }
