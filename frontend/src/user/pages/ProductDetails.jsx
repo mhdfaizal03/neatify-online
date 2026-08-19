@@ -91,7 +91,7 @@ export default function ProductDetails() {
                 </Link>
               </div>
             ) : (
-              <div className="row g-5 align-items-center">
+              <div className="row g-5 align-items-start">
                 {/* Left: Image */}
                 <div className="col-lg-6">
                   <div className="detail-img-card" style={{ overflow: 'hidden', borderRadius: 'var(--r-md)', aspectRatio: '1 / 1' }}>
