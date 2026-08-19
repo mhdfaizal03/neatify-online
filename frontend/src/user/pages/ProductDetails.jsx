@@ -167,11 +167,7 @@ export default function ProductDetails() {
                       </div>
                     )}
                     
-                    <div className="mt-4">
-                      <Link to="/" className="btn-back d-inline-flex align-items-center text-decoration-none" style={{ color: '#6e7872', fontWeight: 600, fontSize: '0.9rem' }}>
-                        <i className="bi bi-arrow-left me-2" style={{ transform: 'translateY(1px)' }}></i> Back to Shop
-                      </Link>
-                    </div>
+
                   </div>
                 </div>
               </div>
