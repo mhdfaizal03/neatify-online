@@ -78,23 +78,28 @@ async function loadSettings() {
 /* ── PRODUCTS ───────────────────────────────────────────── */
 async function loadProducts(attempt = 1) {
   const grid = $("productGrid");
-  grid.innerHTML = `<div class="col-12"><div class="grid-loading"><div class="spin-ring"></div><span>Loading products…</span></div></div>`;
+  if (grid) {
+    grid.innerHTML = `<div class="col-12"><div class="grid-loading"><div class="spin-ring"></div><span>Loading products…</span></div></div>`;
+  }
   try {
     products = await api("/api/products");
+    window.products = products;
   } catch {
     if (attempt < 3) {
       await new Promise(r => setTimeout(r, 600 * attempt));
       return loadProducts(attempt + 1);
     }
-    grid.innerHTML = "";
-    $("emptyState").classList.remove("d-none");
-    $("emptyStateTitle").textContent = "Couldn't load products";
-    $("emptyStateText").textContent = "Make sure the server is running (npm start) and open http://localhost:3000.";
-    $("retryProducts").classList.remove("d-none");
+    if (grid) {
+      grid.innerHTML = "";
+    }
+    if ($("emptyState")) $("emptyState").classList.remove("d-none");
+    if ($("emptyStateTitle")) $("emptyStateTitle").textContent = "Couldn't load products";
+    if ($("emptyStateText")) $("emptyStateText").textContent = "Make sure the server is running (npm start) and open http://localhost:3000.";
+    if ($("retryProducts")) $("retryProducts").classList.remove("d-none");
     showToast("Could not load products. Please refresh.", true);
     return;
   }
-  $("retryProducts").classList.add("d-none");
+  if ($("retryProducts")) $("retryProducts").classList.add("d-none");
   renderPillCounts();
   renderBundle();
   renderProducts();
@@ -1277,6 +1282,10 @@ async function boot() {
   await step(loadCart);
   await step(renderCart);
   await step(updateActiveNav);
+  
+  // Expose key objects/functions to window for product.html details script
+  window.addToCart = addToCart;
+  window.cartDrawer = cartDrawer;
 }
 
 boot();
