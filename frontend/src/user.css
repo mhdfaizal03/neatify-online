@@ -913,7 +913,7 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   border: 1.5px solid rgba(0,0,0,0.1);
   background: #fff;
   border-radius: var(--r-xs);
-  padding: 0.5rem 0.9rem;
+  padding: 0.5rem 2.2rem 0.5rem 0.9rem;
   font-size: 0.78rem;
   font-weight: 600;
   color: #555;

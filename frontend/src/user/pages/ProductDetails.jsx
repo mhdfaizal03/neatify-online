@@ -39,10 +39,10 @@ export default function ProductDetails() {
     
     // Add to cart matching selected quantity
     for (let i = 0; i < quantity - 1; i++) {
-      window.addToCart(Number(product.id));
+      window.addToCart(product.id);
     }
     // Show drawer on the last addition
-    window.addToCart(Number(product.id), true);
+    window.addToCart(product.id, true);
   };
 
   const incrementQty = () => {

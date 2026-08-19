@@ -48,7 +48,7 @@ const navCollapse    = hasBS ? bootstrap.Collapse.getOrCreateInstance($("navMenu
 const money = (v) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(v);
 
-const getProduct = (id) => products.find((p) => p.id === id);
+const getProduct = (id) => products.find((p) => String(p.id) === String(id));
 
 const matchesSearch = (p, q) => {
   if (!q) return true;
@@ -297,7 +297,7 @@ function addToCart(id, openDrawer = false) {
     showToast(`${p.name} is currently out of stock`, true);
     return;
   }
-  const found = state.cart.find(i => i.id === id);
+  const found = state.cart.find(i => String(i.id) === String(id));
   if (found) {
     if (found.qty >= p.stock) {
       showToast(`Only ${p.stock} units of ${p.name} are available`, true);
@@ -919,7 +919,7 @@ function initReveal() {
 /* ── EVENTS ─────────────────────────────────────────────── */
 document.addEventListener("click", e => {
   const add = e.target.closest("[data-add]");
-  if (add) { addToCart(Number(add.dataset.add)); return; }
+  if (add) { addToCart(add.dataset.add); return; }
 
   const view = e.target.closest("[data-view]");
   if (view) { navigate(`/product/${view.dataset.view}`); return; }
@@ -928,12 +928,12 @@ document.addEventListener("click", e => {
   if (prodImg && !e.target.closest("button")) { navigate(`/product/${prodImg.dataset.id}`); return; }
 
   const modalAdd = e.target.closest("[data-modal-add]");
-  if (modalAdd) { addToCart(Number(modalAdd.dataset.modalAdd)); productModal.hide(); cartDrawer.show(); return; }
+  if (modalAdd) { addToCart(modalAdd.dataset.modalAdd); productModal.hide(); cartDrawer.show(); return; }
 
   const qty = e.target.closest("[data-qty]");
   if (qty) {
-    const id   = Number(qty.dataset.qty);
-    const item = state.cart.find(i => i.id === id);
+    const id   = qty.dataset.qty;
+    const item = state.cart.find(i => String(i.id) === String(id));
     if (!item) return;
     const p = getProduct(id);
     const delta = Number(qty.dataset.delta);
@@ -942,13 +942,13 @@ document.addEventListener("click", e => {
       return;
     }
     item.qty += delta;
-    if (item.qty <= 0) state.cart = state.cart.filter(i => i.id !== id);
+    if (item.qty <= 0) state.cart = state.cart.filter(i => String(i.id) !== String(id));
     saveCart(); renderCart(); return;
   }
 
   const rem = e.target.closest("[data-remove]");
   if (rem) {
-    state.cart = state.cart.filter(i => i.id !== Number(rem.dataset.remove));
+    state.cart = state.cart.filter(i => String(i.id) !== String(rem.dataset.remove));
     saveCart(); renderCart();
   }
 });
@@ -974,7 +974,7 @@ document.addEventListener("click", function(e) {
   const bundleBtn = e.target.closest(".bundleBtn");
   if (bundleBtn) {
     const kitId = bundleBtn.dataset.kitId;
-    if (kitId) addToCart(Number(kitId), true);
+    if (kitId) addToCart(kitId, true);
   }
 });
 
