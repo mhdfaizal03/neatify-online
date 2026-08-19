@@ -40,6 +40,19 @@ const seedDB = async () => {
     if (productCount === 0) {
       await Product.insertMany(defaultProducts);
       logger.info("Database Seeding: Default products seeded.");
+    } else {
+      // Check if at least one kit exists, otherwise seed the default kit
+      const kitCount = await Product.countDocuments({ isKit: true });
+      if (kitCount === 0) {
+        const defaultKit = defaultProducts.find(p => p.isKit);
+        if (defaultKit) {
+          // Find max id to avoid duplicate key conflicts
+          const maxProduct = await Product.findOne().sort("-id");
+          const nextId = maxProduct && maxProduct.id ? maxProduct.id + 1 : 10;
+          await Product.create({ ...defaultKit, id: nextId });
+          logger.info(`Database Seeding: Default kit product seeded with ID ${nextId}.`);
+        }
+      }
     }
 
     const settingsCount = await Settings.countDocuments();

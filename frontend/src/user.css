@@ -1002,7 +1002,18 @@ button:disabled { opacity: 0.5; pointer-events: none; }
   margin-bottom: 0.35rem;
   line-height: 1.25;
 }
-.prod-body p { font-size: 0.8rem; color: #6e7872; line-height: 1.55; margin-bottom: 1rem; flex: 1; }
+.prod-body p {
+  font-size: 0.8rem;
+  color: #6e7872;
+  line-height: 1.55;
+  margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 2.48rem; /* 1.55 line-height * 2 lines * 0.8rem = 2.48rem */
+}
 @media (max-width: 575px) {
   /* compact two-up product grid on phones */
   .prod-body { padding: 0.8rem 0.85rem 0.95rem; }

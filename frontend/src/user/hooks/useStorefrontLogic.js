@@ -208,7 +208,10 @@ function renderBundle() {
 }
 
 function filteredProducts() {
-  let list = products.filter(p => !p.isKit && (state.filter === "all" || p.category === state.filter));
+  let list = products.filter(p => {
+    if (p.isKit) return state.filter === "kit";
+    return state.filter === "all" || p.category === state.filter;
+  });
   if (state.search) list = list.filter(p => matchesSearch(p, state.search));
   if (state.sort === "featured") list.sort((a, b) => a.featured - b.featured);
   if (state.sort === "low")      list.sort((a, b) => a.price - b.price);
