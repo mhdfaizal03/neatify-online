@@ -60,10 +60,10 @@ export default function ProductDetails() {
     <>
       <Header />
       <main id="productPage" style={{ paddingTop: 'var(--header-height)', minHeight: '80vh' }}>
-        <section className="sec product-detail-sec">
+        <section className="product-detail-sec" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
           <div className="container">
             {/* Breadcrumbs */}
-            <nav aria-label="breadcrumb" className="mb-5">
+            <nav aria-label="breadcrumb" className="mb-4">
               <ol className="breadcrumb">
                 <li className="breadcrumb-item">
                   <Link to="/" className="text-decoration-none">Home</Link>
