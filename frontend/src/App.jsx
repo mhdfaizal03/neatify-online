@@ -1,6 +1,7 @@
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Storefront from './user/pages/Storefront'
+import ProductDetails from './user/pages/ProductDetails'
 import AdminLayout from './admin/components/AdminLayout'
 
 // If Admin is logged in, they can't go to storefront (redirect to /admin)
@@ -32,6 +33,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<StorefrontGuard><Storefront /></StorefrontGuard>} />
+      <Route path="/product/:id" element={<StorefrontGuard><ProductDetails /></StorefrontGuard>} />
       <Route path="/admin/*" element={<AdminGuard><AdminLayout /></AdminGuard>} />
     </Routes>
   )

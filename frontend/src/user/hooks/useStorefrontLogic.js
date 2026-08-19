@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export function useStorefrontLogic() {
+  const navigate = useNavigate();
   useEffect(() => {
-    const rootEl = document.getElementById("home");
+    const rootEl = document.getElementById("home") || document.getElementById("productPage");
     if (rootEl && rootEl.dataset.initialized === "true") return;
     if (rootEl) rootEl.dataset.initialized = "true";
 
@@ -920,10 +922,10 @@ document.addEventListener("click", e => {
   if (add) { addToCart(Number(add.dataset.add)); return; }
 
   const view = e.target.closest("[data-view]");
-  if (view) { openProduct(Number(view.dataset.view)); return; }
+  if (view) { navigate(`/product/${view.dataset.view}`); return; }
 
   const prodImg = e.target.closest(".prod-img");
-  if (prodImg && !e.target.closest("button")) { openProduct(Number(prodImg.dataset.id)); return; }
+  if (prodImg && !e.target.closest("button")) { navigate(`/product/${prodImg.dataset.id}`); return; }
 
   const modalAdd = e.target.closest("[data-modal-add]");
   if (modalAdd) { addToCart(Number(modalAdd.dataset.modalAdd)); productModal.hide(); cartDrawer.show(); return; }
@@ -990,7 +992,7 @@ $("searchInput").addEventListener("input", () => {
 $("searchResults").addEventListener("click", e => {
   const r = e.target.closest("[data-search-id]");
   if (!r) return;
-  openProduct(Number(r.dataset.searchId));
+  navigate(`/product/${r.dataset.searchId}`);
   closeSearch();
 });
 document.addEventListener("keydown", e => {
