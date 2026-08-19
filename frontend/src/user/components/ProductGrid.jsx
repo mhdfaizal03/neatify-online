@@ -21,6 +21,7 @@ export default function ProductGrid() {
             <button className="f-pill" data-filter="wash" aria-pressed="false">Wash</button>
             <button className="f-pill" data-filter="tools" aria-pressed="false">Tools</button>
             <button className="f-pill" data-filter="finish" aria-pressed="false">Finish</button>
+            <button className="f-pill" data-filter="kit" aria-pressed="false">Kits</button>
           </div>
           <select id="sortSelect" className="sort-dd" aria-label="Sort products">
             <option value="featured">Featured</option>

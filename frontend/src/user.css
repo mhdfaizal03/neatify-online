@@ -209,9 +209,20 @@ button, .btn-hero-primary, .btn-hero-ghost, .btn-primary-sm, .f-pill, .socials a
 .navbar-nav .nav-link::after {
   display: none;
 }
-.navbar-nav .nav-link:hover, .navbar-nav .nav-link.active {
+.navbar-nav .nav-link:hover {
   color: #fff !important;
   background-color: rgba(255, 255, 255, 0.08) !important;
+}
+.navbar-nav .nav-link.active {
+  color: var(--lime) !important;
+  background-color: transparent !important;
+}
+
+/* Tailwind-Bootstrap Collapse compatibility fix */
+.collapse.show, 
+.collapsing, 
+.navbar-collapse {
+  visibility: visible !important;
 }
 
 /* Burger */

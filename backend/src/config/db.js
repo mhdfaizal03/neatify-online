@@ -59,7 +59,13 @@ const seedDB = async () => {
     if (settingsCount === 0) {
       await Settings.create(defaultSettings);
       logger.info("Database Seeding: Default settings seeded.");
+    } else {
+      await Settings.updateOne({}, { $set: { weekendKitIds: [3, 5], highlightProductId: 1 } });
     }
+
+    // Synchronize kit properties to match real data
+    await Product.updateMany({ category: "kit" }, { $set: { isKit: true } });
+    logger.info("Database Seeding: Synchronized kit properties and settings.");
   } catch (err) {
     logger.error(`Database Seeding Error: ${err.message}`);
   }
