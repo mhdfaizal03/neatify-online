@@ -7,7 +7,7 @@ export default function Footer() {
     <div className="container">
       <div className="row g-4">
         <div className="col-lg-5">
-          <a className="foot-brand" href="#home">Neatify<span>.</span></a>
+          <a className="foot-brand" href="/">Neatify<span>.</span></a>
           <p className="foot-tagline">Clean. Shine. Protect.<br />Exterior care for vehicles that deserve it.</p>
           <div className="socials">
             <a href="#" aria-label="Instagram"><i className="bi bi-instagram"></i></a>
@@ -17,15 +17,15 @@ export default function Footer() {
         </div>
         <div className="col-6 col-lg-2">
           <h5>Explore</h5>
-          <a href="#shop">Shop</a>
-          <a href="#how-it-works">Process</a>
-          <a href="#story">About</a>
+          <a href="/#shop">Shop</a>
+          <a href="/#how-it-works">Process</a>
+          <a href="/#story">About</a>
         </div>
         <div className="col-6 col-lg-2">
           <h5>Support</h5>
-          <a href="#faq">FAQ</a>
-          <a href="#shop">Products</a>
-          <a href="#faq5">Shipping</a>
+          <a href="/#faq">FAQ</a>
+          <a href="/#shop">Products</a>
+          <a href="/#faq">Shipping</a>
         </div>
         <div className="col-lg-3">
           <h5>Coming next</h5>

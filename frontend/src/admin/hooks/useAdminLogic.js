@@ -266,14 +266,18 @@ export function useAdminLogic() {
     tbody.innerHTML = list.map(p => {
       const pointsList = (p.points || []).slice(0, 3).map(pt => `<span class="kit-item-chip"><i class="bi bi-check2"></i> ${esc(pt)}</span>`).join("");
       const remainingCount = (p.points || []).length > 3 ? `<span class="kit-item-more">+${(p.points || []).length - 3} more</span>` : "";
+      const hasSecondary = p.images && p.images.length > 1;
 
       return `
       <tr>
         <td>
           <div class="product-cell">
-            <img src="/${esc(p.image)}" class="product-thumb" alt="${esc(p.name)}" />
+            <div style="position: relative; display: inline-flex; margin-right: 8px;">
+              <img src="/${esc(p.image)}" class="product-thumb" alt="${esc(p.name)}" />
+              ${hasSecondary ? `<img src="/${esc(p.images[1])}" class="product-thumb" style="width: 26px; height: 26px; position: absolute; bottom: -4px; right: -8px; border: 2px solid #fff; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);" alt="Offer" title="Offer Item Included" />` : ''}
+            </div>
             <div>
-              <div class="product-name">${esc(p.name)}</div>
+              <div class="product-name">${esc(p.name)} ${hasSecondary ? '<span class="badge-pill" style="font-size: 0.68rem; padding: 2px 6px; margin-left: 4px;">2 IMAGES / OFFER</span>' : ''}</div>
               <div class="product-subtext" style="font-size: 0.8rem; color: var(--text-muted); max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${esc(p.description || '')}</div>
             </div>
           </div>
@@ -386,7 +390,8 @@ export function useAdminLogic() {
     $("#kitStock").value = kit.stock;
     $("#kitBadge").value = kit.badge || "";
     $("#kitFeatured").value = kit.featured || 1;
-    $("#kitImage").value = kit.image || "";
+    $("#kitImage").value = kit.image || (kit.images && kit.images[0]) || "";
+    $("#kitSecondaryImage").value = (kit.images && kit.images[1]) || "";
     $("#kitDescription").value = kit.description || "";
     $("#kitActive").checked = kit.active !== false;
     
@@ -407,6 +412,10 @@ export function useAdminLogic() {
 
     const points = $("#kitPointsHidden").value ? $("#kitPointsHidden").value.split("||").filter(Boolean) : [];
 
+    const mainImage = $("#kitImage")?.value?.trim() || "";
+    const secImage = $("#kitSecondaryImage")?.value?.trim() || "";
+    const images = [mainImage, secImage].filter(Boolean);
+
     const payload = {
       name: $("#kitName").value,
       category: "kit",
@@ -414,7 +423,8 @@ export function useAdminLogic() {
       price: Number($("#kitPrice").value),
       stock: Number($("#kitStock").value),
       featured: Number($("#kitFeatured").value),
-      image: $("#kitImage").value,
+      image: mainImage,
+      images: images,
       badge: $("#kitBadge").value,
       description: $("#kitDescription").value,
       active: $("#kitActive").checked,
@@ -820,6 +830,7 @@ export function useAdminLogic() {
       $("#kitId").value = "";
       $("#kitStock").value = 20;
       $("#kitPointsHidden").value = "";
+      if ($("#kitSecondaryImage")) $("#kitSecondaryImage").value = "";
       renderKitPills();
       renderKitChecklist([]);
       $("#kitModalTitle").textContent = "Add Kit";
@@ -829,9 +840,14 @@ export function useAdminLogic() {
     $$("#closeKitModal, #cancelKitModal").forEach(btn => btn.addEventListener("click", () => $("#kitModal").classList.add("hidden")));
     
     $("#pickKitImageBtn")?.addEventListener("click", () => {
-      loadMedia(); // Ensure picker is up-to-date
-      // Hack: tell the picker where to put the image
+      loadMedia();
       window.__admin._currentImageTarget = "#kitImage";
+      $("#imagePickerModal").classList.remove("hidden");
+    });
+
+    $("#pickKitSecondaryImageBtn")?.addEventListener("click", () => {
+      loadMedia();
+      window.__admin._currentImageTarget = "#kitSecondaryImage";
       $("#imagePickerModal").classList.remove("hidden");
     });
 

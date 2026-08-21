@@ -20,11 +20,13 @@ export default function ProductDetails() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [includedItems, setIncludedItems] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     // Scroll to top on navigation
     window.scrollTo(0, 0);
     setIncludedItems([]);
+    setSelectedImage(null);
     
     async function fetchProduct() {
       setLoading(true);
@@ -54,6 +56,8 @@ export default function ProductDetails() {
     }
     fetchProduct();
   }, [id]);
+
+  const activeImage = selectedImage || (product ? product.image : '');
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -95,23 +99,40 @@ export default function ProductDetails() {
   return (
     <>
       <Header />
-      <main id="productPage" style={{ paddingTop: 'var(--header-height)', minHeight: '80vh' }}>
-        <section className="product-detail-sec" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
+      <main id="productPage" style={{ minHeight: '80vh' }}>
+        <section className="product-detail-sec" style={{ paddingTop: '1.75rem', paddingBottom: '4rem' }}>
           <div className="container">
-            {/* Breadcrumbs */}
-            <nav aria-label="breadcrumb" className="mb-4">
-              <ol className="breadcrumb">
-                <li className="breadcrumb-item">
-                  <Link to="/" className="text-decoration-none">Home</Link>
-                </li>
-                <li className="breadcrumb-item">
-                  <a href="/#shop" className="text-decoration-none">Shop</a>
-                </li>
-                <li className="breadcrumb-item active" id="breadcrumbName" aria-current="page" style={{ color: '#6e7872' }}>
-                  {loading ? 'Loading...' : (product ? product.name : 'Product not found')}
-                </li>
-              </ol>
-            </nav>
+            {/* Breadcrumb & Back action bar */}
+            <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+              <nav aria-label="breadcrumb" className="mb-0">
+                <ol className="breadcrumb mb-0">
+                  <li className="breadcrumb-item">
+                    <Link to="/" className="text-decoration-none" style={{ color: '#1e293b', fontWeight: 600 }}>Home</Link>
+                  </li>
+                  <li className="breadcrumb-item">
+                    <a href="/#shop" className="text-decoration-none" style={{ color: '#1e293b', fontWeight: 600 }}>Shop</a>
+                  </li>
+                  <li className="breadcrumb-item active" id="breadcrumbName" aria-current="page" style={{ color: '#6e7872' }}>
+                    {loading ? 'Loading...' : (product ? product.name : 'Product not found')}
+                  </li>
+                </ol>
+              </nav>
+
+              <button 
+                type="button" 
+                onClick={() => {
+                  if (window.history.length > 1) {
+                    navigate(-1);
+                  } else {
+                    navigate('/');
+                  }
+                }} 
+                className="btn-back-link d-inline-flex align-items-center gap-1"
+                style={{ background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#0f172a', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', padding: '6px 14px', borderRadius: '8px', transition: 'all 0.2s ease' }}
+              >
+                <i className="bi bi-arrow-left"></i> Back to Shop
+              </button>
+            </div>
 
             {loading ? (
               <div className="text-center py-5">
@@ -130,14 +151,45 @@ export default function ProductDetails() {
               <div className="row g-5 align-items-start">
                 {/* Left: Image and Action Controls */}
                 <div className="col-lg-5">
-                  <div className="detail-img-card" style={{ overflow: 'hidden', borderRadius: 'var(--r-md)', aspectRatio: '1 / 1', marginBottom: '1.25rem', boxShadow: '0 8px 30px rgba(0,0,0,0.06)' }}>
+                  <div className="detail-img-card" style={{ overflow: 'hidden', borderRadius: 'var(--r-md)', aspectRatio: '1 / 1', marginBottom: product.images && product.images.length > 1 ? '0.75rem' : '1.25rem', boxShadow: '0 8px 30px rgba(0,0,0,0.06)' }}>
                     <img 
-                      src={getImageUrl(product.image)} 
+                      src={getImageUrl(activeImage)} 
                       alt={product.name} 
                       className="img-fluid w-100 h-100" 
-                      style={{ objectFit: 'cover' }}
+                      style={{ objectFit: 'cover', transition: 'all 0.3s ease' }}
                     />
                   </div>
+
+                  {product.images && product.images.length > 1 && (
+                    <div className="detail-thumbnails d-flex gap-2 mb-3">
+                      {product.images.map((img, idx) => {
+                        const isCurrent = (activeImage === img) || (!selectedImage && idx === 0);
+                        return (
+                          <button
+                            key={idx}
+                            type="button"
+                            className={`detail-thumb-btn ${isCurrent ? 'active' : ''}`}
+                            onClick={() => setSelectedImage(img)}
+                            aria-label={`View image ${idx + 1}`}
+                            style={{
+                              width: '60px',
+                              height: '60px',
+                              borderRadius: '8px',
+                              overflow: 'hidden',
+                              border: isCurrent ? '2.5px solid #c8f53c' : '1.5px solid #e2e8f0',
+                              padding: 0,
+                              background: '#f8fafc',
+                              cursor: 'pointer',
+                              boxShadow: isCurrent ? '0 0 0 2px rgba(200,245,60,0.4)' : 'none',
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            <img src={getImageUrl(img)} alt={`Thumbnail ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
 
                   {product.stock === 0 ? (
                     <div className="alert alert-danger mb-0" role="alert" style={{ borderRadius: '8px', fontWeight: 600, fontSize: '0.92rem' }}>

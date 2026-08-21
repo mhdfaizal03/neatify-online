@@ -93,10 +93,16 @@ export default function AdminModals() {
                 <label>Display Order
                   <input type="number" id="kitFeatured" min="1" defaultValue="1" />
                 </label>
-                <label className="full">Main Image
+                <label className="full">Main Kit Image
                   <div className="image-picker">
-                    <input type="text" id="kitImage" placeholder="Upload or enter URL" required />
+                    <input type="text" id="kitImage" placeholder="Upload or enter main image URL" required />
                     <button type="button" className="btn-secondary" id="pickKitImageBtn">Browse</button>
+                  </div>
+                </label>
+                <label className="full">Offer / Secondary Image <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 400 }}>(Optional bonus gift / offer image)</span>
+                  <div className="image-picker">
+                    <input type="text" id="kitSecondaryImage" placeholder="Upload or enter secondary/offer image URL" />
+                    <button type="button" className="btn-secondary" id="pickKitSecondaryImageBtn">Browse</button>
                   </div>
                 </label>
                 <label className="full">Short Description

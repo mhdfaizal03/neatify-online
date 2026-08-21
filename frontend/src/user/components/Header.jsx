@@ -15,18 +15,18 @@ export default function Header() {
 
       <nav className="navbar navbar-expand-lg" id="mainNav">
         <div className="container">
-          <a className="nav-brand" href="#home" aria-label="Neatify">
+          <a className="nav-brand" href="/" aria-label="Neatify">
             <span className="brand-text">Neatify</span>
             <span className="brand-accent">.</span>
           </a>
 
           <div className="collapse navbar-collapse" id="navMenu">
             <ul className="navbar-nav mx-auto gap-1">
-              <li className="nav-item"><a className="nav-link active" href="#home">Home</a></li>
-              <li className="nav-item"><a className="nav-link" href="#shop">Shop</a></li>
-              <li className="nav-item"><a className="nav-link" href="#how-it-works">Process</a></li>
-              <li className="nav-item"><a className="nav-link" href="#story">About</a></li>
-              <li className="nav-item"><a className="nav-link" href="#faq">FAQ</a></li>
+              <li className="nav-item"><a className="nav-link active" href="/#home">Home</a></li>
+              <li className="nav-item"><a className="nav-link" href="/#shop">Shop</a></li>
+              <li className="nav-item"><a className="nav-link" href="/#how-it-works">Process</a></li>
+              <li className="nav-item"><a className="nav-link" href="/#story">About</a></li>
+              <li className="nav-item"><a className="nav-link" href="/#faq">FAQ</a></li>
             </ul>
           </div>
 
@@ -41,7 +41,7 @@ export default function Header() {
               <i className="bi bi-bag"></i>
               <span className="cart-badge" id="cartCount">0</span>
             </button>
-            <a className="btn-primary-sm d-none d-lg-inline-flex" href="#shop">Shop Now</a>
+            <a className="btn-primary-sm d-none d-lg-inline-flex" href="/#shop">Shop Now</a>
           </div>
 
           <button className="nav-burger" type="button" id="navBurger" aria-controls="navDrawer" aria-expanded="false" aria-label="Open menu">
@@ -58,14 +58,14 @@ export default function Header() {
           <button className="ann-pop-x" id="navDrawerClose" aria-label="Close menu"><i className="bi bi-x-lg"></i></button>
         </div>
         <nav className="nav-drawer-links" aria-label="Mobile navigation">
-          <a href="#home" className="drawer-link active">Home</a>
-          <a href="#shop" className="drawer-link">Shop</a>
-          <a href="#how-it-works" className="drawer-link">Process</a>
-          <a href="#story" className="drawer-link">About</a>
-          <a href="#faq" className="drawer-link">FAQ</a>
+          <a href="/#home" className="drawer-link active">Home</a>
+          <a href="/#shop" className="drawer-link">Shop</a>
+          <a href="/#how-it-works" className="drawer-link">Process</a>
+          <a href="/#story" className="drawer-link">About</a>
+          <a href="/#faq" className="drawer-link">FAQ</a>
         </nav>
         <div className="nav-drawer-foot">
-          <a className="btn-primary-sm" href="#shop">Shop Now</a>
+          <a className="btn-primary-sm" href="/#shop">Shop Now</a>
           <p className="drawer-note">Premium vehicle care, made simple.</p>
         </div>
       </aside>

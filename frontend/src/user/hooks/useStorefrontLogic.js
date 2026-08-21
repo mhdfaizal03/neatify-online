@@ -164,59 +164,97 @@ function renderPillCounts() {
   });
 }
 
+function getImgUrl(img) {
+  if (!img) return "/assets/product-1.jpeg";
+  if (img.startsWith("http://") || img.startsWith("https://")) return img;
+  if (img.startsWith("/")) return img;
+  return `/${img}`;
+}
+
 function renderBundle() {
-  const kitProducts = products.filter(p => p.isKit);
+  const kitProducts = products.filter(p => p.isKit && p.active !== false);
   const wrap = document.getElementById("kitOffersContainer");
   const list = document.getElementById("kitOffersList");
   
+  if (!wrap) return;
+
   if (!kitProducts.length) {
-    if (wrap) wrap.style.display = "none";
+    wrap.style.display = "none";
+    if (list) list.innerHTML = "";
     return;
   }
   
-  if (wrap) wrap.style.display = "block";
+  wrap.style.display = "block";
   if (list) {
-    list.innerHTML = kitProducts.map(kit => {
-      const itemCount = kit.points ? kit.points.length : 1;
-      
-      let firstPart = "";
-      let restPart = "";
-      
-      // If the name contains a period (e.g., "Wash it. Own the shine."), split by period.
-      // Otherwise fallback to splitting by space.
-      if (kit.name.includes('.')) {
-        const parts = kit.name.split('.');
-        firstPart = parts[0].trim() + '.';
-        restPart = parts.slice(1).join('.').trim();
-      } else {
-        const parts = kit.name.split(" ");
-        firstPart = parts.shift() || "";
-        restPart = parts.join(" ");
-      }
-      
-      return `
-      <div class="bundle-card reveal">
-        <div class="bundle-copy">
-          <p class="sec-eyebrow">— ${esc(kit.badge || "KIT OFFER")}</p>
-          <h2 class="bundle-title">${esc(firstPart)}<br /><em>${esc(restPart)}</em></h2>
-          <p class="bundle-desc">${esc(kit.description)}</p>
-          <div class="bundle-foot">
-            <button class="btn-lime bundleBtn" data-kit-id="${kit.id}">Add the kit <i class="bi bi-plus"></i></button>
-            <span class="bundle-price">${itemCount} items · ${money(kit.price)}</span>
-          </div>
+    // Featured primary kit showcase
+    const kit = kitProducts[0];
+    const itemCount = kit.includedProducts && kit.includedProducts.length > 0
+      ? kit.includedProducts.length
+      : (kit.points ? kit.points.length : 1);
+    
+    let firstPart = "";
+    let restPart = "";
+    
+    if (kit.name.includes('.')) {
+      const parts = kit.name.split('.');
+      firstPart = parts[0].trim() + '.';
+      restPart = parts.slice(1).join('.').trim();
+    } else {
+      const parts = kit.name.split(" ");
+      firstPart = parts.shift() || "";
+      restPart = parts.join(" ");
+    }
+
+    const pointsHtml = (kit.points || []).slice(0, 3).map(pt => `
+      <li style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: rgba(255,255,255,0.85); margin-bottom: 6px;">
+        <i class="bi bi-check2" style="color: var(--lime); font-size: 1.1rem; flex-shrink: 0;"></i>
+        <span>${esc(pt)}</span>
+      </li>
+    `).join("");
+
+    const hasMultiImg = kit.images && kit.images.length > 1;
+    const imgSectionHtml = hasMultiImg ? `
+      <div class="bundle-img-wrap bundle-multi-grid">
+        <div class="bundle-main-img">
+          <img src="${getImgUrl(kit.images[0])}" alt="${esc(kit.name)}" />
         </div>
-        <div class="bundle-img-wrap">
-          <img src="/${esc(kit.image)}" alt="${esc(kit.name)}" />
+        <div class="bundle-sub-img">
+          <span class="bundle-offer-pill"><i class="bi bi-gift-fill me-1"></i> Offer Item Included</span>
+          <img src="${getImgUrl(kit.images[1])}" alt="Offer Item Included" />
         </div>
       </div>
-      `;
-    }).join("");
+    ` : `
+      <div class="bundle-img-wrap">
+        <img src="${getImgUrl(kit.image)}" alt="${esc(kit.name)}" />
+      </div>
+    `;
+    
+    list.innerHTML = `
+    <div class="bundle-card reveal visible" data-id="${kit.id}">
+      <div class="bundle-copy">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <p class="sec-eyebrow mb-0">— ${esc(kit.badge || "FEATURED KIT OFFER")}</p>
+          ${kitProducts.length > 1 ? `<span class="badge-pill" style="font-size: 0.72rem; padding: 2px 8px;">1 of ${kitProducts.length} Kits</span>` : ''}
+        </div>
+        <h2 class="bundle-title">${esc(firstPart)}<br /><em>${esc(restPart)}</em></h2>
+        <p class="bundle-desc">${esc(kit.description)}</p>
+        ${pointsHtml ? `<ul style="list-style: none; padding: 0; margin-bottom: 1.8rem;">${pointsHtml}</ul>` : ''}
+        <div class="bundle-foot d-flex align-items-center gap-3 flex-wrap">
+          <button class="btn-lime bundleBtn" data-kit-id="${kit.id}">Add the kit <i class="bi bi-plus"></i></button>
+          <button class="btn-ghost-lime see-more-kits" id="seeMoreKitsBtn" type="button">See more kits <i class="bi bi-arrow-right"></i></button>
+          <span class="bundle-price ms-auto">${itemCount} items · ${money(kit.price)}</span>
+        </div>
+      </div>
+      ${imgSectionHtml}
+    </div>
+    `;
+    initReveal();
   }
 }
 
 function filteredProducts() {
   let list = products.filter(p => {
-    if (p.isKit) return state.filter === "kit";
+    if (p.isKit) return state.filter === "kit" || state.filter === "all";
     return state.filter === "all" || p.category === state.filter;
   });
   if (state.search) list = list.filter(p => matchesSearch(p, state.search));
@@ -239,18 +277,32 @@ function renderProducts() {
     grid.innerHTML = "";
     return;
   }
-  grid.innerHTML = list.map(p => `
+  grid.innerHTML = list.map(p => {
+    const isMultiImg = p.images && p.images.length > 1;
+    const imgHtml = isMultiImg ? `
+      <div class="prod-dual-grid">
+        <img src="${getImgUrl(p.images[0])}" alt="${esc(p.name)}" class="dual-main" loading="lazy">
+        <div class="dual-sub">
+          <img src="${getImgUrl(p.images[1])}" alt="Offer item" loading="lazy">
+          <span class="offer-tag"><i class="bi bi-gift-fill"></i> Bonus</span>
+        </div>
+      </div>
+    ` : `
+      <img src="${getImgUrl(p.image)}" alt="${esc(p.name)}" loading="lazy">
+    `;
+
+    return `
     <div class="col-6 col-lg-4 col-xl-3">
-      <article class="product-card">
-        <div class="prod-img" data-id="${p.id}" role="button" tabindex="0" aria-label="View ${esc(p.name)}">
-          ${p.stock === 0 ? '<span class="prod-badge soldout">Sold Out</span>' : (p.stock < 5 ? `<span class="prod-badge lowstock">Only ${p.stock} left</span>` : (p.badge ? `<span class="prod-badge${p.id === settings.highlightProductId ? " lime" : ""}">${esc(p.badge)}</span>` : ''))}
+      <article class="product-card ${p.isKit ? 'kit-card' : ''}">
+        <div class="prod-img ${isMultiImg ? 'has-multi-img' : ''}" data-id="${p.id}" role="button" tabindex="0" aria-label="View ${esc(p.name)}">
+          ${p.stock === 0 ? '<span class="prod-badge soldout">Sold Out</span>' : (p.stock < 5 ? `<span class="prod-badge lowstock">Only ${p.stock} left</span>` : (p.badge ? `<span class="prod-badge${p.id === settings.highlightProductId ? " lime" : ""}">${esc(p.badge)}</span>` : (p.isKit ? '<span class="prod-badge lime">KIT</span>' : '')))}
           <button class="prod-quick" data-view="${p.id}" aria-label="Quick view ${esc(p.name)}">
             <i class="bi bi-eye"></i>
           </button>
-          <img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">
+          ${imgHtml}
         </div>
         <div class="prod-body">
-          <span class="prod-kicker">${esc(p.type)} / Exterior</span>
+          <span class="prod-kicker">${esc(p.type)} / ${p.isKit ? 'BUNDLE' : 'Exterior'}</span>
           <h3>${esc(p.name)}</h3>
           <p>${esc(p.description)}</p>
           <div class="prod-foot">
@@ -267,7 +319,8 @@ function renderProducts() {
           </div>
         </div>
       </article>
-    </div>`).join("");
+    </div>`;
+  }).join("");
 }
 
 /* ── CART ───────────────────────────────────────────────── */
@@ -945,6 +998,20 @@ document.addEventListener("click", e => {
   const view = e.target.closest("[data-view]");
   if (view) { navigate(`/product/${view.dataset.view}`); return; }
 
+  const moreKits = e.target.closest(".see-more-kits, #seeMoreKitsBtn");
+  if (moreKits) {
+    document.querySelectorAll(".f-pill").forEach(x => {
+      const isKit = x.dataset.filter === "kit";
+      x.classList.toggle("active", isKit);
+      x.setAttribute("aria-pressed", isKit ? "true" : "false");
+    });
+    state.filter = "kit";
+    renderProducts();
+    const shop = document.getElementById("shop");
+    if (shop) shop.scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+
   const prodCard = e.target.closest(".product-card");
   if (prodCard && !e.target.closest("button") && !e.target.closest("a")) {
     const imgEl = prodCard.querySelector(".prod-img");
@@ -1553,6 +1620,16 @@ async function boot() {
   await step(loadCart);
   await step(renderCart);
   await step(updateActiveNav);
+  await step(() => {
+    if (window.location.hash) {
+      setTimeout(() => {
+        try {
+          const target = document.querySelector(window.location.hash);
+          if (target) target.scrollIntoView({ behavior: "smooth" });
+        } catch {}
+      }, 200);
+    }
+  });
 }
 
 

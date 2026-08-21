@@ -13,6 +13,7 @@ const formatProduct = (p) => {
     price: p.price,
     featured: p.featured || 0,
     image: p.image || "",
+    images: p.images && p.images.length > 0 ? p.images : (p.image ? [p.image] : []),
     badge: p.badge || "",
     description: p.description || "",
     points: p.points || [],
