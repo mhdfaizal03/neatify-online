@@ -177,7 +177,7 @@ export default function Modals() {
             </div>
             <div className="acc-pane" id="accPaneProfile">
               <h4>Profile details</h4>
-              <form id="profileForm" novalidate>
+              <form id="profileForm" noValidate>
                 <label>Full name<input type="text" id="pfName" autoComplete="name" /></label>
                 <label>Email <span className="opt">(fixed)</span><input type="email" id="pfEmail" disabled /></label>
                 <label>Phone<input type="tel" id="pfPhone" placeholder="+91 98765 43210" autoComplete="tel" /></label>
@@ -187,7 +187,7 @@ export default function Modals() {
             </div>
             <div className="acc-pane" id="accPaneSecurity">
               <h4>Change password</h4>
-              <form id="passwordForm" novalidate>
+              <form id="passwordForm" noValidate>
                 <label>Current password<input type="password" id="pwCurrent" autoComplete="current-password" /></label>
                 <label>New password<input type="password" id="pwNext" placeholder="Min. 6 characters" autoComplete="new-password" /></label>
                 <button className="btn-lime" type="submit" id="passwordSaveBtn">Update password <i className="bi bi-key"></i></button>
@@ -210,7 +210,7 @@ export default function Modals() {
             <p className="cart-eyebrow">CHECKOUT</p>
             <h3>Almost there.</h3>
             <p className="co-sub">Fill in your delivery details.</p>
-            <form id="checkoutForm" novalidate>
+            <form id="checkoutForm" noValidate>
               <div className="field-row">
                 <label>Full name<input type="text" id="coName" placeholder="Your name" required autoComplete="name" /><small className="ferr" id="coNameError"></small></label>
                 <label>Phone<input type="tel" id="coPhone" placeholder="+91 98765 43210" required autoComplete="tel" /><small className="ferr" id="coPhoneError"></small></label>

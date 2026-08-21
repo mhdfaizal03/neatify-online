@@ -128,23 +128,28 @@ function renderFilterPills() {
 /* ── PRODUCTS ───────────────────────────────────────────── */
 async function loadProducts(attempt = 1) {
   const grid = $("productGrid");
-  grid.innerHTML = `<div class="col-12"><div class="grid-loading"><div class="spin-ring"></div><span>Loading products…</span></div></div>`;
+  if (grid) {
+    grid.innerHTML = `<div class="col-12"><div class="grid-loading"><div class="spin-ring"></div><span>Loading products…</span></div></div>`;
+  }
   try {
     products = await api("/api/products");
+    window.products = products;
   } catch {
     if (attempt < 3) {
       await new Promise(r => setTimeout(r, 600 * attempt));
       return loadProducts(attempt + 1);
     }
-    grid.innerHTML = "";
-    $("emptyState").classList.remove("d-none");
-    $("emptyStateTitle").textContent = "Couldn't load products";
-    $("emptyStateText").textContent = "Make sure the server is running (npm start) and open http://localhost:3000.";
-    $("retryProducts").classList.remove("d-none");
+    if (grid) grid.innerHTML = "";
+    $("emptyState")?.classList.remove("d-none");
+    const emptyTitle = $("emptyStateTitle");
+    if (emptyTitle) emptyTitle.textContent = "Couldn't load products";
+    const emptyText = $("emptyStateText");
+    if (emptyText) emptyText.textContent = "Make sure the server is running (npm start) and open http://localhost:3000.";
+    $("retryProducts")?.classList.remove("d-none");
     showToast("Could not load products. Please refresh.", true);
     return;
   }
-  $("retryProducts").classList.add("d-none");
+  $("retryProducts")?.classList.add("d-none");
   renderPillCounts();
   renderBundle();
   renderProducts();
@@ -226,10 +231,11 @@ function renderProducts() {
   const list = filteredProducts();
   const grid = $("productGrid");
   const empty = $("emptyState");
-  empty.classList.toggle("d-none", list.length !== 0);
+  if (empty) empty.classList.toggle("d-none", list.length !== 0);
+  if (!grid) return;
   if (!list.length) {
-    $("emptyStateTitle").textContent = "No products found";
-    $("emptyStateText").textContent = "Try another search or category.";
+    if ($("emptyStateTitle")) $("emptyStateTitle").textContent = "No products found";
+    if ($("emptyStateText")) $("emptyStateText").textContent = "Try another search or category.";
     grid.innerHTML = "";
     return;
   }
@@ -311,8 +317,15 @@ function addToCart(id, openDrawer = false) {
   renderCart();
   bumpBadge();
   showToast(`${p.name} added`);
-  if (openDrawer) cartDrawer.show();
+  if (openDrawer && cartDrawer) cartDrawer.show();
 }
+
+// Global cart bridge for cross-component access
+window.addToCart = addToCart;
+window.addBundle = addBundle;
+window.renderCart = renderCart;
+window.loadProducts = loadProducts;
+window.products = products;
 
 function addBundle(ids) {
   const added = ids.map(getProduct).filter(Boolean);
@@ -323,7 +336,7 @@ function addBundle(ids) {
     return;
   }
   added.forEach(p => {
-    const found = state.cart.find(i => i.id === p.id);
+    const found = state.cart.find(i => String(i.id) === String(p.id));
     if (found) {
       if (found.qty < p.stock) found.qty++;
     } else {
@@ -334,11 +347,12 @@ function addBundle(ids) {
   renderCart();
   bumpBadge();
   showToast("Weekend kit added to cart");
-  cartDrawer.show();
+  if (cartDrawer) cartDrawer.show();
 }
 
 function bumpBadge() {
   const badge = $("cartCount");
+  if (!badge) return;
   badge.classList.remove("bump");
   void badge.offsetWidth;
   badge.classList.add("bump");
@@ -385,9 +399,12 @@ function renderCart() {
 
   const sub  = subtotalValue();
   const ship = shippingFor(sub);
-  $("cartSubtotal").textContent = money(sub);
-  $("cartShipping").textContent = ship === 0 ? "FREE" : money(ship);
-  $("cartTotal").textContent    = money(sub + ship);
+  const subEl = $("cartSubtotal");
+  if (subEl) subEl.textContent = money(sub);
+  const shipEl = $("cartShipping");
+  if (shipEl) shipEl.textContent = ship === 0 ? "FREE" : money(ship);
+  const totalEl = $("cartTotal");
+  if (totalEl) totalEl.textContent = money(sub + ship);
   renderShipProgress(sub);
 }
 
@@ -442,12 +459,16 @@ function renderCheckoutSummary() {
       <span>${money(p.price * item.qty)}</span>
     </div>`;
   }).join("");
-  $("checkoutItems").innerHTML = items;
+  const itemsEl = $("checkoutItems");
+  if (itemsEl) itemsEl.innerHTML = items;
   const sub  = subtotalValue();
   const ship = shippingFor(sub);
-  $("coSubtotal").textContent = money(sub);
-  $("coShipping").textContent = ship === 0 ? "FREE" : money(ship);
-  $("coTotal").textContent    = money(sub + ship);
+  const coSub = $("coSubtotal");
+  if (coSub) coSub.textContent = money(sub);
+  const coShip = $("coShipping");
+  if (coShip) coShip.textContent = ship === 0 ? "FREE" : money(ship);
+  const coTot = $("coTotal");
+  if (coTot) coTot.textContent = money(sub + ship);
 }
 
 function validateCheckout() {
@@ -1412,8 +1433,8 @@ function initHero3D() {
 
     /* ── UI sync ── */
     if (cueEl) cueEl.classList.toggle("hide", p > 0.02);
-    // 4 stages for 4 dashes
-    setStage(p < 0.25 ? 0 : p < 0.5 ? 1 : p < 0.75 ? 2 : 3);
+    // 3 stages mapped smoothly across scroll progress
+    setStage(p < 0.35 ? 0 : p < 0.7 ? 1 : 2);
 
     renderer.render(scene, camera);
   }
@@ -1423,11 +1444,27 @@ function initHero3D() {
 
   new IntersectionObserver(([entry]) => {
     heroVisible = entry.isIntersecting;
-    heroVisible ? start() : stop();
+    if (heroVisible) {
+      start();
+    } else {
+      stop();
+    }
   }).observe(section);
 
   window.addEventListener("scroll", readScroll, { passive: true });
   window.addEventListener("resize", () => { setSize(); readScroll(); });
+
+  // Interactive rail click navigation
+  railDots.forEach((dash, i) => {
+    dash.style.cursor = "pointer";
+    dash.addEventListener("click", () => {
+      if (!space) return;
+      const total = space.offsetHeight - ((sticky && sticky.clientHeight) || innerHeight);
+      const targetProgress = i / Math.max(1, railDots.length - 1);
+      const targetScrollY = space.offsetTop + total * targetProgress;
+      window.scrollTo({ top: targetScrollY, behavior: "smooth" });
+    });
+  });
 
   $("heroKitBtn")?.addEventListener("click", () => addBundle(settings.weekendKitIds || []));
 

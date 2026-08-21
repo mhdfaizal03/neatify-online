@@ -83,7 +83,6 @@ export default function Hero() {
             <span className="rail-dash active" data-rail="0"></span>
             <span className="rail-dash" data-rail="1"></span>
             <span className="rail-dash" data-rail="2"></span>
-            <span className="rail-dash" data-rail="3"></span>
           </nav>
 
           
@@ -99,7 +98,7 @@ export default function Hero() {
           </div>
         </div>
       </div>
-      <div id="heroStatus" className="sr-only" aria-live="polite" aria-atomic="true">Stage 1 of 4</div>
+      <div id="heroStatus" className="sr-only" aria-live="polite" aria-atomic="true">Stage 1 of 3</div>
     </section>
 
     

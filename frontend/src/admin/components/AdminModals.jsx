@@ -34,7 +34,7 @@ export default function AdminModals() {
                   <input type="number" id="productStock" min="0" required />
                 </label>
                 <label>Display Order
-                  <input type="number" id="productFeatured" min="1" value="1" />
+                  <input type="number" id="productFeatured" min="1" defaultValue="1" />
                 </label>
                 <label>Display Badge
                   <input type="text" id="productBadge" placeholder="e.g. NEW" />
@@ -52,7 +52,7 @@ export default function AdminModals() {
                   <textarea id="productPoints" rows="4" placeholder="Deep cleaning formula&#10;pH Neutral"></textarea>
                 </label>
                 <label className="checkbox-label">
-                  <input type="checkbox" id="productActive" checked />
+                  <input type="checkbox" id="productActive" defaultChecked />
                   <span>Show on Storefront</span>
                 </label>
                 <label className="checkbox-label">

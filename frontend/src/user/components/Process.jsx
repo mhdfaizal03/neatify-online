@@ -204,7 +204,7 @@ export default function Process() {
             <h2>Stay in the<br />clean loop.</h2>
             <p>Product drops, care tips and interior launch updates — no noise.</p>
           </div>
-          <form id="newsletterForm" className="news-form" novalidate>
+          <form id="newsletterForm" className="news-form" noValidate>
             <label className="visually-hidden" htmlFor="emailInput">Email address</label>
             <input id="emailInput" type="email" placeholder="Your email address" required autoComplete="email" />
             <button className="btn-dark" type="submit" id="newsletterBtn">Join <i className="bi bi-arrow-right"></i></button>

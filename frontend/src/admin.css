@@ -1169,3 +1169,110 @@ label > textarea {
   box-shadow: none !important;
   font-size: 0.95rem;
 }
+
+/* ═══════════════════════════════════════════════
+   KIT MANAGEMENT UI STYLES
+   ═══════════════════════════════════════════════ */
+.badge-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  background: rgba(200, 245, 60, 0.15);
+  color: #557700;
+  border: 1px solid rgba(200, 245, 60, 0.4);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.kit-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 320px;
+}
+
+.kit-item-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.kit-item-chip i {
+  color: var(--success);
+  font-size: 0.85rem;
+}
+
+.kit-item-more {
+  display: inline-block;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.kit-product-select-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--bg-panel);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kit-product-select-item:hover {
+  border-color: var(--info);
+  background: var(--bg-alt);
+}
+
+.kit-product-select-item.selected {
+  border-color: var(--info);
+  background: var(--info-dim);
+}
+
+.kit-check-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
+.kit-check-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.kit-check-title {
+  font-size: 0.9rem;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.kit-check-type {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.kit-check-price {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+

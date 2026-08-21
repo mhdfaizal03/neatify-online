@@ -248,30 +248,55 @@ export function useAdminLogic() {
     const tbody = $("#kitsTbody");
     if (!tbody) return;
     
-    let list = state.allProducts.filter(p => p.isKit === true);
+    const filter = $("#kitFilter")?.value || "all";
+    const search = $("#globalSearch")?.value?.toLowerCase()?.trim() || "";
+
+    let list = state.allProducts.filter(p => {
+      const isKit = p.isKit === true;
+      const matchesFilter = filter === 'all' || (filter === 'active' && p.active !== false) || (filter === 'inactive' && p.active === false);
+      const matchesSearch = p.name.toLowerCase().includes(search) || (p.badge || "").toLowerCase().includes(search) || (p.description || "").toLowerCase().includes(search);
+      return isKit && matchesFilter && matchesSearch;
+    });
 
     if (!list.length) {
-      tbody.innerHTML = `<tr><td colspan="6"><div class="admin-empty-state"><i class="bi bi-gift"></i><h4>No kits found</h4><p>Create a bundle to offer to your customers.</p></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6"><div class="admin-empty-state"><i class="bi bi-gift"></i><h4>No kits found</h4><p>Create a bundle or weekend kit to showcase to your customers.</p></div></td></tr>`;
       return;
     }
 
-    tbody.innerHTML = list.map(p => `
+    tbody.innerHTML = list.map(p => {
+      const pointsList = (p.points || []).slice(0, 3).map(pt => `<span class="kit-item-chip"><i class="bi bi-check2"></i> ${esc(pt)}</span>`).join("");
+      const remainingCount = (p.points || []).length > 3 ? `<span class="kit-item-more">+${(p.points || []).length - 3} more</span>` : "";
+
+      return `
       <tr>
-        <td><div class="product-cell"><img src="/${esc(p.image)}" class="product-thumb" alt=""><div><div class="product-name">${esc(p.name)}</div></div></div></td>
-        <td>${esc(p.name)}</td>
-        <td class="price-cell">${currency(p.price)}</td>
-        <td>${esc(p.badge || '-')}</td>
-        <td><span class="status-badge ${p.active !== false ? 'active' : 'inactive'}">${p.active !== false ? 'Active' : 'Inactive'}</span></td>
         <td>
-          <div class="row-actions">
-            <button class="icon-action" onclick="window.__admin.editKit(${p.id})"><i class="bi bi-pencil"></i></button>
+          <div class="product-cell">
+            <img src="/${esc(p.image)}" class="product-thumb" alt="${esc(p.name)}" />
+            <div>
+              <div class="product-name">${esc(p.name)}</div>
+              <div class="product-subtext" style="font-size: 0.8rem; color: var(--text-muted); max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${esc(p.description || '')}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="kit-chips-wrap">
+            ${pointsList || '<span style="color: var(--text-muted); font-size: 0.85rem;">No highlight points</span>'}
+            ${remainingCount}
+          </div>
+        </td>
+        <td class="price-cell">${currency(p.price)}</td>
+        <td>${p.badge ? `<span class="badge-pill">${esc(p.badge)}</span>` : `<span style="color: var(--text-muted);">—</span>`}</td>
+        <td><span class="status-badge ${p.active !== false ? 'active' : 'inactive'}">${p.active !== false ? 'Active' : 'Inactive'}</span></td>
+        <td style="text-align: right;">
+          <div class="row-actions" style="justify-content: flex-end;">
+            <button class="icon-action" onclick="window.__admin.editKit(${p.id})" title="Edit Kit"><i class="bi bi-pencil"></i></button>
             ${p.active !== false
-              ? `<button class="icon-action danger" onclick="window.__admin.deleteProduct(${p.id})"><i class="bi bi-trash"></i></button>`
-              : `<button class="icon-action restore" onclick="window.__admin.restoreProduct(${p.id})"><i class="bi bi-arrow-counterclockwise"></i></button>`}
+              ? `<button class="icon-action danger" onclick="window.__admin.deleteProduct(${p.id})" title="Archive Kit"><i class="bi bi-trash"></i></button>`
+              : `<button class="icon-action restore" onclick="window.__admin.restoreProduct(${p.id})" title="Restore Kit"><i class="bi bi-arrow-counterclockwise"></i></button>`}
           </div>
         </td>
       </tr>
-    `).join("");
+    `}).join("");
   }
 
   /* ── PRODUCT MODAL ── */
@@ -310,15 +335,19 @@ export function useAdminLogic() {
     const regularProducts = state.allProducts.filter(p => p.isKit !== true);
     
     if (!regularProducts.length) {
-      wrap.innerHTML = `<div class="admin-empty-state"><p>No standard products available to include.</p></div>`;
+      wrap.innerHTML = `<div class="admin-empty-state" style="padding: 1rem;"><p>No standard products available to include.</p></div>`;
       return;
     }
 
     wrap.innerHTML = regularProducts.map(p => `
-      <label class="checkbox-label" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-        <input type="checkbox" name="includedProducts" value="${p.id}" ${selectedIds.includes(Number(p.id)) ? 'checked' : ''} />
-        <img src="/${esc(p.image)}" style="width: 24px; height: 24px; border-radius: 4px; object-fit: cover;" />
-        <span>${esc(p.name)} (${currency(p.price)})</span>
+      <label class="kit-product-select-item ${selectedIds.includes(Number(p.id)) ? 'selected' : ''}">
+        <input type="checkbox" name="includedProducts" value="${p.id}" ${selectedIds.includes(Number(p.id)) ? 'checked' : ''} onchange="this.closest('.kit-product-select-item').classList.toggle('selected', this.checked)" />
+        <img src="/${esc(p.image)}" class="kit-check-thumb" alt="${esc(p.name)}" />
+        <div class="kit-check-info">
+          <strong class="kit-check-title">${esc(p.name)}</strong>
+          <span class="kit-check-type">${esc(p.type || p.category)}</span>
+        </div>
+        <div class="kit-check-price">${currency(p.price)}</div>
       </label>
     `).join("");
   }
@@ -762,11 +791,16 @@ export function useAdminLogic() {
     $("#globalSearch").addEventListener("input", () => {
       const view = state.currentView;
       if (view === 'products') renderProductsTable();
+      else if (view === 'kits') renderKitsTable();
       else if (view === 'categories') renderCategoriesTable();
       else if (view === 'orders') renderOrdersTable();
       else if (view === 'subscribers') renderSubscribersTable();
       else if (view === 'media') renderMediaGrid();
     });
+
+    $("#kitFilter")?.addEventListener("change", renderKitsTable);
+    $("#productFilter")?.addEventListener("change", renderProductsTable);
+    $("#productCategoryFilter")?.addEventListener("change", renderProductsTable);
 
     $("#refreshStats").addEventListener("click", loadDashboard);
 
@@ -792,7 +826,7 @@ export function useAdminLogic() {
       $("#kitModal").classList.remove("hidden");
     });
     $("#kitForm")?.addEventListener("submit", saveKit);
-    $("#closeKitModal, #cancelKitModal")?.addEventListener("click", () => $("#kitModal").classList.add("hidden"));
+    $$("#closeKitModal, #cancelKitModal").forEach(btn => btn.addEventListener("click", () => $("#kitModal").classList.add("hidden")));
     
     $("#pickKitImageBtn")?.addEventListener("click", () => {
       loadMedia(); // Ensure picker is up-to-date
@@ -837,8 +871,8 @@ export function useAdminLogic() {
       window.__admin._currentImageTarget = "#productImage";
       $("#imagePickerModal").classList.remove("hidden");
     });
-    $("#closeProductModal, #cancelProductModal").addEventListener("click", () => $("#productModal").classList.add("hidden"));
-    $("#closeOrderModal, #cancelOrderModal").addEventListener("click", () => $("#orderModal").classList.add("hidden"));
+    $$("#closeProductModal, #cancelProductModal").forEach(btn => btn.addEventListener("click", () => $("#productModal").classList.add("hidden")));
+    $$("#closeOrderModal, #cancelOrderModal").forEach(btn => btn.addEventListener("click", () => $("#orderModal").classList.add("hidden")));
     $("#closeImagePicker").addEventListener("click", () => $("#imagePickerModal").classList.add("hidden"));
 
     $("#mediaUpload").addEventListener("change", (e) => uploadMedia(e.target.files[0]));

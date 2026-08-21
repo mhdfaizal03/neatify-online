@@ -7,26 +7,41 @@ export default function AdminKits() {
         <div className="page-head">
           <div>
             <h2>Kit Offerings</h2>
-            <p>Manage product bundles and weekend kits</p>
+            <p>Manage product bundles, special offers & weekend kits</p>
           </div>
-          <button className="btn-primary" id="addKitBtn"><i className="bi bi-plus-lg"></i> Add New Kit</button>
+          <button className="btn-primary" id="addKitBtn">
+            <i className="bi bi-plus-lg"></i> Add New Kit
+          </button>
         </div>
-        <div className="table-responsive">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Image</th>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Badge</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="kitsTbody">
-              {/* Kits rendered by JS */}
-            </tbody>
-          </table>
+
+        <div className="panel">
+          <div className="panel-body">
+            <div className="toolbar">
+              <select id="kitFilter" aria-label="Filter Kit Status">
+                <option value="all">All kit offerings</option>
+                <option value="active">Active kits only</option>
+                <option value="inactive">Inactive only</option>
+              </select>
+            </div>
+
+            <div className="table-wrap animate-fade">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Kit Bundle</th>
+                    <th>Highlights / Inclusions</th>
+                    <th>Price</th>
+                    <th>Badge</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="kitsTbody">
+                  {/* Dynamic Kit rows populated by useAdminLogic */}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
     </>

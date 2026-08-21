@@ -56,14 +56,29 @@ export default function ProductDetails() {
   }, [id]);
 
   const handleAddToCart = () => {
-    if (!product || !window.addToCart) return;
-    
-    // Add to cart matching selected quantity
-    for (let i = 0; i < quantity - 1; i++) {
-      window.addToCart(product.id);
+    if (!product) return;
+    if (typeof window.addToCart === 'function') {
+      // Add to cart matching selected quantity
+      for (let i = 0; i < quantity - 1; i++) {
+        window.addToCart(product.id);
+      }
+      // Show drawer on the last addition
+      window.addToCart(product.id, true);
+    } else {
+      try {
+        const saved = JSON.parse(localStorage.getItem('neatify-cart-v2') || '[]');
+        const found = saved.find(i => String(i.id) === String(product.id));
+        if (found) {
+          found.qty += quantity;
+        } else {
+          saved.push({ id: product.id, qty: quantity });
+        }
+        localStorage.setItem('neatify-cart-v2', JSON.stringify(saved));
+        if (typeof window.renderCart === 'function') window.renderCart();
+      } catch (e) {
+        console.error('Cart fallback error:', e);
+      }
     }
-    // Show drawer on the last addition
-    window.addToCart(product.id, true);
   };
 
   const incrementQty = () => {
@@ -113,9 +128,9 @@ export default function ProductDetails() {
               </div>
             ) : (
               <div className="row g-5 align-items-start">
-                {/* Left: Image */}
+                {/* Left: Image and Action Controls */}
                 <div className="col-lg-5">
-                  <div className="detail-img-card" style={{ overflow: 'hidden', borderRadius: 'var(--r-md)', aspectRatio: '1 / 1' }}>
+                  <div className="detail-img-card" style={{ overflow: 'hidden', borderRadius: 'var(--r-md)', aspectRatio: '1 / 1', marginBottom: '1.25rem', boxShadow: '0 8px 30px rgba(0,0,0,0.06)' }}>
                     <img 
                       src={getImageUrl(product.image)} 
                       alt={product.name} 
@@ -123,6 +138,44 @@ export default function ProductDetails() {
                       style={{ objectFit: 'cover' }}
                     />
                   </div>
+
+                  {product.stock === 0 ? (
+                    <div className="alert alert-danger mb-0" role="alert" style={{ borderRadius: '8px', fontWeight: 600, fontSize: '0.92rem' }}>
+                      This item is currently sold out.
+                    </div>
+                  ) : (
+                    <div className="detail-actions d-flex align-items-center gap-3 w-100">
+                      <div className="qty-control" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1.5px solid #e2e8f0', borderRadius: '8px', padding: '0.4rem 0.6rem', background: '#f8fafc', width: '110px', height: '52px', flexShrink: 0 }}>
+                        <button 
+                          className="qty-btn" 
+                          onClick={decrementQty} 
+                          aria-label="Decrease quantity"
+                          style={{ background: 'none', border: 0, width: '28px', height: '28px', display: 'grid', placeItems: 'center', color: '#1e293b', fontSize: '1.2rem', cursor: 'pointer' }}
+                        >
+                          <i className="bi bi-dash"></i>
+                        </button>
+                        <span className="qty-num" style={{ minWidth: '24px', textAlign: 'center', fontWeight: 800, fontSize: '1.15rem', color: '#0f172a', fontFamily: 'Space Grotesk, sans-serif' }}>
+                          {quantity}
+                        </span>
+                        <button 
+                          className="qty-btn" 
+                          onClick={incrementQty} 
+                          aria-label="Increase quantity"
+                          style={{ background: 'none', border: 0, width: '28px', height: '28px', display: 'grid', placeItems: 'center', color: '#1e293b', fontSize: '1.2rem', cursor: 'pointer' }}
+                        >
+                          <i className="bi bi-plus"></i>
+                        </button>
+                      </div>
+                      <button 
+                        className="btn-lime flex-grow-1" 
+                        onClick={handleAddToCart}
+                        style={{ height: '52px', borderRadius: '8px', fontSize: '1.05rem', fontWeight: 800, background: '#c8f53c', color: '#0f172a', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(200,245,60,0.35)', transition: 'all 0.2s ease', cursor: 'pointer' }}
+                      >
+                        <span>Add to cart</span>
+                        <i className="bi bi-bag" style={{ fontSize: '1.15rem' }}></i>
+                      </button>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Right: Info */}
@@ -176,43 +229,6 @@ export default function ProductDetails() {
                         </div>
                       </div>
                     )}
-                    
-                    <hr className="my-4" style={{ opacity: 0.08, borderColor: '#000' }} />
-                    
-                    {product.stock === 0 ? (
-                      <div className="alert alert-danger" role="alert">
-                        This item is currently sold out.
-                      </div>
-                    ) : (
-                      <div className="detail-actions d-flex align-items-center gap-3">
-                        <div className="qty-control" style={{ display: 'flex', alignItems: 'center', border: '1.5px solid rgba(0,0,0,0.1)', borderRadius: 'var(--r-xs)', padding: '0.2rem' }}>
-                          <button 
-                            className="qty-btn" 
-                            onClick={decrementQty} 
-                            aria-label="Decrease quantity"
-                            style={{ background: 'none', border: 0, width: '32px', height: '32px', display: 'grid', placeItems: 'center', color: '#555' }}
-                          >
-                            <i className="bi bi-dash"></i>
-                          </button>
-                          <span className="qty-num" style={{ minWidth: '24px', textAlign: 'center', fontWeight: 600, fontSize: '0.95rem' }}>
-                            {quantity}
-                          </span>
-                          <button 
-                            className="qty-btn" 
-                            onClick={incrementQty} 
-                            aria-label="Increase quantity"
-                            style={{ background: 'none', border: 0, width: '32px', height: '32px', display: 'grid', placeItems: 'center', color: '#555' }}
-                          >
-                            <i className="bi bi-plus"></i>
-                          </button>
-                        </div>
-                        <button className="btn-lime flex-grow-1 py-3" onClick={handleAddToCart}>
-                          Add to cart <i className="bi bi-bag ms-1"></i>
-                        </button>
-                      </div>
-                    )}
-                    
-
                   </div>
                 </div>
               </div>
