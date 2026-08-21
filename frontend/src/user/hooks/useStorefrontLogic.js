@@ -945,8 +945,12 @@ document.addEventListener("click", e => {
   const view = e.target.closest("[data-view]");
   if (view) { navigate(`/product/${view.dataset.view}`); return; }
 
-  const prodImg = e.target.closest(".prod-img");
-  if (prodImg && !e.target.closest("button")) { navigate(`/product/${prodImg.dataset.id}`); return; }
+  const prodCard = e.target.closest(".product-card");
+  if (prodCard && !e.target.closest("button") && !e.target.closest("a")) {
+    const imgEl = prodCard.querySelector(".prod-img");
+    const id = imgEl?.dataset?.id;
+    if (id) { navigate(`/product/${id}`); return; }
+  }
 
   const modalAdd = e.target.closest("[data-modal-add]");
   if (modalAdd) { addToCart(modalAdd.dataset.modalAdd); productModal.hide(); cartDrawer.show(); return; }
