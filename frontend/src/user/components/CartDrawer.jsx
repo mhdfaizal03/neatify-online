@@ -1,5 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useCartStore } from '../../store/useCartStore';
+import { getProductPlaceholderSvg } from '../../utils/placeholder';
+
+const KNOWN_ACTUAL_IMAGES = new Set([
+  'assets/product-2.jpeg',
+  'assets/product-8.jpeg',
+  '/assets/product-2.jpeg',
+  '/assets/product-8.jpeg',
+  'assets/interior-teaser.png',
+  '/assets/interior-teaser.png'
+]);
+
+function getItemImage(item) {
+  const img = item.image;
+  if (img && (img.startsWith('data:') || img.startsWith('blob:') || img.startsWith('http://') || img.startsWith('https://'))) {
+    return img;
+  }
+  const clean = img ? img.replace(/^\//, '') : '';
+  if (clean && (KNOWN_ACTUAL_IMAGES.has(clean) || KNOWN_ACTUAL_IMAGES.has(`/${clean}`))) {
+    return `/${clean}`;
+  }
+  return getProductPlaceholderSvg(item.name, item.type);
+}
 
 export default function CartDrawer() {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,7 +55,12 @@ export default function CartDrawer() {
             <div className="cart-items-container">
               {items.map(item => (
                 <div className="cart-item" key={item.id}>
-                  <img src={item.image || "/assets/placeholder.png"} alt={item.name} className="cart-item-img" />
+                  <img
+                    src={getItemImage(item)}
+                    alt={item.name}
+                    className="cart-item-img"
+                    onError={(e) => { e.currentTarget.src = getProductPlaceholderSvg(item.name, item.type); }}
+                  />
                   <div className="cart-item-info">
                     <h5 className="cart-item-title">{item.name}</h5>
                     <div className="cart-item-price">₹{item.price}</div>

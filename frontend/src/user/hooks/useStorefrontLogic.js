@@ -464,7 +464,7 @@ function renderCart() {
     const p = getProduct(item.id);
     if (!p) return "";
     return `<div class="cart-item">
-      <img src="${esc(p.image)}" alt="${esc(p.name)}">
+      <img src="${getImgUrl(p.image, p)}" alt="${esc(p.name)}" onerror="this.src='${getProductPlaceholderSvg(p.name, p.type)}'">
       <div>
         <h4>${esc(p.name)}</h4>
         <p>${money(p.price)} each</p>
@@ -1008,8 +1008,8 @@ function openProduct(id) {
   if (!p) return;
   const isMultiImg = p.images && p.images.length > 1;
   const imgHtml = isMultiImg
-    ? `<img src="${getImgUrl(p.images[0])}" alt="${esc(p.name)}" class="w-100 h-100" style="object-fit:cover;">`
-    : `<img src="${getImgUrl(p.image)}" alt="${esc(p.name)}" class="w-100 h-100" style="object-fit:cover;">`;
+    ? `<img src="${getImgUrl(p.images[0], p)}" alt="${esc(p.name)}" class="w-100 h-100" style="object-fit:cover;" onerror="this.src='${getProductPlaceholderSvg(p.name, p.type)}'">`
+    : `<img src="${getImgUrl(p.image, p)}" alt="${esc(p.name)}" class="w-100 h-100" style="object-fit:cover;" onerror="this.src='${getProductPlaceholderSvg(p.name, p.type)}'">`;
 
   $("productModalContent").innerHTML = `
     <div class="col-md-6 modal-prod-img">${imgHtml}</div>

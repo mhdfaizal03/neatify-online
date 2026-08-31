@@ -68,7 +68,7 @@ export default function Hero() {
           </div>
 
           <div className="hero-fallback d-none" id="heroFallback">
-            <img src="assets/hero-bottle.jpg" alt="Neatify Foam Wash" />
+            <img src="/assets/product-2.jpeg" alt="Neatify Foam Sprayer" />
           </div>
 
           <nav className="hero-rail" aria-label="Hero stages">

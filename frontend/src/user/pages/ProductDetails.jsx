@@ -78,7 +78,7 @@ export default function ProductDetails() {
     fetchProduct();
   }, [id]);
 
-  const activeImage = selectedImage || (product ? product.image : '');
+  const activeImage = selectedImage || (product?.images && product.images.length > 0 ? product.images[0] : (product?.image || ''));
 
   const handleAddToCart = () => {
     if (!product) return;

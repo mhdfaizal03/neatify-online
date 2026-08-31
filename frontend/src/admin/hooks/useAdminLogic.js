@@ -1,4 +1,25 @@
 import { useEffect } from 'react';
+import { getProductPlaceholderSvg } from '../../utils/placeholder';
+
+const KNOWN_ACTUAL_IMAGES = new Set([
+  'assets/product-2.jpeg',
+  'assets/product-8.jpeg',
+  '/assets/product-2.jpeg',
+  '/assets/product-8.jpeg',
+  'assets/interior-teaser.png',
+  '/assets/interior-teaser.png'
+]);
+
+function getAdminImgUrl(img, name = "Product", type = "Care") {
+  if (img && (img.startsWith('data:') || img.startsWith('blob:') || img.startsWith('http://') || img.startsWith('https://'))) {
+    return img;
+  }
+  const clean = img ? img.replace(/^\//, '') : '';
+  if (clean && (KNOWN_ACTUAL_IMAGES.has(clean) || KNOWN_ACTUAL_IMAGES.has(`/${clean}`))) {
+    return `/${clean}`;
+  }
+  return getProductPlaceholderSvg(name, type);
+}
 
 export function useAdminLogic() {
   useEffect(() => {
@@ -226,7 +247,7 @@ export function useAdminLogic() {
 
     tbody.innerHTML = list.map(p => `
       <tr>
-        <td><div class="product-cell"><img src="/${esc(p.image)}" class="product-thumb" alt=""><div><div class="product-name">${esc(p.name)}</div></div></div></td>
+        <td><div class="product-cell"><img src="${getAdminImgUrl(p.image, p.name, p.type)}" class="product-thumb" alt="${esc(p.name)}" onerror="this.src='${getProductPlaceholderSvg(p.name, p.type)}'"><div><div class="product-name">${esc(p.name)}</div></div></div></td>
         <td>${esc(p.category)}</td>
         <td class="price-cell">${currency(p.price)}</td>
         <td>${p.stock === 0 ? '<span class="status-badge cancelled">Sold Out</span>' : (p.stock < 5 ? `<span class="status-badge pending">Low: ${p.stock}</span>` : p.stock)}</td>
@@ -273,8 +294,8 @@ export function useAdminLogic() {
         <td>
           <div class="product-cell">
             <div style="position: relative; display: inline-flex; margin-right: 8px;">
-              <img src="/${esc(p.image)}" class="product-thumb" alt="${esc(p.name)}" />
-              ${hasSecondary ? `<img src="/${esc(p.images[1])}" class="product-thumb" style="width: 26px; height: 26px; position: absolute; bottom: -4px; right: -8px; border: 2px solid #fff; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);" alt="Offer" title="Offer Item Included" />` : ''}
+              <img src="${getAdminImgUrl(p.image, p.name, p.type)}" class="product-thumb" alt="${esc(p.name)}" onerror="this.src='${getProductPlaceholderSvg(p.name, p.type)}'" />
+              ${hasSecondary ? `<img src="${getAdminImgUrl(p.images[1], 'Bonus Item', 'Kit Extra')}" class="product-thumb" style="width: 26px; height: 26px; position: absolute; bottom: -4px; right: -8px; border: 2px solid #fff; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);" alt="Offer" title="Offer Item Included" onerror="this.src='${getProductPlaceholderSvg('Bonus Item', 'Kit Extra')}'" />` : ''}
             </div>
             <div>
               <div class="product-name">${esc(p.name)} ${hasSecondary ? '<span class="badge-pill" style="font-size: 0.68rem; padding: 2px 6px; margin-left: 4px;">2 IMAGES / OFFER</span>' : ''}</div>
@@ -346,7 +367,7 @@ export function useAdminLogic() {
     wrap.innerHTML = regularProducts.map(p => `
       <label class="kit-product-select-item ${selectedIds.includes(Number(p.id)) ? 'selected' : ''}">
         <input type="checkbox" name="includedProducts" value="${p.id}" ${selectedIds.includes(Number(p.id)) ? 'checked' : ''} onchange="this.closest('.kit-product-select-item').classList.toggle('selected', this.checked)" />
-        <img src="/${esc(p.image)}" class="kit-check-thumb" alt="${esc(p.name)}" />
+        <img src="${getAdminImgUrl(p.image, p.name, p.type)}" class="kit-check-thumb" alt="${esc(p.name)}" onerror="this.src='${getProductPlaceholderSvg(p.name, p.type)}'" />
         <div class="kit-check-info">
           <strong class="kit-check-title">${esc(p.name)}</strong>
           <span class="kit-check-type">${esc(p.type || p.category)}</span>

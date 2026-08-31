@@ -61,7 +61,7 @@ export default function Process() {
             <button className="btn-outline-lime" id="notifyBtn">Get notified <i className="bi bi-bell"></i></button>
           </div>
           <div className="interior-art">
-            <img className="art-photo" src="assets/interior-teaser.png" alt="Premium vehicle interior bathed in lime accent light" loading="lazy" />
+            <img className="art-photo" src="/assets/interior-teaser.png" alt="Premium vehicle interior bathed in lime accent light" loading="lazy" />
             <div className="art-glow"></div>
             <span className="art-tag">INTERIOR / 02</span>
           </div>
@@ -75,7 +75,7 @@ export default function Process() {
         <div className="row align-items-center g-5">
           <div className="col-lg-6 reveal">
             <div className="story-photo">
-              <img src="assets/product-10.jpeg" alt="Neatify Clean+ Foam Wash" />
+              <img src="/assets/product-2.jpeg" alt="Neatify Pressure Foam Sprayer" />
             </div>
           </div>
           <div className="col-lg-6 reveal">
