@@ -335,13 +335,16 @@ export default function ProductDetails() {
                     <h1 className="detail-title" style={{ fontSize: '2.4rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.8rem' }}>
                       {product.name}
                     </h1>
-                    <div className="d-flex align-items-baseline gap-3 mb-3">
+                    <div className="d-flex align-items-baseline gap-3 mb-1">
                       <div className="detail-price" style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '1.8rem', color: '#111', margin: 0 }}>
                         ₹{product.price}
                       </div>
-                      <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style={{ fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px' }}>
-                        <i className="bi bi-check-circle me-1"></i> WhatsApp Instant Order Available
-                      </span>
+                    </div>
+
+                    <div className="detail-trust-row">
+                      <span className="detail-trust-item"><i className="bi bi-shield-check"></i> Secure checkout</span>
+                      <span className="detail-trust-item"><i className="bi bi-truck"></i> Ships in 1–3 days</span>
+                      <span className="detail-trust-item"><i className="bi bi-arrow-return-left"></i> Easy returns</span>
                     </div>
 
                     <hr className="my-4" style={{ opacity: 0.08, borderColor: '#000' }} />
@@ -350,23 +353,23 @@ export default function ProductDetails() {
                       {product.description}
                     </p>
 
-                    <ul className="detail-pts my-4" style={{ listStyle: 'none', paddingLeft: 0 }}>
+                    <ul className="detail-benefits">
                       {(product.points || []).map((pt, index) => (
-                        <li key={index} className="d-flex align-items-center mb-2" style={{ fontSize: '0.9rem', color: '#444' }}>
-                          <i className="bi bi-check2 text-success me-2 fs-5"></i>
+                        <li key={index}>
+                          <i className="bi bi-check2-circle"></i>
                           <span>{pt}</span>
                         </li>
                       ))}
                     </ul>
 
                     {includedItems.length > 0 && (
-                      <div className="mt-4 mb-4">
-                        <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#111', marginBottom: '0.8rem' }}>
+                      <div className="detail-kit-items mt-4 mb-4">
+                        <h3 className="detail-kit-title" style={{ fontSize: '1rem', fontWeight: 700, color: '#111', marginBottom: '0.8rem' }}>
                           Included in this set:
                         </h3>
-                        <div className="d-flex flex-column gap-2">
+                        <div className="detail-kit-list d-flex flex-column gap-2">
                           {includedItems.map(item => (
-                            <div key={item.id} className="d-flex align-items-center gap-3 p-2" style={{ border: '1px solid rgba(0,0,0,0.06)', borderRadius: 'var(--r-xs)', background: '#fafafa' }}>
+                            <div key={item.id} className="detail-kit-item d-flex align-items-center gap-3 p-2" style={{ border: '1px solid rgba(0,0,0,0.06)', borderRadius: 'var(--r-xs)', background: '#fafafa' }}>
                               <img
                                 src={getImageUrl(item.image, item)}
                                 alt={item.name}
@@ -377,10 +380,25 @@ export default function ProductDetails() {
                                 <h4 style={{ fontSize: '0.85rem', fontWeight: 600, margin: 0, color: '#222' }}>{item.name}</h4>
                                 <span style={{ fontSize: '0.72rem', color: '#777' }}>{item.type}</span>
                               </div>
-                              <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#111' }}>₹{item.price}</div>
+                              <div className="detail-kit-price" style={{ fontWeight: 600, fontSize: '0.85rem', color: '#111' }}>₹{item.price}</div>
                             </div>
                           ))}
                         </div>
+                      </div>
+                    )}
+
+                    {/* Mobile sticky buy bar */}
+                    {product && product.stock > 0 && (
+                      <div className="detail-sticky-bar">
+                        <div className="detail-sticky-price">₹{product.price}</div>
+                        <button
+                          type="button"
+                          onClick={handleDirectOrder}
+                          className="detail-sticky-cta"
+                        >
+                          <i className="bi bi-whatsapp"></i>
+                          <span>Order via WhatsApp</span>
+                        </button>
                       </div>
                     )}
                   </div>

@@ -263,9 +263,11 @@ function renderBundle() {
         </div>
         <h2 class="bundle-title">${esc(firstPart)}<br /><em>${esc(restPart)}</em></h2>
         <p class="bundle-desc">${esc(kit.description)}</p>
-        <button class="btn-lime" data-kit-id="${kit.id}">Add to Cart</button>
-        <button class="btn-ghost-lime see-more-kits" id="seeMoreKitsBtn" type="button">See more kits <i class="bi bi-arrow-right"></i></button>
-        <span class="bundle-price ms-auto">${itemCount} items · ${money(kit.price)}</span>
+        <div class="bundle-foot mt-4">
+          <button class="btn-lime" data-kit-id="${kit.id}">Add to Cart</button>
+          <button class="btn-ghost-lime see-more-kits" id="seeMoreKitsBtn" type="button">See more kits <i class="bi bi-arrow-right"></i></button>
+          <span class="bundle-price ms-auto">${itemCount} items · ${money(kit.price)}</span>
+        </div>
       </div>
       ${imgSectionHtml}
     </div>
@@ -300,25 +302,34 @@ function renderProducts() {
   }
   grid.innerHTML = list.map(p => {
     const isMultiImg = p.images && p.images.length > 1;
+    const placeholder = getProductPlaceholderSvg(p.name, p.type || p.category);
     const imgHtml = isMultiImg ? `
       <div class="prod-dual-grid">
-        <img src="${getImgUrl(p.images[0], p)}" alt="${esc(p.name)}" class="dual-main" loading="lazy">
+        <img src="${getImgUrl(p.images[0], p)}" alt="${esc(p.name)}" class="dual-main" loading="lazy" onerror="this.src='${placeholder}'">
         <div class="dual-sub">
-          <img src="${getImgUrl(p.images[1], p)}" alt="Offer item" loading="lazy">
+          <img src="${getImgUrl(p.images[1], p)}" alt="Bonus item" loading="lazy" onerror="this.src='${placeholder}'">
           <span class="offer-tag"><i class="bi bi-gift-fill"></i> Bonus</span>
         </div>
       </div>
     ` : `
-      <img src="${getImgUrl(p.image, p)}" alt="${esc(p.name)}" loading="lazy">
+      <img src="${getImgUrl(p.image, p)}" alt="${esc(p.name)}" loading="lazy" onerror="this.src='${placeholder}'">
     `;
+
+    const badgeHtml = p.stock === 0
+      ? '<span class="prod-badge soldout">Sold Out</span>'
+      : p.stock < 5
+        ? `<span class="prod-badge lowstock">Only ${p.stock} left</span>`
+        : p.badge
+          ? `<span class="prod-badge${p.id === settings.highlightProductId ? " lime" : ""}">${esc(p.badge)}</span>`
+          : p.isKit ? '<span class="prod-badge lime">KIT</span>' : '';
 
     return `
     <div class="col-6 col-lg-4 col-xl-3">
       <article class="product-card ${p.isKit ? 'kit-card' : ''}">
         <div class="prod-img ${isMultiImg ? 'has-multi-img' : ''}" data-id="${p.id}" role="button" tabindex="0" aria-label="View ${esc(p.name)}">
-          ${p.stock === 0 ? '<span class="prod-badge soldout">Sold Out</span>' : (p.stock < 5 ? `<span class="prod-badge lowstock">Only ${p.stock} left</span>` : (p.badge ? `<span class="prod-badge${p.id === settings.highlightProductId ? " lime" : ""}">${esc(p.badge)}</span>` : (p.isKit ? '<span class="prod-badge lime">KIT</span>' : '')))}
-          <button class="prod-quick" data-view="${p.id}" aria-label="Quick view ${esc(p.name)}">
-            <i class="bi bi-eye"></i>
+          ${badgeHtml}
+          <button class="prod-quick" data-view="${p.id}" aria-label="View ${esc(p.name)} details">
+            <i class="bi bi-arrow-up-right"></i><span>View</span>
           </button>
           ${imgHtml}
         </div>
@@ -329,14 +340,11 @@ function renderProducts() {
           <div class="prod-foot">
             <span class="prod-price">${money(p.price)}</span>
             <div class="d-flex align-items-center gap-1 ms-auto">
-              <button class="share-btn-card" data-share="${p.id}" title="Share product" aria-label="Share ${esc(p.name)}">
-                <i class="bi bi-share"></i>
-              </button>
               <button class="wa-btn-card" data-wa-order="${p.id}" title="Order on WhatsApp" aria-label="Order ${esc(p.name)} on WhatsApp">
                 <i class="bi bi-whatsapp"></i>
               </button>
               ${p.stock === 0 ? `
-              <button class="add-btn disabled" disabled style="background:#333;color:#666;cursor:not-allowed;" aria-label="${esc(p.name)} is sold out">
+              <button class="add-btn" disabled style="background:#f1f5f9;color:#94a3b8;cursor:not-allowed;border:0;" aria-label="Sold out">
                 <i class="bi bi-slash-circle"></i>
               </button>
               ` : `
