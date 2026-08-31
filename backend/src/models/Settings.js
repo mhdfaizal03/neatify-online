@@ -36,6 +36,14 @@ const settingsSchema = new mongoose.Schema(
         "pH-NEUTRAL & WAX-SAFE",
         "STREAK-FREE EVERY TIME"
       ]
+    },
+    whatsappNumber: {
+      type: String,
+      default: "918113001959",
+    },
+    supportPhone: {
+      type: String,
+      default: "+91 8113001959",
     }
   },
   {

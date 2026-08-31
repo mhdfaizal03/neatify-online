@@ -4,12 +4,33 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Modals from '../components/Modals';
 import { useStorefrontLogic } from '../hooks/useStorefrontLogic';
+import {
+  buildWhatsAppUrl,
+  buildProductOrderMessage,
+  buildProductInquiryMessage,
+  buildProductShareText,
+  shareToWhatsApp
+} from '../../utils/whatsapp';
+import { getProductPlaceholderSvg } from '../../utils/placeholder';
 
-const getImageUrl = (img) => {
-  if (!img) return '';
-  if (img.startsWith('http://') || img.startsWith('https://')) return img;
-  if (img.startsWith('/')) return img;
-  return `/${img}`;
+const KNOWN_ACTUAL_IMAGES = new Set([
+  'assets/product-2.jpeg',
+  'assets/product-8.jpeg',
+  '/assets/product-2.jpeg',
+  '/assets/product-8.jpeg',
+  'assets/interior-teaser.png',
+  '/assets/interior-teaser.png'
+]);
+
+const getImageUrl = (img, p = {}) => {
+  if (img && (img.startsWith('data:') || img.startsWith('blob:') || img.startsWith('http://') || img.startsWith('https://'))) {
+    return img;
+  }
+  const clean = img ? img.replace(/^\//, '') : '';
+  if (clean && (KNOWN_ACTUAL_IMAGES.has(clean) || KNOWN_ACTUAL_IMAGES.has(`/${clean}`))) {
+    return `/${clean}`;
+  }
+  return getProductPlaceholderSvg(p?.name || 'Neatify Product', p?.type || p?.category || 'Vehicle Care');
 };
 
 export default function ProductDetails() {
@@ -27,7 +48,7 @@ export default function ProductDetails() {
     window.scrollTo(0, 0);
     setIncludedItems([]);
     setSelectedImage(null);
-    
+
     async function fetchProduct() {
       setLoading(true);
       try {
@@ -35,13 +56,13 @@ export default function ProductDetails() {
         if (!res.ok) throw new Error('Product not found');
         const data = await res.json();
         setProduct(data);
-        
+
         // Fetch included products if it's a kit/set
         if (data.isKit && data.includedProducts && data.includedProducts.length > 0) {
           const allRes = await fetch('/api/products');
           if (allRes.ok) {
             const allProducts = await allRes.json();
-            const included = allProducts.filter(p => 
+            const included = allProducts.filter(p =>
               data.includedProducts.map(String).includes(String(p.id))
             );
             setIncludedItems(included);
@@ -85,6 +106,33 @@ export default function ProductDetails() {
     }
   };
 
+  const handleDirectOrder = () => {
+    if (!product) return;
+    try {
+      const raw = localStorage.getItem('neatify-cart-v2');
+      let cart = raw ? JSON.parse(raw) : [];
+      const existing = cart.find(it => String(it.id) === String(product.id));
+      if (existing) {
+        existing.qty = Math.max(1, quantity);
+      } else {
+        cart.push({ id: product.id, qty: quantity });
+      }
+      localStorage.setItem('neatify-cart-v2', JSON.stringify(cart));
+      if (typeof window.renderCart === 'function') window.renderCart();
+      if (typeof window.openCheckout === 'function') {
+        window.openCheckout();
+      } else if (window.bootstrap) {
+        const modalEl = document.getElementById('checkoutModal');
+        if (modalEl) {
+          const bsModal = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+          bsModal.show();
+        }
+      }
+    } catch (e) {
+      console.error('Direct order error:', e);
+    }
+  };
+
   const incrementQty = () => {
     setQuantity(prev => {
       if (product && prev >= product.stock) return prev;
@@ -117,16 +165,15 @@ export default function ProductDetails() {
                   </li>
                 </ol>
               </nav>
-
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => {
                   if (window.history.length > 1) {
                     navigate(-1);
                   } else {
                     navigate('/');
                   }
-                }} 
+                }}
                 className="btn-back-link d-inline-flex align-items-center gap-1"
                 style={{ background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#0f172a', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', padding: '6px 14px', borderRadius: '8px', transition: 'all 0.2s ease' }}
               >
@@ -152,11 +199,12 @@ export default function ProductDetails() {
                 {/* Left: Image and Action Controls */}
                 <div className="col-lg-5">
                   <div className="detail-img-card" style={{ overflow: 'hidden', borderRadius: 'var(--r-md)', aspectRatio: '1 / 1', marginBottom: product.images && product.images.length > 1 ? '0.75rem' : '1.25rem', boxShadow: '0 8px 30px rgba(0,0,0,0.06)' }}>
-                    <img 
-                      src={getImageUrl(activeImage)} 
-                      alt={product.name} 
-                      className="img-fluid w-100 h-100" 
+                    <img
+                      src={getImageUrl(activeImage, product)}
+                      alt={product.name}
+                      className="img-fluid w-100 h-100"
                       style={{ objectFit: 'cover', transition: 'all 0.3s ease' }}
+                      onError={(e) => { e.currentTarget.src = getProductPlaceholderSvg(product.name, product.type || product.category); }}
                     />
                   </div>
 
@@ -184,7 +232,12 @@ export default function ProductDetails() {
                               transition: 'all 0.2s ease'
                             }}
                           >
-                            <img src={getImageUrl(img)} alt={`Thumbnail ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img
+                              src={getImageUrl(img, product)}
+                              alt={`Thumbnail ${idx + 1}`}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              onError={(e) => { e.currentTarget.src = getProductPlaceholderSvg(product.name, product.type || product.category); }}
+                            />
                           </button>
                         );
                       })}
@@ -196,40 +249,83 @@ export default function ProductDetails() {
                       This item is currently sold out.
                     </div>
                   ) : (
-                    <div className="detail-actions d-flex align-items-center gap-3 w-100">
-                      <div className="qty-control" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1.5px solid #e2e8f0', borderRadius: '8px', padding: '0.4rem 0.6rem', background: '#f8fafc', width: '110px', height: '52px', flexShrink: 0 }}>
-                        <button 
-                          className="qty-btn" 
-                          onClick={decrementQty} 
-                          aria-label="Decrease quantity"
-                          style={{ background: 'none', border: 0, width: '28px', height: '28px', display: 'grid', placeItems: 'center', color: '#1e293b', fontSize: '1.2rem', cursor: 'pointer' }}
+                    <div className="d-flex flex-column gap-3 w-100">
+                      {/* Quantity + Add to Cart Row */}
+                      <div className="detail-actions d-flex align-items-center gap-2 gap-sm-3 w-100">
+                        <div className="qty-control" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1.5px solid #e2e8f0', borderRadius: '8px', padding: '0.4rem 0.6rem', background: '#f8fafc', width: '105px', height: '50px', flexShrink: 0 }}>
+                          <button
+                            className="qty-btn"
+                            onClick={decrementQty}
+                            aria-label="Decrease quantity"
+                            style={{ background: 'none', border: 0, width: '26px', height: '26px', display: 'grid', placeItems: 'center', color: '#1e293b', fontSize: '1.1rem', cursor: 'pointer' }}
+                          >
+                            <i className="bi bi-dash"></i>
+                          </button>
+                          <span className="qty-num" style={{ minWidth: '22px', textAlign: 'center', fontWeight: 800, fontSize: '1.1rem', color: '#0f172a', fontFamily: 'Space Grotesk, sans-serif' }}>
+                            {quantity}
+                          </span>
+                          <button
+                            className="qty-btn"
+                            onClick={incrementQty}
+                            aria-label="Increase quantity"
+                            style={{ background: 'none', border: 0, width: '26px', height: '26px', display: 'grid', placeItems: 'center', color: '#1e293b', fontSize: '1.1rem', cursor: 'pointer' }}
+                          >
+                            <i className="bi bi-plus"></i>
+                          </button>
+                        </div>
+
+                        {/* Add to Cart Button */}
+                        <button
+                          className="btn-add-cart-secondary flex-grow-1"
+                          onClick={handleAddToCart}
+                          style={{ height: '50px', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 700, background: '#f1f5f9', color: '#0f172a', border: '1.5px solid #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s ease', cursor: 'pointer' }}
                         >
-                          <i className="bi bi-dash"></i>
-                        </button>
-                        <span className="qty-num" style={{ minWidth: '24px', textAlign: 'center', fontWeight: 800, fontSize: '1.15rem', color: '#0f172a', fontFamily: 'Space Grotesk, sans-serif' }}>
-                          {quantity}
-                        </span>
-                        <button 
-                          className="qty-btn" 
-                          onClick={incrementQty} 
-                          aria-label="Increase quantity"
-                          style={{ background: 'none', border: 0, width: '28px', height: '28px', display: 'grid', placeItems: 'center', color: '#1e293b', fontSize: '1.2rem', cursor: 'pointer' }}
-                        >
-                          <i className="bi bi-plus"></i>
+                          <i className="bi bi-bag" style={{ fontSize: '1.1rem' }}></i>
+                          <span>Add to cart</span>
                         </button>
                       </div>
-                      <button 
-                        className="btn-lime flex-grow-1" 
-                        onClick={handleAddToCart}
-                        style={{ height: '52px', borderRadius: '8px', fontSize: '1.05rem', fontWeight: 800, background: '#c8f53c', color: '#0f172a', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(200,245,60,0.35)', transition: 'all 0.2s ease', cursor: 'pointer' }}
+
+                      {/* Direct WhatsApp Order CTA Button */}
+                      <button
+                        type="button"
+                        onClick={handleDirectOrder}
+                        className="btn-whatsapp-order w-100"
+                        style={{ height: '52px', borderRadius: '8px', fontSize: '1.02rem', fontWeight: 800, background: '#25D366', color: '#FFFFFF', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 4px 16px rgba(37,211,102,0.32)', textDecoration: 'none', transition: 'all 0.2s ease', cursor: 'pointer' }}
                       >
-                        <span>Add to cart</span>
-                        <i className="bi bi-bag" style={{ fontSize: '1.15rem' }}></i>
+                        <i className="bi bi-whatsapp" style={{ fontSize: '1.25rem' }}></i>
+                        <span>Order on WhatsApp · ₹{product.price * quantity}</span>
                       </button>
+
+                      {/* Enquire & Share Row */}
+                      <div className="d-flex align-items-center gap-2 w-100">
+                        <a
+                          href={buildWhatsAppUrl(buildProductInquiryMessage(product))}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-secondary-action flex-grow-1 d-flex align-items-center justify-content-center gap-2"
+                          style={{ height: '42px', borderRadius: '8px', fontSize: '0.86rem', fontWeight: 600, background: '#ffffff', color: '#334155', border: '1px solid #e2e8f0', textDecoration: 'none', transition: 'all 0.2s ease' }}
+                        >
+                          <i className="bi bi-chat-dots" style={{ color: '#25D366' }}></i>
+                          <span>Ask a Question</span>
+                        </a>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const text = buildProductShareText(product);
+                            shareToWhatsApp(text);
+                          }}
+                          className="btn-secondary-action flex-grow-1 d-flex align-items-center justify-content-center gap-2"
+                          style={{ height: '42px', borderRadius: '8px', fontSize: '0.86rem', fontWeight: 600, background: '#ffffff', color: '#334155', border: '1px solid #e2e8f0', cursor: 'pointer', transition: 'all 0.2s ease' }}
+                        >
+                          <i className="bi bi-share" style={{ color: '#0284c7' }}></i>
+                          <span>Share Product</span>
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
-                
+
                 {/* Right: Info */}
                 <div className="col-lg-6 offset-lg-1">
                   <div className="detail-copy">
@@ -239,16 +335,21 @@ export default function ProductDetails() {
                     <h1 className="detail-title" style={{ fontSize: '2.4rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.8rem' }}>
                       {product.name}
                     </h1>
-                    <div className="detail-price" style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '1.8rem', color: '#111', marginBottom: '1.5rem' }}>
-                      ₹{product.price}
+                    <div className="d-flex align-items-baseline gap-3 mb-3">
+                      <div className="detail-price" style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '1.8rem', color: '#111', margin: 0 }}>
+                        ₹{product.price}
+                      </div>
+                      <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style={{ fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px' }}>
+                        <i className="bi bi-check-circle me-1"></i> WhatsApp Instant Order Available
+                      </span>
                     </div>
-                    
+
                     <hr className="my-4" style={{ opacity: 0.08, borderColor: '#000' }} />
-                    
+
                     <p className="detail-desc" style={{ fontSize: '0.95rem', color: '#555', lineHeight: 1.6, marginBottom: '1.5rem' }}>
                       {product.description}
                     </p>
-                    
+
                     <ul className="detail-pts my-4" style={{ listStyle: 'none', paddingLeft: 0 }}>
                       {(product.points || []).map((pt, index) => (
                         <li key={index} className="d-flex align-items-center mb-2" style={{ fontSize: '0.9rem', color: '#444' }}>
@@ -266,10 +367,11 @@ export default function ProductDetails() {
                         <div className="d-flex flex-column gap-2">
                           {includedItems.map(item => (
                             <div key={item.id} className="d-flex align-items-center gap-3 p-2" style={{ border: '1px solid rgba(0,0,0,0.06)', borderRadius: 'var(--r-xs)', background: '#fafafa' }}>
-                              <img 
-                                src={getImageUrl(item.image)} 
-                                alt={item.name} 
-                                style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} 
+                              <img
+                                src={getImageUrl(item.image, item)}
+                                alt={item.name}
+                                style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
+                                onError={(e) => { e.currentTarget.src = getProductPlaceholderSvg(item.name, item.type || item.category); }}
                               />
                               <div className="flex-grow-1">
                                 <h4 style={{ fontSize: '0.85rem', fontWeight: 600, margin: 0, color: '#222' }}>{item.name}</h4>

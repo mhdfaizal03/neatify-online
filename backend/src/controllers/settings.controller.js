@@ -39,6 +39,8 @@ class SettingsController {
         announcement,
         announcementSub,
         marqueeKeywords,
+        whatsappNumber,
+        supportPhone,
       } = req.body;
 
       if (freeShippingThreshold !== undefined) settings.freeShippingThreshold = freeShippingThreshold;
@@ -48,6 +50,8 @@ class SettingsController {
       if (announcement !== undefined) settings.announcement = announcement;
       if (announcementSub !== undefined) settings.announcementSub = announcementSub;
       if (marqueeKeywords !== undefined) settings.marqueeKeywords = marqueeKeywords;
+      if (whatsappNumber !== undefined) settings.whatsappNumber = whatsappNumber;
+      if (supportPhone !== undefined) settings.supportPhone = supportPhone;
 
       await settings.save();
       res.status(200).json(settings);

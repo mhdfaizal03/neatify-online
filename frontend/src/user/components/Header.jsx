@@ -41,7 +41,17 @@ export default function Header() {
               <i className="bi bi-bag"></i>
               <span className="cart-badge" id="cartCount">0</span>
             </button>
-            <a className="btn-primary-sm d-none d-lg-inline-flex" href="/#shop">Shop Now</a>
+            <a 
+              href="https://wa.me/918113001959?text=Hello%20Neatify%20Car%20Care,%20I%20would%20like%20to%20inquire%20about%20your%20products." 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="btn-contact-whatsapp d-none d-lg-inline-flex align-items-center gap-2"
+              title="Chat with us on WhatsApp"
+            >
+              <i className="bi bi-whatsapp text-success fs-6"></i>
+              <span>WhatsApp</span>
+            </a>
+            <a className="btn-primary-sm d-none d-xl-inline-flex" href="/#shop">Shop Now</a>
           </div>
 
           <button className="nav-burger" type="button" id="navBurger" aria-controls="navDrawer" aria-expanded="false" aria-label="Open menu">
@@ -64,8 +74,17 @@ export default function Header() {
           <a href="/#story" className="drawer-link">About</a>
           <a href="/#faq" className="drawer-link">FAQ</a>
         </nav>
-        <div className="nav-drawer-foot">
-          <a className="btn-primary-sm" href="/#shop">Shop Now</a>
+        <div className="nav-drawer-foot d-flex flex-column gap-2">
+          <a 
+            href="https://wa.me/918113001959?text=Hello%20Neatify%20Car%20Care,%20I%20would%20like%20to%20inquire%20about%20your%20products."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-whatsapp-drawer d-flex align-items-center justify-content-center gap-2 w-100 py-2"
+          >
+            <i className="bi bi-whatsapp text-success fs-5"></i>
+            <span>Order / Chat on WhatsApp</span>
+          </a>
+          <a className="btn-primary-sm w-100 text-center" href="/#shop">Shop Products</a>
           <p className="drawer-note">Premium vehicle care, made simple.</p>
         </div>
       </aside>

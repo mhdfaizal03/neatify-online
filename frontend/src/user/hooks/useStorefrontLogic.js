@@ -1,5 +1,19 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  buildWhatsAppUrl,
+  buildProductOrderMessage,
+  buildProductInquiryMessage,
+  buildProductShareText,
+  buildCartOrderMessage,
+  buildKitOrderMessage,
+  shareToWhatsApp,
+  DEFAULT_WHATSAPP_NUMBER,
+  saveCustomerDeliveryDetails,
+  loadCustomerDeliveryDetails,
+  formatDeliveryDetailsBlock,
+} from '../../utils/whatsapp';
+import { getProductPlaceholderSvg } from '../../utils/placeholder';
 
 export function useStorefrontLogic() {
   const navigate = useNavigate();
@@ -61,6 +75,26 @@ function esc(str) {
   return d.innerHTML;
 }
 
+const KNOWN_ACTUAL_IMAGES = new Set([
+  "assets/product-2.jpeg",
+  "assets/product-8.jpeg",
+  "/assets/product-2.jpeg",
+  "/assets/product-8.jpeg",
+  "assets/interior-teaser.png",
+  "/assets/interior-teaser.png"
+]);
+
+function getImgUrl(img, p = {}) {
+  if (img && (img.startsWith("data:") || img.startsWith("blob:") || img.startsWith("http://") || img.startsWith("https://"))) {
+    return img;
+  }
+  const clean = img ? img.replace(/^\//, "") : "";
+  if (clean && (KNOWN_ACTUAL_IMAGES.has(clean) || KNOWN_ACTUAL_IMAGES.has(`/${clean}`))) {
+    return `/${clean}`;
+  }
+  return getProductPlaceholderSvg(p.name || "Neatify Detail Product", p.type || p.category || "Vehicle Care");
+}
+
 const BASE_URL = import.meta.env.VITE_API_URL || "";
 async function api(path, opts = {}) {
   const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
@@ -89,7 +123,7 @@ async function loadSettings() {
 
   const keywords = settings.marqueeKeywords || ["DEEP DIRT LIFT", "PAINT-SAFE FORMULA", "THICK CLINGING FOAM", "CRYSTAL GLOSS FINISH", "pH-NEUTRAL & WAX-SAFE", "STREAK-FREE EVERY TIME"];
   const marqueeHtml = keywords.map(kw => `<span>${esc(kw)}</span><span class="dot">◆</span>`).join("");
-  $$(".marquee-group").forEach(g => {
+  document.querySelectorAll(".marquee-group").forEach(g => {
     g.innerHTML = marqueeHtml;
   });
 }
@@ -146,7 +180,6 @@ async function loadProducts(attempt = 1) {
     const emptyText = $("emptyStateText");
     if (emptyText) emptyText.textContent = "Make sure the server is running (npm start) and open http://localhost:3000.";
     $("retryProducts")?.classList.remove("d-none");
-    showToast("Could not load products. Please refresh.", true);
     return;
   }
   $("retryProducts")?.classList.add("d-none");
@@ -164,13 +197,6 @@ function renderPillCounts() {
   });
 }
 
-function getImgUrl(img) {
-  if (!img) return "/assets/product-1.jpeg";
-  if (img.startsWith("http://") || img.startsWith("https://")) return img;
-  if (img.startsWith("/")) return img;
-  return `/${img}`;
-}
-
 function renderBundle() {
   const kitProducts = products.filter(p => p.isKit && p.active !== false);
   const wrap = document.getElementById("kitOffersContainer");
@@ -186,7 +212,6 @@ function renderBundle() {
   
   wrap.style.display = "block";
   if (list) {
-    // Featured primary kit showcase
     const kit = kitProducts[0];
     const itemCount = kit.includedProducts && kit.includedProducts.length > 0
       ? kit.includedProducts.length
@@ -216,16 +241,16 @@ function renderBundle() {
     const imgSectionHtml = hasMultiImg ? `
       <div class="bundle-img-wrap bundle-multi-grid">
         <div class="bundle-main-img">
-          <img src="${getImgUrl(kit.images[0])}" alt="${esc(kit.name)}" />
+          <img src="${getImgUrl(kit.images[0], kit)}" alt="${esc(kit.name)}" />
         </div>
         <div class="bundle-sub-img">
           <span class="bundle-offer-pill"><i class="bi bi-gift-fill me-1"></i> Offer Item Included</span>
-          <img src="${getImgUrl(kit.images[1])}" alt="Offer Item Included" />
+          <img src="${getImgUrl(kit.images[1], kit)}" alt="Offer Item Included" />
         </div>
       </div>
     ` : `
       <div class="bundle-img-wrap">
-        <img src="${getImgUrl(kit.image)}" alt="${esc(kit.name)}" />
+        <img src="${getImgUrl(kit.image, kit)}" alt="${esc(kit.name)}" />
       </div>
     `;
     
@@ -238,17 +263,13 @@ function renderBundle() {
         </div>
         <h2 class="bundle-title">${esc(firstPart)}<br /><em>${esc(restPart)}</em></h2>
         <p class="bundle-desc">${esc(kit.description)}</p>
-        ${pointsHtml ? `<ul style="list-style: none; padding: 0; margin-bottom: 1.8rem;">${pointsHtml}</ul>` : ''}
-        <div class="bundle-foot d-flex align-items-center gap-3 flex-wrap">
-          <button class="btn-lime bundleBtn" data-kit-id="${kit.id}">Add the kit <i class="bi bi-plus"></i></button>
-          <button class="btn-ghost-lime see-more-kits" id="seeMoreKitsBtn" type="button">See more kits <i class="bi bi-arrow-right"></i></button>
-          <span class="bundle-price ms-auto">${itemCount} items · ${money(kit.price)}</span>
-        </div>
+        <button class="btn-lime" data-kit-id="${kit.id}">Add to Cart</button>
+        <button class="btn-ghost-lime see-more-kits" id="seeMoreKitsBtn" type="button">See more kits <i class="bi bi-arrow-right"></i></button>
+        <span class="bundle-price ms-auto">${itemCount} items · ${money(kit.price)}</span>
       </div>
       ${imgSectionHtml}
     </div>
     `;
-    initReveal();
   }
 }
 
@@ -281,14 +302,14 @@ function renderProducts() {
     const isMultiImg = p.images && p.images.length > 1;
     const imgHtml = isMultiImg ? `
       <div class="prod-dual-grid">
-        <img src="${getImgUrl(p.images[0])}" alt="${esc(p.name)}" class="dual-main" loading="lazy">
+        <img src="${getImgUrl(p.images[0], p)}" alt="${esc(p.name)}" class="dual-main" loading="lazy">
         <div class="dual-sub">
-          <img src="${getImgUrl(p.images[1])}" alt="Offer item" loading="lazy">
+          <img src="${getImgUrl(p.images[1], p)}" alt="Offer item" loading="lazy">
           <span class="offer-tag"><i class="bi bi-gift-fill"></i> Bonus</span>
         </div>
       </div>
     ` : `
-      <img src="${getImgUrl(p.image)}" alt="${esc(p.name)}" loading="lazy">
+      <img src="${getImgUrl(p.image, p)}" alt="${esc(p.name)}" loading="lazy">
     `;
 
     return `
@@ -307,15 +328,23 @@ function renderProducts() {
           <p>${esc(p.description)}</p>
           <div class="prod-foot">
             <span class="prod-price">${money(p.price)}</span>
-            ${p.stock === 0 ? `
-            <button class="add-btn disabled" disabled style="background:#333;color:#666;cursor:not-allowed;" aria-label="${esc(p.name)} is sold out">
-              <i class="bi bi-slash-circle"></i>
-            </button>
-            ` : `
-            <button class="add-btn" data-add="${p.id}" aria-label="Add ${esc(p.name)} to cart">
-              <i class="bi bi-plus-lg"></i>
-            </button>
-            `}
+            <div class="d-flex align-items-center gap-1 ms-auto">
+              <button class="share-btn-card" data-share="${p.id}" title="Share product" aria-label="Share ${esc(p.name)}">
+                <i class="bi bi-share"></i>
+              </button>
+              <button class="wa-btn-card" data-wa-order="${p.id}" title="Order on WhatsApp" aria-label="Order ${esc(p.name)} on WhatsApp">
+                <i class="bi bi-whatsapp"></i>
+              </button>
+              ${p.stock === 0 ? `
+              <button class="add-btn disabled" disabled style="background:#333;color:#666;cursor:not-allowed;" aria-label="${esc(p.name)} is sold out">
+                <i class="bi bi-slash-circle"></i>
+              </button>
+              ` : `
+              <button class="add-btn" data-add="${p.id}" title="Add to cart" aria-label="Add ${esc(p.name)} to cart">
+                <i class="bi bi-plus-lg"></i>
+              </button>
+              `}
+            </div>
           </div>
         </div>
       </article>
@@ -379,6 +408,7 @@ window.addBundle = addBundle;
 window.renderCart = renderCart;
 window.loadProducts = loadProducts;
 window.products = products;
+window.openCheckout = openCheckout;
 
 function addBundle(ids) {
   const added = ids.map(getProduct).filter(Boolean);
@@ -476,18 +506,9 @@ function renderShipProgress(sub) {
   }
 }
 
-/* ── CHECKOUT ───────────────────────────────────────────── */
+/* ── CHECKOUT (WHATSAPP DISPATCH) ─────────────────────── */
 function openCheckout() {
   if (!state.cart.length) return;
-  if (!isLoggedIn()) {
-    /* Purchases require an account — route through auth, then resume */
-    pendingCheckout = true;
-    cartDrawer.hide();
-    showAuthNotice(true);
-    authSwitch("login");
-    authModal.show();
-    return;
-  }
   prefillCheckout();
   renderCheckoutSummary();
   cartDrawer.hide();
@@ -496,11 +517,27 @@ function openCheckout() {
 
 /* Returning customers never re-type what we already know */
 function prefillCheckout() {
+  const saved = loadCustomerDeliveryDetails() || {};
   const u = session.user || {};
-  if (!$("coName").value.trim())    $("coName").value    = u.name || "";
-  if (!$("coPhone").value.trim())   $("coPhone").value   = u.phone || "";
-  if (!$("coEmail").value.trim())   $("coEmail").value   = u.email || "";
-  if (!$("coAddress").value.trim()) $("coAddress").value = u.address || "";
+
+  const setVal = (id, val) => {
+    const el = $(id);
+    if (el && !el.value.trim() && val) el.value = val;
+  };
+
+  setVal("coName", saved.name || u.name);
+  setVal("coPhone", saved.phone || u.phone);
+  setVal("coAltPhone", saved.altPhone);
+  setVal("coEmail", saved.email || u.email);
+  setVal("coHouse", saved.house);
+  setVal("coStreet", saved.street);
+  setVal("coLocality", saved.locality);
+  setVal("coCity", saved.city);
+  setVal("coDistrict", saved.district);
+  setVal("coState", saved.state);
+  setVal("coPin", saved.pin);
+  setVal("coLandmark", saved.landmark);
+  setVal("coInstructions", saved.instructions);
 }
 
 function renderCheckoutSummary() {
@@ -527,15 +564,21 @@ function renderCheckoutSummary() {
 function validateCheckout() {
   let valid = true;
   const rules = [
-    { id: "coName",    err: "coNameError",    test: v => v.length >= 2,                      msg: "Enter your name" },
-    { id: "coPhone",   err: "coPhoneError",   test: v => /^[+\d][\d\s\-()]{7,14}$/.test(v), msg: "Enter a valid phone" },
-    { id: "coEmail",   err: "coEmailError",   test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), msg: "Enter a valid email" },
-    { id: "coAddress", err: "coAddressError", test: v => v.length >= 10,                     msg: "Enter a full address" },
+    { id: "coName",       err: "coNameError",       test: v => v.length >= 2,                                  msg: "Enter full customer name" },
+    { id: "coPhone",      err: "coPhoneError",      test: v => /^[+\d][\d\s\-()]{7,14}$/.test(v),             msg: "Enter valid WhatsApp number" },
+    { id: "coHouse",      err: "coHouseError",      test: v => v.length >= 1,                                  msg: "Enter house / building name" },
+    { id: "coStreet",     err: "coStreetError",     test: v => v.length >= 1,                                  msg: "Enter street / road name" },
+    { id: "coLocality",   err: "coLocalityError",   test: v => v.length >= 1,                                  msg: "Enter area / locality" },
+    { id: "coCity",       err: "coCityError",       test: v => v.length >= 1,                                  msg: "Enter city or town" },
+    { id: "coDistrict",   err: "coDistrictError",   test: v => v.length >= 1,                                  msg: "Enter district" },
+    { id: "coState",      err: "coStateError",      test: v => v.length >= 1,                                  msg: "Enter state" },
+    { id: "coPin",        err: "coPinError",        test: v => /^\d{6}$/.test(v.replace(/\s/g, "")),           msg: "Enter 6-digit PIN code" },
   ];
   rules.forEach(rule => {
     const input = $(rule.id);
     const errEl = $(rule.err);
-    const ok    = rule.test(input.value.trim());
+    if (!input) return;
+    const ok = rule.test(input.value.trim());
     input.classList.toggle("invalid", !ok);
     if (errEl) errEl.textContent = ok ? "" : rule.msg;
     if (!ok) valid = false;
@@ -547,47 +590,91 @@ async function placeOrder(e) {
   e.preventDefault();
   if (!validateCheckout() || !state.cart.length) return;
   const btn = $("placeOrderBtn");
-  btn.disabled = true;
-  btn.innerHTML = `<span class="loader-spin" style="width:14px;height:14px;border-width:1.5px;margin-right:0.4rem;"></span>Placing…`;
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span class="loader-spin" style="width:14px;height:14px;border-width:1.5px;margin-right:0.4rem;"></span>Dispatching to WhatsApp…`;
+  }
 
   const sub  = subtotalValue();
   const ship = shippingFor(sub);
+
+  const customerData = {
+    name: $("coName")?.value.trim() || "",
+    phone: $("coPhone")?.value.trim() || "",
+    altPhone: $("coAltPhone")?.value.trim() || "",
+    email: $("coEmail")?.value.trim() || "",
+    house: $("coHouse")?.value.trim() || "",
+    street: $("coStreet")?.value.trim() || "",
+    locality: $("coLocality")?.value.trim() || "",
+    city: $("coCity")?.value.trim() || "",
+    district: $("coDistrict")?.value.trim() || "",
+    state: $("coState")?.value.trim() || "",
+    pin: $("coPin")?.value.trim() || "",
+    landmark: $("coLandmark")?.value.trim() || "",
+    instructions: $("coInstructions")?.value.trim() || "",
+  };
+
+  customerData.address = [
+    customerData.house,
+    customerData.street,
+    customerData.locality,
+    customerData.city,
+    customerData.district,
+    customerData.state,
+    customerData.pin ? `PIN: ${customerData.pin}` : ""
+  ].filter(Boolean).join(", ");
+
+  // 1. Save to customer browser localStorage for future auto-fill
+  saveCustomerDeliveryDetails(customerData);
+
   const payload = {
     items: state.cart.map(item => {
       const p = getProduct(item.id);
       return { id: p.id, name: p.name, price: p.price, qty: item.qty };
     }),
-    total: sub + ship, shipping: ship,
-    customer: {
-      name:    $("coName").value.trim(),
-      phone:   $("coPhone").value.trim(),
-      email:   $("coEmail").value.trim(),
-      address: $("coAddress").value.trim(),
-      notes:   $("coNotes").value.trim(),
-    },
+    total: sub + ship,
+    shipping: ship,
+    source: "whatsapp",
+    customer: customerData,
   };
+
+  let orderId = `ORD-${Date.now().toString().slice(-6)}`;
   try {
     const order = await api("/api/orders", { method: "POST", body: JSON.stringify(payload) });
-    checkoutModal.hide();
-    $("checkoutForm").reset();
-    state.cart = [];
-    saveCart();
-    renderCart();
-    $("orderIdChip").textContent = order.id;
-    orderSuccModal.show();
+    if (order && order.id) orderId = order.id;
   } catch (err) {
-    if (/sign in/i.test(err.message)) {
-      /* token expired mid-checkout — re-auth then resume */
-      clearSession();
-      pendingCheckout = true;
-      checkoutModal.hide();
-      showAuthNotice(true);
-      authModal.show();
-    }
-    showToast(err.message || "Could not place order. Try again.", true);
-  } finally {
+    console.warn("Backend order logging note:", err.message);
+  }
+
+  // 2. Build WhatsApp Order message with full delivery details
+  const waMsg = buildCartOrderMessage({
+    items: payload.items,
+    subtotal: sub,
+    shipping: ship,
+    total: sub + ship,
+    customer: customerData,
+    orderId: orderId,
+  });
+
+  const targetNumber = settings.whatsappNumber || DEFAULT_WHATSAPP_NUMBER;
+  const waUrl = buildWhatsAppUrl(waMsg, targetNumber);
+
+  // 3. Open WhatsApp
+  window.open(waUrl, "_blank", "noopener,noreferrer");
+
+  checkoutModal.hide();
+  state.cart = [];
+  saveCart();
+  renderCart();
+
+  if ($("orderIdChip")) $("orderIdChip").textContent = orderId;
+  const reopenBtn = $("reopenWaBtn");
+  if (reopenBtn) reopenBtn.href = waUrl;
+  orderSuccModal.show();
+
+  if (btn) {
     btn.disabled = false;
-    btn.innerHTML = `Place order <i class="bi bi-check2-circle"></i>`;
+    btn.innerHTML = `<i class="bi bi-whatsapp fs-5"></i><span>Continue to WhatsApp →</span>`;
   }
 }
 
@@ -919,19 +1006,46 @@ function showToast(message, isError = false) {
 function openProduct(id) {
   const p = getProduct(id);
   if (!p) return;
+  const isMultiImg = p.images && p.images.length > 1;
+  const imgHtml = isMultiImg
+    ? `<img src="${getImgUrl(p.images[0])}" alt="${esc(p.name)}" class="w-100 h-100" style="object-fit:cover;">`
+    : `<img src="${getImgUrl(p.image)}" alt="${esc(p.name)}" class="w-100 h-100" style="object-fit:cover;">`;
+
   $("productModalContent").innerHTML = `
-    <div class="col-md-6 modal-prod-img"><img src="${esc(p.image)}" alt="${esc(p.name)}"></div>
+    <div class="col-md-6 modal-prod-img">${imgHtml}</div>
     <div class="col-md-6 modal-prod-copy">
       <span class="prod-kicker">${esc(p.type)} / Exterior</span>
       <h2 id="productModalTitle">${esc(p.name)}</h2>
-      <div class="modal-price">${money(p.price)}</div>
+      <div class="d-flex align-items-baseline gap-2 mb-2">
+        <div class="modal-price">${money(p.price)}</div>
+        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size:0.75rem; font-weight:700;">
+          <i class="bi bi-whatsapp me-1"></i> WhatsApp Order Ready
+        </span>
+      </div>
       ${p.stock === 0 ? '<span class="badge bg-danger mb-3">Sold Out</span>' : (p.stock < 5 ? `<span class="badge bg-warning text-dark mb-3">Only ${p.stock} remaining!</span>` : '')}
       <p>${esc(p.description)}</p>
       <ul class="detail-pts">${(p.points || []).map(x => `<li><i class="bi bi-check2"></i>${esc(x)}</li>`).join("")}</ul>
       ${p.stock === 0 ? `
       <button class="btn-lime w-100 disabled" disabled style="background:#444;color:#888;cursor:not-allowed;border:none;">Sold Out <i class="bi bi-slash-circle ms-1"></i></button>
       ` : `
-      <button class="btn-lime w-100" data-modal-add="${p.id}">Add to cart <i class="bi bi-bag ms-1"></i></button>
+      <div class="d-flex flex-column gap-2 mt-3 w-100">
+        <button class="btn-whatsapp-order w-100 d-flex align-items-center justify-content-center gap-2" data-modal-wa="${p.id}" style="height: 48px; border-radius: 8px; font-weight: 800; background: #25D366; color: #FFF; border: none; cursor: pointer;">
+          <i class="bi bi-whatsapp fs-5"></i>
+          <span>Order on WhatsApp · ${money(p.price)}</span>
+        </button>
+        <div class="d-flex gap-2 w-100">
+          <button class="btn-add-cart-secondary flex-grow-1 d-flex align-items-center justify-content-center gap-2" data-modal-add="${p.id}" style="height: 44px; border-radius: 8px; font-weight: 700; background: #f1f5f9; color: #0f172a; border: 1.5px solid #cbd5e1; cursor: pointer;">
+            <i class="bi bi-bag"></i>
+            <span>Add to cart</span>
+          </button>
+          <button class="btn-secondary-action d-flex align-items-center justify-content-center px-3" data-modal-share="${p.id}" title="Share Product" style="height: 44px; border-radius: 8px; background: #FFF; border: 1px solid #e2e8f0; cursor: pointer;">
+            <i class="bi bi-share text-primary"></i>
+          </button>
+          <button class="btn-secondary-action d-flex align-items-center justify-content-center px-3" data-modal-view="${p.id}" title="Full Details" style="height: 44px; border-radius: 8px; background: #FFF; border: 1px solid #e2e8f0; cursor: pointer;">
+            <i class="bi bi-box-arrow-up-right"></i>
+          </button>
+        </div>
+      </div>
       `}
     </div>`;
   $("productModal").setAttribute("aria-labelledby", "productModalTitle");
@@ -994,6 +1108,81 @@ function initReveal() {
 document.addEventListener("click", e => {
   const add = e.target.closest("[data-add]");
   if (add) { addToCart(add.dataset.add); return; }
+
+  const cardWa = e.target.closest("[data-card-wa]");
+  if (cardWa) {
+    const id = Number(cardWa.dataset.cardWa);
+    const existing = state.cart.find(it => String(it.id) === String(id));
+    if (!existing) state.cart.push({ id, qty: 1 });
+    saveCart();
+    renderCart();
+    openCheckout();
+    return;
+  }
+
+  const waOrder = e.target.closest("[data-wa-order]");
+  if (waOrder) {
+    const id = Number(waOrder.dataset.waOrder);
+    const existing = state.cart.find(it => String(it.id) === String(id));
+    if (!existing) state.cart.push({ id, qty: 1 });
+    saveCart();
+    renderCart();
+    openCheckout();
+    return;
+  }
+
+  const shareBtn = e.target.closest("[data-share], [data-card-share]");
+  if (shareBtn) {
+    const id = shareBtn.dataset.share || shareBtn.dataset.cardShare;
+    const p = getProduct(id);
+    if (p) {
+      const text = buildProductShareText(p);
+      shareToWhatsApp(text);
+      showToast(`Sharing ${p.name}...`);
+    }
+    return;
+  }
+
+  const modalWa = e.target.closest("[data-modal-wa]");
+  if (modalWa) {
+    const id = Number(modalWa.dataset.modalWa);
+    const existing = state.cart.find(it => String(it.id) === String(id));
+    if (!existing) state.cart.push({ id, qty: 1 });
+    saveCart();
+    renderCart();
+    productModal.hide();
+    openCheckout();
+    return;
+  }
+
+  const modalShare = e.target.closest("[data-modal-share]");
+  if (modalShare) {
+    const p = getProduct(modalShare.dataset.modalShare);
+    if (p) {
+      const text = buildProductShareText(p);
+      shareToWhatsApp(text);
+      showToast(`Sharing ${p.name}...`);
+    }
+    return;
+  }
+
+  const modalView = e.target.closest("[data-modal-view]");
+  if (modalView) {
+    productModal.hide();
+    navigate(`/product/${modalView.dataset.modalView}`);
+    return;
+  }
+
+  const bundleWa = e.target.closest(".bundleWaBtn, [data-bundle-wa]");
+  if (bundleWa) {
+    const id = Number(bundleWa.dataset.kitId || bundleWa.dataset.bundleWa);
+    const existing = state.cart.find(it => String(it.id) === String(id));
+    if (!existing) state.cart.push({ id, qty: 1 });
+    saveCart();
+    renderCart();
+    openCheckout();
+    return;
+  }
 
   const view = e.target.closest("[data-view]");
   if (view) { navigate(`/product/${view.dataset.view}`); return; }
@@ -1122,15 +1311,28 @@ $("newsletterForm")?.addEventListener("submit", async e => {
   }
 });
 
+let scrollTicking = false;
 window.addEventListener("scroll", () => {
-  $("mainNav")?.classList.toggle("scrolled", scrollY > 20);
-  $("backToTop")?.classList.toggle("show", scrollY > 700);
-  updateActiveNav();
+  if (!scrollTicking) {
+    requestAnimationFrame(() => {
+      const sy = window.scrollY;
+      $("mainNav")?.classList.toggle("scrolled", sy > 20);
+      $("backToTop")?.classList.toggle("show", sy > 700);
+      updateActiveNav();
+      scrollTicking = false;
+    });
+    scrollTicking = true;
+  }
 }, { passive: true });
 
-window.addEventListener("resize", updateHeaderHeight);
+let resizeTimer = null;
+window.addEventListener("resize", () => {
+  if (resizeTimer) clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(updateHeaderHeight, 100);
+}, { passive: true });
+
 updateHeaderHeight();  /* sync --header-height at boot so navbar + hero = exactly one screen */
-window.addEventListener("load", updateHeaderHeight);
+window.addEventListener("load", updateHeaderHeight, { passive: true });
 if (document.fonts && document.fonts.ready) {
   /* re-measure once webfonts settle, then let the hero canvas re-fit */
   document.fonts.ready.then(() => { updateHeaderHeight(); window.dispatchEvent(new Event("resize")); });
@@ -1213,7 +1415,8 @@ function initHero3D() {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
   } catch { showHeroFallback(section); return; }
 
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  const isMobile = () => typeof window !== "undefined" && window.innerWidth < 992;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile() ? 1.25 : 1.75));
   if (typeof THREE.sRGBEncoding !== "undefined") renderer.outputEncoding = THREE.sRGBEncoding;
   if (typeof THREE.ACESFilmicToneMapping !== "undefined") {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -1291,7 +1494,7 @@ function initHero3D() {
               m.transparent = false;
               m.depthWrite = true;
               if ("envMapIntensity" in m) m.envMapIntensity = 1;
-              if (m.map) m.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+              if (m.map) m.map.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
               m.needsUpdate = true;
             });
           });
@@ -1337,21 +1540,21 @@ function initHero3D() {
 
   /* ── Orbiting ring — lime halo that truly wraps the bottle ── */
   const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(1.6, 0.03, 20, 120),
+    new THREE.TorusGeometry(1.6, 0.03, 16, isMobile() ? 48 : 96),
     new THREE.MeshBasicMaterial({
       color: 0xc8f53c,
       transparent: true,
       opacity: 0.55,
-      blending: THREE.AdditiveBlending, /* draws as light, never a hard cutting line */
-      depthWrite: false,                /* bottle depth still hides the back arc → real wrap */
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
     })
   );
-  ring.rotation.x = Math.PI * 0.45;  /* slight tilt — not flat */
+  ring.rotation.x = Math.PI * 0.45;
   scene.add(ring);
 
   /* ── Tiny accent ring (counter-rotating) ── */
   const ring2 = new THREE.Mesh(
-    new THREE.TorusGeometry(1.1, 0.018, 12, 96),
+    new THREE.TorusGeometry(1.1, 0.018, 12, isMobile() ? 36 : 64),
     new THREE.MeshBasicMaterial({
       color: 0x4488ff,
       transparent: true,
@@ -1364,8 +1567,8 @@ function initHero3D() {
   ring2.rotation.z = Math.PI * 0.25;
   scene.add(ring2);
 
-  /* ── Bubble particle field ── */
-  const PARTS = 160;
+  /* ── Bubble particle field (optimized for mobile) ── */
+  const PARTS = isMobile() ? 45 : 120;
   const pPos  = new Float32Array(PARTS * 3);
   const pSpd  = new Float32Array(PARTS);
   for (let i = 0; i < PARTS; i++) {
@@ -1392,28 +1595,36 @@ function initHero3D() {
   let activeStage   = -1;
   let rafId         = null;
   let heroVisible   = true;
-  const clock = new THREE.Clock();
+  let spaceTop      = 0;
+  let spaceTotal    = 1;
+  const clock       = new THREE.Clock();
 
   const smoothstep = (x, a, b) => {
     const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
     return t * t * (3 - 2 * t);
   };
-  const isMobile = () => innerWidth < 992;
 
   function setSize() {
     const w = section.clientWidth;
-    const h = (sticky && sticky.clientHeight) || innerHeight;  /* tracks svh sticky box, immune to browser chrome */
+    const h = (sticky && sticky.clientHeight) || window.innerHeight;
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
   }
 
+  function measureSpace() {
+    if (!space) return;
+    const rect = space.getBoundingClientRect();
+    spaceTop = rect.top + window.scrollY;
+    const stickyH = (sticky && sticky.clientHeight) || window.innerHeight;
+    spaceTotal = Math.max(1, space.offsetHeight - stickyH);
+  }
+
   function readScroll() {
     if (!space) return;
-    const total = space.offsetHeight - ((sticky && sticky.clientHeight) || innerHeight);
-    scrollTarget = total > 0
-      ? Math.min(1, Math.max(0, -space.getBoundingClientRect().top / total))
-      : 0;
+    const sy = window.scrollY;
+    const offset = sy - spaceTop;
+    scrollTarget = Math.min(1, Math.max(0, offset / spaceTotal));
   }
 
   function setStage(index) {
@@ -1425,30 +1636,33 @@ function initHero3D() {
   }
 
   function animate() {
+    if (!heroVisible) {
+      rafId = null;
+      return;
+    }
     rafId = requestAnimationFrame(animate);
-    if (!REDUCED) scrollCurrent += (scrollTarget - scrollCurrent) * 0.045;  /* floaty, premium lag */
-    const p  = REDUCED ? 0 : scrollCurrent;  /* reduced motion → static showcase pose */
+
+    if (!REDUCED) scrollCurrent += (scrollTarget - scrollCurrent) * 0.045;
+    const p  = REDUCED ? 0 : scrollCurrent;
     const t  = REDUCED ? 0 : clock.getElapsedTime();
     const mb = isMobile();
 
     /* ── Model: scroll is the controller; idle adds life ── */
-    const idleY  = Math.sin(t * 0.6) * 0.12;  /* gentle bob */
-    const idleRZ = Math.sin(t * 0.4) * 0.04;  /* gentle lean */
-    productGroup.rotation.y  = p * Math.PI * 3 + Math.sin(t * 0.5) * 0.06; /* 1.5 full rounds over the 3-page scroll */
+    const idleY  = Math.sin(t * 0.6) * 0.12;
+    const idleRZ = Math.sin(t * 0.4) * 0.04;
+    productGroup.rotation.y  = p * Math.PI * 3 + Math.sin(t * 0.5) * 0.06;
     productGroup.rotation.z  = idleRZ + Math.sin(p * Math.PI) * 0.05;
     productGroup.position.y  = idleY + p * 0.3;
 
-    /* Desktop: model sits on right half, converges to centre at stage 3 */
     const blend = smoothstep(p, 0.6, 1.0);
     if (mb) {
-      /* Mobile: Center the bottle, eye level, appropriate scale */
+      /* Mobile: Perfectly proportioned compact bottle floating in upper section */
       productGroup.position.x = 0;
-      productGroup.position.y = 0.5 + p * 0.2; // Adjusted for a better center
-      productGroup.scale.setScalar(1.2);
+      productGroup.position.y = 1.15 + idleY * 0.4 + p * 0.15;
+      productGroup.scale.setScalar(0.70);
     } else {
-      /* Desktop/TV: right-side showcase, tablet-and-up sits a touch further right */
       const wideBias = Math.min(0.8, Math.max(0, camera.aspect - 1.45) * 1.4);
-      productGroup.position.x = (3.3 + wideBias) * (1 - blend); /* converges to centre at stage 3 */
+      productGroup.position.x = (3.3 + wideBias) * (1 - blend);
       productGroup.scale.setScalar(1);
     }
 
@@ -1458,23 +1672,23 @@ function initHero3D() {
       modelHolder.scale.setScalar(modelScale * Math.max(introEase, 0.0001));
     }
 
-    /* ── Rings orbit productGroup — scroll drives the rounds ── */
+    /* ── Rings orbit productGroup ── */
     ring.position.copy(productGroup.position);
+    ring.scale.setScalar(mb ? 0.70 : 1);
     ring.rotation.y  = t * 0.5 + p * Math.PI * 2;
     ring.rotation.x  = Math.PI * 0.45 + Math.sin(t * 0.3) * 0.06;
 
     ring2.position.copy(productGroup.position);
+    ring2.scale.setScalar(mb ? 0.70 : 1);
     ring2.rotation.y = -t * 0.7 - p * Math.PI * 2.5;
     ring2.rotation.z = Math.PI * 0.25 + t * 0.2;
 
     /* ── Camera ── */
     if (mb) {
-      /* Mobile: Straight-on lens at product height */
-      camera.position.set(0, 0.5, 6.0);
-      camera.lookAt(0, 0.5, 0);
+      camera.position.set(0, 0.85, 6.2);
+      camera.lookAt(0, 0.85, 0);
     } else {
-      /* Desktop: slightly left of centre so model on right is in view */
-      const camX = -1.2 + blend * 1.2;  /* moves right as page scrolls */
+      const camX = -1.2 + blend * 1.2;
       const camZ = 6.5 - Math.sin(p * Math.PI) * 0.5;
       camera.position.set(camX, 0.5 + idleY * 0.3, camZ);
       camera.lookAt(productGroup.position.x * 0.45, 0.5, 0);
@@ -1504,14 +1718,24 @@ function initHero3D() {
 
     /* ── UI sync ── */
     if (cueEl) cueEl.classList.toggle("hide", p > 0.02);
-    // 3 stages mapped smoothly across scroll progress
     setStage(p < 0.35 ? 0 : p < 0.7 ? 1 : 2);
 
     renderer.render(scene, camera);
   }
 
-  const start = () => { if (rafId === null && heroVisible) rafId = requestAnimationFrame(animate); };
-  const stop  = () => { if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; } };
+  const start = () => {
+    if (rafId === null && heroVisible) {
+      measureSpace();
+      readScroll();
+      rafId = requestAnimationFrame(animate);
+    }
+  };
+  const stop  = () => {
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+  };
 
   new IntersectionObserver(([entry]) => {
     heroVisible = entry.isIntersecting;
@@ -1520,19 +1744,29 @@ function initHero3D() {
     } else {
       stop();
     }
-  }).observe(section);
+  }, { threshold: 0.05 }).observe(section);
 
-  window.addEventListener("scroll", readScroll, { passive: true });
-  window.addEventListener("resize", () => { setSize(); readScroll(); });
+  measureSpace();
+  readScroll();
+
+  window.addEventListener("scroll", () => {
+    if (heroVisible) readScroll();
+  }, { passive: true });
+
+  window.addEventListener("resize", () => {
+    measureSpace();
+    setSize();
+    readScroll();
+  }, { passive: true });
 
   // Interactive rail click navigation
   railDots.forEach((dash, i) => {
     dash.style.cursor = "pointer";
     dash.addEventListener("click", () => {
       if (!space) return;
-      const total = space.offsetHeight - ((sticky && sticky.clientHeight) || innerHeight);
+      measureSpace();
       const targetProgress = i / Math.max(1, railDots.length - 1);
-      const targetScrollY = space.offsetTop + total * targetProgress;
+      const targetScrollY = spaceTop + spaceTotal * targetProgress;
       window.scrollTo({ top: targetScrollY, behavior: "smooth" });
     });
   });

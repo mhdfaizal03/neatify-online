@@ -12,10 +12,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-      <ErrorBoundary>
-        <App />
-      </ErrorBoundary>
-    </BrowserRouter>
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
+      </BrowserRouter>
     </QueryClientProvider>
   </React.StrictMode>,
 )

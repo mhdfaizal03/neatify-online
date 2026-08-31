@@ -63,9 +63,35 @@ const seedDB = async () => {
       await Settings.updateOne({}, { $set: { weekendKitIds: [3, 5], highlightProductId: 1 } });
     }
 
-    // Synchronize kit properties to match real data
+    // Synchronize kit properties and authentic images
     await Product.updateMany({ category: "kit" }, { $set: { isKit: true } });
-    logger.info("Database Seeding: Synchronized kit properties and settings.");
+    
+    // Set authentic image for Pressure Foam Sprayer
+    await Product.updateMany(
+      { $or: [{ name: /Foam Sprayer/i }, { id: 2 }, { id: 5 }] },
+      { $set: { image: "assets/product-2.jpeg", images: ["assets/product-2.jpeg"] } }
+    );
+    
+    // Set authentic image for Detail Brush / FoamCannon
+    await Product.updateMany(
+      { $or: [{ name: /Brush/i }, { id: 8 }] },
+      { $set: { image: "assets/product-8.jpeg", images: ["assets/product-8.jpeg"] } }
+    );
+
+    // Clear removed dummy image paths for other products
+    await Product.updateMany(
+      { 
+        $and: [
+          { name: { $not: /Foam Sprayer/i } },
+          { name: { $not: /Brush/i } },
+          { id: { $nin: [2, 5, 8] } },
+          { image: { $regex: /product-(1|3|4|5|6|7|9|10)\.jpeg/ } }
+        ]
+      },
+      { $set: { image: "", images: [] } }
+    );
+
+    logger.info("Database Seeding: Synchronized kit properties and authentic images.");
   } catch (err) {
     logger.error(`Database Seeding Error: ${err.message}`);
   }

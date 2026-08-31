@@ -30,7 +30,10 @@ export default function Modals() {
         <div className="cart-row"><span>Subtotal</span><span id="cartSubtotal">₹0</span></div>
         <div className="cart-row"><span>Shipping</span><span id="cartShipping">₹0</span></div>
         <div className="cart-total"><span>Total</span><strong id="cartTotal">₹0</strong></div>
-        <button className="btn-lime w-100" id="checkoutBtn">Continue to checkout <i className="bi bi-arrow-right"></i></button>
+        <button className="btn-lime w-100 d-flex align-items-center justify-content-center gap-2" id="checkoutBtn">
+          <i className="bi bi-whatsapp fs-5"></i>
+          <span>Order via WhatsApp</span>
+        </button>
       </div>
     </div>
   </div>
@@ -202,35 +205,83 @@ export default function Modals() {
 
   
   <div className="modal fade" id="checkoutModal" tabIndex="-1" aria-hidden="true">
-    <div className="modal-dialog modal-dialog-centered modal-lg">
+    <div className="modal-dialog modal-dialog-centered modal-xl">
       <div className="modal-content checkout-modal">
         <button type="button" className="modal-x" data-bs-dismiss="modal" aria-label="Close"><i className="bi bi-x-lg"></i></button>
         <div className="row g-0">
-          <div className="col-md-7 co-form-side">
-            <p className="cart-eyebrow">CHECKOUT</p>
-            <h3>Almost there.</h3>
-            <p className="co-sub">Fill in your delivery details.</p>
+          <div className="col-lg-7 co-form-side" style={{ maxHeight: '85vh', overflowY: 'auto' }}>
+            <div className="d-flex align-items-center gap-2 mb-1">
+              <span className="badge bg-success text-white px-2 py-1" style={{ fontSize: '0.75rem', fontWeight: 700 }}>
+                <i className="bi bi-whatsapp me-1"></i> WhatsApp Direct Order
+              </span>
+              <p className="cart-eyebrow mb-0">NEATIFY — DELIVERY DETAILS</p>
+            </div>
+            <h3>Delivery Details</h3>
+            <p className="co-sub mb-3">Please provide your accurate delivery address. Your details will be saved for instant future orders.</p>
+            
             <form id="checkoutForm" noValidate>
+              {/* Customer Contact */}
               <div className="field-row">
-                <label>Full name<input type="text" id="coName" placeholder="Your name" required autoComplete="name" /><small className="ferr" id="coNameError"></small></label>
-                <label>Phone<input type="tel" id="coPhone" placeholder="+91 98765 43210" required autoComplete="tel" /><small className="ferr" id="coPhoneError"></small></label>
+                <label>Customer Name *<input type="text" id="coName" placeholder="Full Name" required autoComplete="name" /><small className="ferr" id="coNameError"></small></label>
+                <label>Phone / WhatsApp Number *<input type="tel" id="coPhone" placeholder="+91 98765 43210" required autoComplete="tel" /><small className="ferr" id="coPhoneError"></small></label>
               </div>
-              <label>Email<input type="email" id="coEmail" placeholder="you@example.com" required autoComplete="email" /><small className="ferr" id="coEmailError"></small></label>
-              <label>Delivery address<textarea id="coAddress" rows="3" placeholder="House, street, city, PIN" required autoComplete="street-address"></textarea><small className="ferr" id="coAddressError"></small></label>
-              <label>Order notes <span className="opt">(optional)</span><textarea id="coNotes" rows="2" placeholder="Anything we should know?"></textarea></label>
+
+              <div className="field-row">
+                <label>Alternative Number <span className="opt">(Optional)</span><input type="tel" id="coAltPhone" placeholder="Alternate phone / landline" autoComplete="tel" /></label>
+                <label>Email Address <span className="opt">(Optional)</span><input type="email" id="coEmail" placeholder="you@example.com" autoComplete="email" /></label>
+              </div>
+
+              <div className="divider my-3" style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}></div>
+              <h5 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#111', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>
+                <i className="bi bi-geo-alt-fill text-success me-1"></i> Full Delivery Address
+              </h5>
+
+              <div className="field-row">
+                <label>House / Building Name *<input type="text" id="coHouse" placeholder="House No. / Villa / Apartment Name" required autoComplete="address-line1" /><small className="ferr" id="coHouseError"></small></label>
+                <label>Street / Road *<input type="text" id="coStreet" placeholder="Street Name / Main Road / Colony" required autoComplete="address-line2" /><small className="ferr" id="coStreetError"></small></label>
+              </div>
+
+              <div className="field-row">
+                <label>Area / Locality *<input type="text" id="coLocality" placeholder="Area / Locality / Sector" required /><small className="ferr" id="coLocalityError"></small></label>
+                <label>City / Town *<input type="text" id="coCity" placeholder="City or Town" required autoComplete="address-level2" /><small className="ferr" id="coCityError"></small></label>
+              </div>
+
+              <div className="field-row">
+                <label>District *<input type="text" id="coDistrict" placeholder="District" required /><small className="ferr" id="coDistrictError"></small></label>
+                <label>State *<input type="text" id="coState" placeholder="State (e.g. Kerala, Karnataka)" required autoComplete="address-level1" /><small className="ferr" id="coStateError"></small></label>
+              </div>
+
+              <div className="field-row">
+                <label>PIN Code *<input type="text" id="coPin" placeholder="6-digit PIN" maxLength={6} required autoComplete="postal-code" /><small className="ferr" id="coPinError"></small></label>
+                <label>Landmark <span className="opt">(Optional)</span><input type="text" id="coLandmark" placeholder="Nearby shop, school, or metro" /></label>
+              </div>
+
+              <label className="mt-2">Delivery Instructions <span className="opt">(Optional)</span>
+                <textarea id="coInstructions" rows="2" placeholder="e.g. Call before delivery, leave with security..."></textarea>
+              </label>
             </form>
           </div>
-          <div className="col-md-5 co-summary-side">
+          
+          <div className="col-lg-5 co-summary-side" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div className="co-summary-receipt">
-              <h4>Order summary</h4>
-              <div id="checkoutItems" className="co-items"></div>
-              <div className="co-lines">
+              <div className="d-flex align-items-center justify-content-between mb-3">
+                <h4 className="mb-0">Order summary</h4>
+                <span className="badge bg-dark text-white px-2 py-1" style={{ fontSize: '0.7rem' }}>NEATIFY VERIFIED</span>
+              </div>
+              <div id="checkoutItems" className="co-items" style={{ maxHeight: '220px', overflowY: 'auto' }}></div>
+              <div className="co-lines my-3">
                 <div><span>Subtotal</span><span id="coSubtotal">₹0</span></div>
                 <div><span>Shipping</span><span id="coShipping">₹0</span></div>
-                <div className="co-grand"><span>Total</span><strong id="coTotal">₹0</strong></div>
+                <div className="co-grand"><span>Total Amount</span><strong id="coTotal" className="text-success">₹0</strong></div>
               </div>
-              <button className="btn-lime w-100" id="placeOrderBtn" form="checkoutForm" type="submit">Place order <i className="bi bi-check2-circle"></i></button>
-              <p className="co-note"><i className="bi bi-shield-lock"></i> Demo — no payment charged.</p>
+              
+              <button className="btn-lime w-100 d-flex align-items-center justify-content-center gap-2" id="placeOrderBtn" form="checkoutForm" type="submit" style={{ height: '52px', fontSize: '1rem', fontWeight: 800 }}>
+                <i className="bi bi-whatsapp fs-5"></i>
+                <span>Continue to WhatsApp →</span>
+              </button>
+              <p className="co-note mt-2 text-center" style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.6)' }}>
+                <i className="bi bi-shield-check text-success me-1"></i> Your delivery details are saved securely for seamless ordering.
+              </p>
             </div>
           </div>
         </div>
@@ -241,16 +292,18 @@ export default function Modals() {
   <div className="modal fade" id="orderSuccessModal" tabIndex="-1" aria-hidden="true">
     <div className="modal-dialog modal-dialog-centered modal-sm">
       <div className="modal-content info-modal success-modal-content">
-        <div className="success-icon-wrap">
-          <svg className="success-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-            <circle className="success-checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
-            <path className="success-checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-          </svg>
+        <div className="success-icon-wrap" style={{ background: 'rgba(37,211,102,0.12)' }}>
+          <i className="bi bi-whatsapp text-success" style={{ fontSize: '2.5rem' }}></i>
         </div>
-        <h3>Order placed!</h3>
-        <p>Thanks for choosing Neatify. Your order has been received.</p>
+        <h3>Order Sent!</h3>
+        <p>Your order details have been formatted and dispatched to WhatsApp.</p>
         <div className="order-chip-premium" id="orderIdChip">ORD-000000</div>
-        <button className="btn-dark w-100 mt-4" data-bs-dismiss="modal">Keep browsing</button>
+        <div className="d-flex flex-column gap-2 mt-4 w-100">
+          <a href="https://wa.me/918113001959" target="_blank" rel="noopener noreferrer" className="btn-lime w-100 text-decoration-none d-flex align-items-center justify-content-center gap-2" id="reopenWaBtn">
+            <i className="bi bi-whatsapp"></i> Chat with Support
+          </a>
+          <button className="btn-dark w-100" data-bs-dismiss="modal">Keep browsing</button>
+        </div>
       </div>
     </div>
   </div>

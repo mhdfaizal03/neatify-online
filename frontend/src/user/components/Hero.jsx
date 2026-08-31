@@ -1,13 +1,26 @@
 import React from 'react';
 
 export default function Hero() {
+  const defaultKeywords = [
+    "DEEP DIRT LIFT",
+    "PAINT-SAFE FORMULA",
+    "THICK CLINGING FOAM",
+    "CRYSTAL GLOSS FINISH",
+    "pH-NEUTRAL & WAX-SAFE",
+    "STREAK-FREE EVERY TIME"
+  ];
+
+  const defaultMarqueeItems = defaultKeywords.map((kw, i) => (
+    <React.Fragment key={i}>
+      <span>{kw}</span>
+      <span className="dot">◆</span>
+    </React.Fragment>
+  ));
+
   return (
     <>
-      
-    
     <section className="hero" id="heroSection">
       <div className="hero-scroll-space">
-        
         <div className="snap-mark" aria-hidden="true"></div>
         <div className="snap-mark snap-mark-2" aria-hidden="true"></div>
         <div className="hero-sticky">
@@ -17,7 +30,6 @@ export default function Hero() {
           <div className="hero-mesh"></div>
           <div className="hero-vignette"></div>
 
-          
           <div className="hero-stages-wrap">
             <div className="container">
               <div className="hero-stages-inner">
@@ -30,12 +42,6 @@ export default function Hero() {
                     <a className="btn-hero-primary" href="#shop">Explore the range <i className="bi bi-arrow-right"></i></a>
                     <a className="btn-hero-ghost" href="#how-it-works">See the process</a>
                   </div>
-                  <div className="marquee-strip stage-marquee" role="marquee" aria-label="Key benefits">
-                    <div className="marquee-track">
-                      <div className="marquee-group"></div>
-                      <div className="marquee-group" aria-hidden="true"></div>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="hero-stage" data-stage="1">
@@ -44,12 +50,6 @@ export default function Hero() {
                   <p className="hero-sub">Clean+ Foam Wash lays down a thick, paint-safe blanket that lifts grit away before your mitt touches the surface.</p>
                   <div className="hero-actions">
                     <a className="btn-hero-primary" href="#shop">Shop foam wash <i className="bi bi-droplet-half"></i></a>
-                  </div>
-                  <div className="marquee-strip stage-marquee" role="marquee" aria-label="Key benefits">
-                    <div className="marquee-track">
-                      <div className="marquee-group"></div>
-                      <div className="marquee-group" aria-hidden="true"></div>
-                    </div>
                   </div>
                 </div>
 
@@ -61,37 +61,27 @@ export default function Hero() {
                     <a className="btn-hero-primary" href="#shop">Build your routine <i className="bi bi-stars"></i></a>
                     <button className="btn-hero-ghost" id="heroKitBtn">Add weekend kit</button>
                   </div>
-                  <div className="marquee-strip stage-marquee" role="marquee" aria-label="Key benefits">
-                    <div className="marquee-track">
-                      <div className="marquee-group"></div>
-                      <div className="marquee-group" aria-hidden="true"></div>
-                    </div>
-                  </div>
                 </div>
 
               </div>
             </div>
           </div>
 
-          
           <div className="hero-fallback d-none" id="heroFallback">
             <img src="assets/hero-bottle.jpg" alt="Neatify Foam Wash" />
           </div>
 
-          
           <nav className="hero-rail" aria-label="Hero stages">
             <span className="rail-dash active" data-rail="0"></span>
             <span className="rail-dash" data-rail="1"></span>
             <span className="rail-dash" data-rail="2"></span>
           </nav>
 
-          
           <div className="model-loader" id="modelLoader" role="status">
             <span className="loader-spin"></span>
             <span id="modelLoaderText">Loading 3D…</span>
           </div>
 
-          
           <div className="scroll-hint" id="scrollCue">
             <span className="hint-line"></span>
             <span>Scroll</span>
@@ -101,11 +91,15 @@ export default function Hero() {
       <div id="heroStatus" className="sr-only" aria-live="polite" aria-atomic="true">Stage 1 of 3</div>
     </section>
 
-    
-    <div className="marquee-strip" role="marquee" aria-label="Key benefits">
+    {/* Seamless full-width benefits ticker strip right under the hero */}
+    <div className="marquee-strip" id="marqueeBar" role="marquee" aria-label="Key benefits">
       <div className="marquee-track">
-        <div className="marquee-group" id="marqueeGroup1"></div>
-        <div className="marquee-group" id="marqueeGroup2" aria-hidden="true"></div>
+        <div className="marquee-group" id="marqueeGroup1">
+          {defaultMarqueeItems}
+        </div>
+        <div className="marquee-group" id="marqueeGroup2" aria-hidden="true">
+          {defaultMarqueeItems}
+        </div>
       </div>
     </div>
     </>

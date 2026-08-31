@@ -61,11 +61,33 @@ export default function CartDrawer() {
               </div>
               <div className="summary-row">
                 <span>Shipping</span>
-                <span>Calculated at checkout</span>
+                <span>{getCartTotal() >= 999 ? 'FREE' : '₹49'}</span>
+              </div>
+              <div className="summary-row total-row" style={{ fontWeight: 700, borderTop: '1px solid #e2e8f0', paddingTop: '8px', marginTop: '4px' }}>
+                <span>Total</span>
+                <span>₹{getCartTotal() + (getCartTotal() >= 999 ? 0 : 49)}</span>
               </div>
             </div>
-            <button className="btn btn-primary w-100 checkout-btn">
-              Proceed to Checkout
+            <button 
+              className="btn btn-lime w-100 checkout-btn d-flex align-items-center justify-content-center gap-2"
+              onClick={() => {
+                const checkoutModalEl = document.getElementById('checkoutModal');
+                if (checkoutModalEl && window.bootstrap) {
+                  setIsOpen(false);
+                  const modal = window.bootstrap.Modal.getOrCreateInstance(checkoutModalEl);
+                  modal.show();
+                } else {
+                  // Direct WhatsApp fallback
+                  const waUrl = useCartStore.getState().getWhatsAppOrderUrl({
+                    shipping: getCartTotal() >= 999 ? 0 : 49
+                  });
+                  window.open(waUrl, '_blank', 'noopener,noreferrer');
+                }
+              }}
+              style={{ background: '#25D366', color: '#FFFFFF', border: 'none', fontWeight: 800, padding: '12px', borderRadius: '8px', marginTop: '10px' }}
+            >
+              <i className="bi bi-whatsapp fs-5"></i>
+              <span>Order via WhatsApp</span>
             </button>
           </div>
         )}

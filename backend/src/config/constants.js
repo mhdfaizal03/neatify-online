@@ -140,6 +140,8 @@ const defaultSettings = {
   storeName: "Neatify",
   announcement: "Premium vehicle care, made simple.",
   announcementSub: "Free shipping on orders above ₹999.",
+  whatsappNumber: "918113001959",
+  supportPhone: "+91 8113001959",
 };
 
 const defaultCategories = [
