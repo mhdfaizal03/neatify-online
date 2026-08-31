@@ -4,8 +4,8 @@
   "description": "Neatify vehicle care storefront with admin dashboard",
   "main": "server.js",
   "scripts": {
-    "start": "node backend/server.js",
-    "dev": "node backend/server.js",
+    "start": "npm start --prefix backend",
+    "dev": "npm run dev --prefix backend",
     "build": "npm install --prefix frontend && npm run build --prefix frontend"
   },
   "engines": {

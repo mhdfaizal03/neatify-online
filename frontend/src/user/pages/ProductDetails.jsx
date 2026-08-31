@@ -148,7 +148,7 @@ export default function ProductDetails() {
     <>
       <Header />
       <main id="productPage" style={{ minHeight: '80vh' }}>
-        <section className="product-detail-sec" style={{ paddingTop: '1.75rem', paddingBottom: '4rem' }}>
+        <section className="product-detail-sec">
           <div className="container">
             {/* Breadcrumb & Back action bar */}
             <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
@@ -195,9 +195,9 @@ export default function ProductDetails() {
                 </Link>
               </div>
             ) : (
-              <div className="row g-5 align-items-start">
+              <div className="row g-4 g-lg-5 align-items-start">
                 {/* Left: Image and Action Controls */}
-                <div className="col-lg-5">
+                <div className="col-9 col-sm-7 col-md-6 col-lg-5 mx-auto mx-lg-0">
                   <div className="detail-img-card" style={{ overflow: 'hidden', borderRadius: 'var(--r-md)', aspectRatio: '1 / 1', marginBottom: product.images && product.images.length > 1 ? '0.75rem' : '1.25rem', boxShadow: '0 8px 30px rgba(0,0,0,0.06)' }}>
                     <img
                       src={getImageUrl(activeImage, product)}
@@ -327,10 +327,10 @@ export default function ProductDetails() {
                 </div>
 
                 {/* Right: Info */}
-                <div className="col-lg-6 offset-lg-1">
+                <div className="col-12 col-lg-6 offset-lg-1">
                   <div className="detail-copy">
                     <span className="prod-kicker">
-                      {product.type} / Exterior
+                      {product.type}{product.category ? ` / ${product.category}` : ''}
                     </span>
                     <h1 className="detail-title" style={{ fontSize: '2.4rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.8rem' }}>
                       {product.name}
