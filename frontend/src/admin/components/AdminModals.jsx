@@ -153,14 +153,14 @@ export default function AdminModals() {
   <div className="modal-backdrop hidden" id="orderModal" role="dialog" aria-labelledby="orderModalTitle">
     <div className="modal-card">
       <div className="modal-head">
-        <h3 id="orderModalTitle">Order Details</h3>
+        <h3 id="orderModalTitle">Enquiry Details</h3>
         <button className="icon-btn" id="closeOrderModal" aria-label="Close modal"><i className="bi bi-x-lg"></i></button>
       </div>
       <form id="orderForm">
         <div className="modal-body">
           <input type="hidden" id="orderId" />
           <div className="form-grid">
-            <label className="full">Order Info
+            <label className="full">Enquiry Info
               <div id="orderInfoDisplay" style={{ padding: '10px', background: 'var(--bg-alt)', borderRadius: '6px', fontSize: '0.9em' }}>
                 
               </div>

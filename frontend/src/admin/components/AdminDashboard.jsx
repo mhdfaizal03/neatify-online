@@ -23,7 +23,7 @@ export default function AdminDashboard() {
             </div>
             <div className="panel">
               <div className="panel-head">
-                <h3>Recent Orders</h3>
+                <h3>Recent Enquiries</h3>
               </div>
               <div className="panel-body" id="recentOrders"></div>
             </div>

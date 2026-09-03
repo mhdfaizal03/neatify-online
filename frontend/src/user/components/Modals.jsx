@@ -9,8 +9,8 @@ export default function Modals() {
   <div className="offcanvas offcanvas-end cart-drawer" tabIndex="-1" id="cartDrawer" aria-labelledby="cartTitle">
     <div className="offcanvas-header">
       <div>
-        <p className="cart-eyebrow">YOUR GARAGE</p>
-        <h2 id="cartTitle">Cart</h2>
+        <p className="cart-eyebrow">YOUR ENQUIRY</p>
+        <h2 id="cartTitle">My Enquiry</h2>
       </div>
       <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
@@ -18,8 +18,8 @@ export default function Modals() {
       <div id="cartItems" className="cart-items flex-grow-1"></div>
       <div id="cartEmpty" className="cart-empty">
         <i className="bi bi-bag-x"></i>
-        <h4>Empty cart</h4>
-        <p>Add some exterior-care essentials.</p>
+        <h4>Your enquiry is empty</h4>
+        <p>Add products to ask about availability and details.</p>
         <button className="btn-dark" data-bs-dismiss="offcanvas">Browse products</button>
       </div>
       <div className="cart-foot d-none" id="cartFooter">
@@ -27,12 +27,12 @@ export default function Modals() {
           <p id="shipMessage"></p>
           <div className="ship-track"><span id="shipFill"></span></div>
         </div>
-        <div className="cart-row"><span>Subtotal</span><span id="cartSubtotal">₹0</span></div>
+        <div className="cart-row"><span>Estimated subtotal</span><span id="cartSubtotal">₹0</span></div>
         <div className="cart-row"><span>Shipping</span><span id="cartShipping">₹0</span></div>
-        <div className="cart-total"><span>Total</span><strong id="cartTotal">₹0</strong></div>
+        <div className="cart-total"><span>Estimated total</span><strong id="cartTotal">₹0</strong></div>
         <button className="btn-lime w-100 d-flex align-items-center justify-content-center gap-2" id="checkoutBtn">
           <i className="bi bi-whatsapp fs-5"></i>
-          <span>Order via WhatsApp</span>
+          <span>Send Enquiry on WhatsApp</span>
         </button>
       </div>
     </div>
@@ -76,8 +76,8 @@ export default function Modals() {
               <span className="brand-text">Neatify<span className="brand-accent">.</span></span>
               <p className="auth-visual-tagline">Engineered for ultimate automotive protection.</p>
               <ul className="auth-visual-perks">
-                <li><i className="bi bi-check-circle-fill"></i> Order history & tracking</li>
-                <li><i className="bi bi-check-circle-fill"></i> Faster repeat checkout</li>
+                <li><i className="bi bi-check-circle-fill"></i> Enquiry history</li>
+                <li><i className="bi bi-check-circle-fill"></i> Faster repeat enquiries</li>
                 <li><i className="bi bi-check-circle-fill"></i> Exclusive member offers</li>
               </ul>
               <div className="auth-visual-glow"></div>
@@ -86,7 +86,7 @@ export default function Modals() {
 
           {/* ── Form pane ── */}
           <div className="col-md-7 auth-form-panel">
-            <p id="authNotice" className="auth-notice d-none"><i className="bi bi-shield-lock"></i> Sign in to complete your purchase.</p>
+            <p id="authNotice" className="auth-notice d-none"><i className="bi bi-shield-lock"></i> Sign in to save your enquiry.</p>
 
             {/* Tabs — Login / Register */}
             <div className="auth-tabs" role="tablist">
@@ -133,7 +133,7 @@ export default function Modals() {
                 </div>
               </div>
               <button className="btn-lime w-100 mt-1" type="submit" id="registerBtn">Create account <i className="bi bi-person-plus"></i></button>
-              <p className="auth-fine">One account for checkout, order tracking and faster repeats.</p>
+              <p className="auth-fine">One account for enquiry history and faster repeat enquiries.</p>
             </form>
 
             {/* ── Forgot password form ── */}
@@ -167,7 +167,7 @@ export default function Modals() {
             <p id="accEmail" className="acc-email">—</p>
             <p className="acc-since" id="accSince"></p>
             <div className="acc-tabs" role="tablist">
-              <button className="acc-tab active" data-acc="orders" type="button"><i className="bi bi-box-seam"></i> Orders</button>
+              <button className="acc-tab active" data-acc="orders" type="button"><i className="bi bi-chat-square-text"></i> Enquiries</button>
               <button className="acc-tab" data-acc="profile" type="button"><i className="bi bi-person"></i> Profile</button>
               <button className="acc-tab" data-acc="security" type="button"><i className="bi bi-key"></i> Security</button>
             </div>
@@ -175,7 +175,7 @@ export default function Modals() {
           </div>
           <div className="col-md-8 acc-main">
             <div className="acc-pane active" id="accPaneOrders">
-              <h4>Your orders</h4>
+              <h4>Your enquiries</h4>
               <div id="accOrders" className="acc-orders"></div>
             </div>
             <div className="acc-pane" id="accPaneProfile">
@@ -212,12 +212,12 @@ export default function Modals() {
           <div className="col-lg-7 co-form-side" style={{ maxHeight: '85vh', overflowY: 'auto' }}>
             <div className="d-flex align-items-center gap-2 mb-1">
               <span className="badge bg-success text-white px-2 py-1" style={{ fontSize: '0.75rem', fontWeight: 700 }}>
-                <i className="bi bi-whatsapp me-1"></i> WhatsApp Direct Order
+                <i className="bi bi-whatsapp me-1"></i> WhatsApp Direct Enquiry
               </span>
-              <p className="cart-eyebrow mb-0">NEATIFY — DELIVERY DETAILS</p>
+              <p className="cart-eyebrow mb-0">NEATIFY — ENQUIRY DETAILS</p>
             </div>
-            <h3>Delivery Details</h3>
-            <p className="co-sub mb-3">Please provide your accurate delivery address. Your details will be saved for instant future orders.</p>
+            <h3>Enquiry details</h3>
+            <p className="co-sub mb-3">Add your contact details so the team can respond with availability, final pricing, and delivery information.</p>
             
             <form id="checkoutForm" noValidate>
               {/* Customer Contact */}
@@ -230,6 +230,15 @@ export default function Modals() {
                 <label>Alternative Number <span className="opt">(Optional)</span><input type="tel" id="coAltPhone" placeholder="Alternate phone / landline" autoComplete="tel" /></label>
                 <label>Email Address <span className="opt">(Optional)</span><input type="email" id="coEmail" placeholder="you@example.com" autoComplete="email" /></label>
               </div>
+
+              <label>What can we help with?
+                <select id="coEnquiryType" defaultValue="availability">
+                  <option value="availability">Check availability</option>
+                  <option value="quote">Request a quote</option>
+                  <option value="product-details">Ask about product details</option>
+                  <option value="bulk">Bulk or business enquiry</option>
+                </select>
+              </label>
 
               <div className="divider my-3" style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}></div>
               <h5 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#111', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>
@@ -265,22 +274,22 @@ export default function Modals() {
           <div className="col-lg-5 co-summary-side" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div className="co-summary-receipt">
               <div className="d-flex align-items-center justify-content-between mb-3">
-                <h4 className="mb-0">Order summary</h4>
-                <span className="badge bg-dark text-white px-2 py-1" style={{ fontSize: '0.7rem' }}>NEATIFY VERIFIED</span>
+                <h4 className="mb-0">Enquiry summary</h4>
+                <span className="badge bg-dark text-white px-2 py-1" style={{ fontSize: '0.7rem' }}>WHATSAPP READY</span>
               </div>
               <div id="checkoutItems" className="co-items" style={{ maxHeight: '220px', overflowY: 'auto' }}></div>
               <div className="co-lines my-3">
                 <div><span>Subtotal</span><span id="coSubtotal">₹0</span></div>
                 <div><span>Shipping</span><span id="coShipping">₹0</span></div>
-                <div className="co-grand"><span>Total Amount</span><strong id="coTotal" className="text-success">₹0</strong></div>
+                <div className="co-grand"><span>Estimated total</span><strong id="coTotal" className="text-success">₹0</strong></div>
               </div>
               
               <button className="btn-lime w-100 d-flex align-items-center justify-content-center gap-2" id="placeOrderBtn" form="checkoutForm" type="submit" style={{ height: '52px', fontSize: '1rem', fontWeight: 800 }}>
                 <i className="bi bi-whatsapp fs-5"></i>
-                <span>Continue to WhatsApp →</span>
+                <span>Open WhatsApp →</span>
               </button>
               <p className="co-note mt-2 text-center" style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.6)' }}>
-                <i className="bi bi-shield-check text-success me-1"></i> Your delivery details are saved securely for seamless ordering.
+                <i className="bi bi-shield-check text-success me-1"></i> Your enquiry details are saved securely. Final availability and pricing are confirmed by the business.
               </p>
             </div>
           </div>
@@ -295,14 +304,14 @@ export default function Modals() {
         <div className="success-icon-wrap" style={{ background: 'rgba(37,211,102,0.12)' }}>
           <i className="bi bi-whatsapp text-success" style={{ fontSize: '2.5rem' }}></i>
         </div>
-        <h3>Order Sent!</h3>
-        <p>Your order details have been formatted and dispatched to WhatsApp.</p>
-        <div className="order-chip-premium" id="orderIdChip">ORD-000000</div>
+        <h3>Enquiry ready</h3>
+        <p>Your product enquiry is ready in WhatsApp. Review it and send it to the business.</p>
+        <div className="order-chip-premium" id="orderIdChip">ENQ-000000</div>
         <div className="d-flex flex-column gap-2 mt-4 w-100">
           <a href="https://wa.me/918113001959" target="_blank" rel="noopener noreferrer" className="btn-lime w-100 text-decoration-none d-flex align-items-center justify-content-center gap-2" id="reopenWaBtn">
             <i className="bi bi-whatsapp"></i> Chat with Support
           </a>
-          <button className="btn-dark w-100" data-bs-dismiss="modal">Keep browsing</button>
+          <button className="btn-dark w-100" data-bs-dismiss="modal">Continue browsing</button>
         </div>
       </div>
     </div>

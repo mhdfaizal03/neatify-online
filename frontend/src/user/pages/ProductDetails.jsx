@@ -6,7 +6,6 @@ import Modals from '../components/Modals';
 import { useStorefrontLogic } from '../hooks/useStorefrontLogic';
 import {
   buildWhatsAppUrl,
-  buildProductOrderMessage,
   buildProductInquiryMessage,
   buildProductShareText,
   shareToWhatsApp
@@ -46,8 +45,6 @@ export default function ProductDetails() {
   useEffect(() => {
     // Scroll to top on navigation
     window.scrollTo(0, 0);
-    setIncludedItems([]);
-    setSelectedImage(null);
 
     async function fetchProduct() {
       setLoading(true);
@@ -78,12 +75,14 @@ export default function ProductDetails() {
     fetchProduct();
   }, [id]);
 
-  const activeImage = selectedImage || (product?.images && product.images.length > 0 ? product.images[0] : (product?.image || ''));
+  const activeImage = selectedImage && product?.images?.includes(selectedImage)
+    ? selectedImage
+    : (product?.images && product.images.length > 0 ? product.images[0] : (product?.image || ''));
 
   const handleAddToCart = () => {
     if (!product) return;
     if (typeof window.addToCart === 'function') {
-      // Add to cart matching selected quantity
+      // Add the selected quantity to the enquiry list
       for (let i = 0; i < quantity - 1; i++) {
         window.addToCart(product.id);
       }
@@ -250,7 +249,7 @@ export default function ProductDetails() {
                     </div>
                   ) : (
                     <div className="d-flex flex-column gap-3 w-100">
-                      {/* Quantity + Add to Cart Row */}
+                      {/* Quantity + enquiry actions */}
                       <div className="detail-actions d-flex align-items-center gap-2 gap-sm-3 w-100">
                         <div className="qty-control" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1.5px solid #e2e8f0', borderRadius: '8px', padding: '0.4rem 0.6rem', background: '#f8fafc', width: '105px', height: '50px', flexShrink: 0 }}>
                           <button
@@ -274,18 +273,18 @@ export default function ProductDetails() {
                           </button>
                         </div>
 
-                        {/* Add to Cart Button */}
+                        {/* Add to enquiry */}
                         <button
                           className="btn-add-cart-secondary flex-grow-1"
                           onClick={handleAddToCart}
                           style={{ height: '50px', borderRadius: '8px', fontSize: '0.95rem', fontWeight: 700, background: '#f1f5f9', color: '#0f172a', border: '1.5px solid #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s ease', cursor: 'pointer' }}
                         >
                           <i className="bi bi-bag" style={{ fontSize: '1.1rem' }}></i>
-                          <span>Add to cart</span>
+                          <span>Add to enquiry</span>
                         </button>
                       </div>
 
-                      {/* Direct WhatsApp Order CTA Button */}
+                      {/* Direct WhatsApp enquiry CTA */}
                       <button
                         type="button"
                         onClick={handleDirectOrder}
@@ -293,7 +292,7 @@ export default function ProductDetails() {
                         style={{ height: '52px', borderRadius: '8px', fontSize: '1.02rem', fontWeight: 800, background: '#25D366', color: '#FFFFFF', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 4px 16px rgba(37,211,102,0.32)', textDecoration: 'none', transition: 'all 0.2s ease', cursor: 'pointer' }}
                       >
                         <i className="bi bi-whatsapp" style={{ fontSize: '1.25rem' }}></i>
-                        <span>Order on WhatsApp · ₹{product.price * quantity}</span>
+                        <span>Enquire on WhatsApp · ₹{product.price * quantity}</span>
                       </button>
 
                       {/* Enquire & Share Row */}
@@ -342,7 +341,7 @@ export default function ProductDetails() {
                     </div>
 
                     <div className="detail-trust-row">
-                      <span className="detail-trust-item"><i className="bi bi-shield-check"></i> Secure checkout</span>
+                      <span className="detail-trust-item"><i className="bi bi-shield-check"></i> Secure enquiry</span>
                       <span className="detail-trust-item"><i className="bi bi-truck"></i> Ships in 1–3 days</span>
                       <span className="detail-trust-item"><i className="bi bi-arrow-return-left"></i> Easy returns</span>
                     </div>
@@ -397,7 +396,7 @@ export default function ProductDetails() {
                           className="detail-sticky-cta"
                         >
                           <i className="bi bi-whatsapp"></i>
-                          <span>Order via WhatsApp</span>
+                          <span>Enquire on WhatsApp</span>
                         </button>
                       </div>
                     )}

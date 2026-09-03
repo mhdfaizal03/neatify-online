@@ -24,6 +24,7 @@ const orderSchema = new mongoose.Schema(
       landmark: { type: String, default: "" },
       instructions: { type: String, default: "" },
       notes: { type: String, default: "" },
+      enquiryType: { type: String, default: "availability" },
     },
     items: [orderItemSchema],
     total: {
@@ -43,7 +44,7 @@ const orderSchema = new mongoose.Schema(
     },
     source: {
       type: String,
-      default: "whatsapp",
+      default: "whatsapp-enquiry",
     },
     isDeleted: {
       type: Boolean,

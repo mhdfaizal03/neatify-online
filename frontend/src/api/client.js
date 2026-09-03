@@ -9,8 +9,7 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   (config) => {
-    // Inject auth token if available (Zustand store will handle this later)
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("neatify-token") || localStorage.getItem("neatify_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

@@ -9,7 +9,7 @@ export default function AdminTopbar() {
         </button>
         <div className="topbar-search">
           <i className="bi bi-search"></i>
-          <input type="search" id="globalSearch" placeholder="Search products, orders, emails..." />
+          <input type="search" id="globalSearch" placeholder="Search products, orders, emails..." aria-label="Search the admin console" />
         </div>
         <div className="topbar-actions">
           <span className="admin-user" id="adminUser">admin</span>

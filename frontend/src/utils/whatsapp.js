@@ -23,17 +23,17 @@ export function buildWhatsAppUrl(message, phone = DEFAULT_WHATSAPP_NUMBER) {
 }
 
 /**
- * Builds a direct single product order message.
+ * Builds a direct single product enquiry message.
  */
 export function buildProductOrderMessage(product, quantity = 1, customNotes = "") {
-  if (!product) return "Hello Neatify, I would like to place an order.";
+  if (!product) return "Hello Neatify, I would like to enquire about your products.";
   const qty = Math.max(1, Number(quantity) || 1);
   const unitPrice = Number(product.price) || 0;
   const totalAmount = unitPrice * qty;
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const productUrl = `${baseUrl}/product/${product.id || product._id}`;
 
-  return `*NEW ORDER — NEATIFY CAR CARE* 🚗✨
+  return `*PRODUCT ENQUIRY — NEATIFY CAR CARE* 🚗✨
 ------------------------------------
 *Product:* ${product.name}
 *Category:* ${product.type || product.category || "Exterior Care"}
@@ -43,7 +43,7 @@ export function buildProductOrderMessage(product, quantity = 1, customNotes = ""
 ------------------------------------
 *Product Link:* ${productUrl}${customNotes ? `\n*Note:* ${customNotes}` : ""}
 
-Please confirm availability and dispatch details. Thank you!`;
+Please confirm availability, final pricing, and delivery details. Thank you!`;
 }
 
 /**
@@ -54,7 +54,7 @@ export function buildProductInquiryMessage(product) {
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const productUrl = `${baseUrl}/product/${product.id || product._id}`;
 
-  return `*PRODUCT INQUIRY — NEATIFY CAR CARE* 🚗❓
+  return `*PRODUCT ENQUIRY — NEATIFY CAR CARE* 🚗❓
 ------------------------------------
 Hello Neatify! I have a question regarding:
 *Product:* ${product.name} (₹${product.price})
@@ -132,15 +132,18 @@ export function formatDeliveryDetailsBlock(customer = {}) {
   if (customer.instructions || customer.notes) {
     lines.push(`📝 *Delivery Instructions:* ${customer.instructions || customer.notes}`);
   }
+  if (customer.enquiryType) {
+    lines.push(`\n💬 *Enquiry Type:* ${String(customer.enquiryType).replace(/-/g, " ")}`);
+  }
 
   return lines.join("\n");
 }
 
 /**
- * Builds a bundle / kit order message.
+ * Builds a bundle / kit enquiry message.
  */
 export function buildKitOrderMessage(kit, includedItems = [], customer = {}) {
-  if (!kit) return "Hello Neatify, I would like to order the kit.";
+  if (!kit) return "Hello Neatify, I would like to enquire about the kit.";
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const productUrl = `${baseUrl}/product/${kit.id || kit._id}`;
 
@@ -153,18 +156,18 @@ export function buildKitOrderMessage(kit, includedItems = [], customer = {}) {
 
   const deliveryBlock = customer && customer.name ? `\n\n${formatDeliveryDetailsBlock(customer)}\n` : "";
 
-  return `*FEATURED KIT ORDER — NEATIFY CAR CARE* 🧰✨
+  return `*FEATURED KIT ENQUIRY — NEATIFY CAR CARE* 🧰✨
 ----------------------------------------
 *Kit:* ${kit.name}
 *Price:* ₹${kit.price}
 ${itemsList ? `*Included in kit:*\n${itemsList}\n` : ""}----------------------------------------
 *Link:* ${productUrl}${deliveryBlock}
 ----------------------------------------
-Please confirm my kit order and delivery schedule. Thank you!`;
+Please confirm kit availability, final pricing, and delivery details. Thank you!`;
 }
 
 /**
- * Builds a multi-item cart order manifest message with structured delivery details.
+ * Builds a multi-item enquiry manifest with structured delivery details.
  */
 export function buildCartOrderMessage({ items = [], subtotal = 0, shipping = 0, total = 0, customer = {}, orderId = "" }) {
   const lines = items.map((item, idx) => {
@@ -175,20 +178,20 @@ export function buildCartOrderMessage({ items = [], subtotal = 0, shipping = 0, 
   const shippingText = shipping === 0 ? "FREE" : `₹${shipping}`;
   const deliveryBlock = formatDeliveryDetailsBlock(customer);
 
-  return `*NEATIFY CAR CARE — ORDER ${orderId ? `#${orderId}` : ""}* 🛒🚗
+  return `*NEATIFY CAR CARE — ENQUIRY ${orderId ? `#${orderId}` : ""}* 🛒🚗
 ----------------------------------------
-*Ordered Items:*
+*Products I am enquiring about:*
 ${lines || "No items"}
 ----------------------------------------
 *Subtotal:* ₹${subtotal}
 *Shipping:* ${shippingText}
-*Grand Total:* *₹${total}*
+*Estimated total:* *₹${total}*
 ----------------------------------------
 
 ${deliveryBlock}
 
 ----------------------------------------
-Please confirm my order and share payment / delivery schedule. Thank you!`;
+Please confirm availability, final pricing, and delivery details. Thank you!`;
 }
 
 /**

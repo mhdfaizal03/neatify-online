@@ -38,7 +38,7 @@ export default function CartDrawer() {
       <div className={`cart-overlay ${isOpen ? 'active' : ''}`} onClick={() => setIsOpen(false)}></div>
       <div className={`cart-panel ${isOpen ? 'active' : ''}`}>
         <div className="cart-header">
-          <h4 className="cart-title">Your Cart</h4>
+          <h4 className="cart-title">My Enquiry</h4>
           <button className="cart-close" onClick={() => setIsOpen(false)} aria-label="Close cart">
             <i className="bi bi-x-lg"></i>
           </button>
@@ -48,7 +48,7 @@ export default function CartDrawer() {
           {items.length === 0 ? (
             <div className="empty-cart-state">
               <i className="bi bi-cart-x"></i>
-              <p>Your cart is empty.</p>
+              <p>Your enquiry list is empty.</p>
               <button className="btn btn-primary mt-3" onClick={() => setIsOpen(false)}>Continue Shopping</button>
             </div>
           ) : (
@@ -91,7 +91,7 @@ export default function CartDrawer() {
                 <span>{getCartTotal() >= 999 ? 'FREE' : '₹49'}</span>
               </div>
               <div className="summary-row total-row" style={{ fontWeight: 700, borderTop: '1px solid #e2e8f0', paddingTop: '8px', marginTop: '4px' }}>
-                <span>Total</span>
+                <span>Estimated total</span>
                 <span>₹{getCartTotal() + (getCartTotal() >= 999 ? 0 : 49)}</span>
               </div>
             </div>
@@ -114,7 +114,7 @@ export default function CartDrawer() {
               style={{ background: '#25D366', color: '#FFFFFF', border: 'none', fontWeight: 800, padding: '12px', borderRadius: '8px', marginTop: '10px' }}
             >
               <i className="bi bi-whatsapp fs-5"></i>
-              <span>Order via WhatsApp</span>
+              <span>Send Enquiry on WhatsApp</span>
             </button>
           </div>
         )}

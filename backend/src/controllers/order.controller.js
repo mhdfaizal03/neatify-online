@@ -15,6 +15,8 @@ const formatOrder = (o) => {
     })),
     total: o.total,
     shipping: o.shipping,
+    enquiryType: o.customer?.enquiryType || "availability",
+    source: o.source || "whatsapp-enquiry",
     status: o.status || "Pending",
     createdAt: o.createdAt || new Date(),
   };
@@ -23,7 +25,7 @@ const formatOrder = (o) => {
 class OrderController {
   async createOrder(req, res, next) {
     try {
-      const { customer, items, total, shipping } = req.body;
+      const { customer, items, total, shipping, enquiryType } = req.body;
 
       if (!customer || !items || items.length === 0) {
         return res.status(400).json({ error: "Invalid order data" });
@@ -32,18 +34,19 @@ class OrderController {
       if (mongoose.connection.readyState === 0) {
         console.warn("Database not connected, returning mock success for order placement.");
         const mockOrder = {
-          id: "ORD-" + Math.floor(100000 + Math.random() * 900000),
+          id: "ENQ-" + Math.floor(100000 + Math.random() * 900000),
           customer,
           items,
           total,
           shipping,
           status: "Pending",
+          source: "whatsapp-enquiry",
           createdAt: new Date(),
         };
         return res.status(201).json(mockOrder);
       }
 
-      // Check stock before placing order
+      // Check current availability without reserving or decrementing stock.
       for (const item of items) {
         const product = await Product.findOne({ id: item.id, isDeleted: false });
         if (!product) {
@@ -54,19 +57,15 @@ class OrderController {
         }
       }
 
-      // Decrement stock atomically
-      for (const item of items) {
-        await Product.findOneAndUpdate(
-          { id: item.id },
-          { $inc: { stock: -item.qty } }
-        );
-      }
-
       const order = await Order.create({
-        customer,
+        customer: {
+          ...customer,
+          enquiryType: enquiryType || customer.enquiryType || "availability",
+        },
         items,
         total,
         shipping,
+        source: "whatsapp-enquiry",
         status: "Pending",
       });
 

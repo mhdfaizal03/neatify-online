@@ -33,10 +33,10 @@ export default function Process() {
       {/* ── Process / How It Works ── */}
       <section className="sec process-sec" id="how-it-works">
         <div className="container">
-          <div className="text-center reveal" style={{ marginBottom: '3.5rem' }}>
-            <p className="sec-eyebrow justify-content-center">SIMPLE BY DESIGN</p>
+          <div className="process-intro reveal" style={{ marginBottom: '3.5rem' }}>
+            <p className="sec-eyebrow">SIMPLE BY DESIGN</p>
             <h2 className="sec-title">Your clean in <em>four moves.</em></h2>
-            <p className="sec-sub mx-auto" style={{ marginTop: '1rem', maxWidth: '460px' }}>
+            <p className="sec-sub" style={{ marginTop: '1rem', maxWidth: '460px' }}>
               No complicated setup. The right product at the right moment.
             </p>
           </div>
@@ -152,7 +152,8 @@ export default function Process() {
                 Start with the foam wash, then build from there.
               </p>
               <a
-                href="https://wa.me/918113001959?text=Hello%20Neatify,%20I%20have%20a%20question."
+                data-whatsapp-link="question"
+                href="#"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="faq-wa-cta"

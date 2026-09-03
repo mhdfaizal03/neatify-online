@@ -137,7 +137,7 @@ export function useAdminLogic() {
       products: "Search products...",
       kits: "Search kits...",
       categories: "Search categories...",
-      orders: "Search by order ID, customer name, or email...",
+      orders: "Search by enquiry ID, customer name, or email...",
       subscribers: "Search by email address...",
       media: "Search by filename...",
       dashboard: "Search...",
@@ -181,7 +181,7 @@ export function useAdminLogic() {
       const s = await api("/api/stats");
       $("#statGrid").innerHTML = `
         <div class="stat-card"><div class="stat-icon green"><i class="bi bi-box-seam"></i></div><div class="stat-value">${s.totalProducts}</div><div class="stat-label">Products</div></div>
-        <div class="stat-card"><div class="stat-icon blue"><i class="bi bi-receipt"></i></div><div class="stat-value">${s.totalOrders}</div><div class="stat-label">Orders</div></div>
+        <div class="stat-card"><div class="stat-icon blue"><i class="bi bi-chat-square-text"></i></div><div class="stat-value">${s.totalOrders}</div><div class="stat-label">Enquiries</div></div>
         <div class="stat-card"><div class="stat-icon yellow"><i class="bi bi-currency-rupee"></i></div><div class="stat-value">${currency(s.totalRevenue)}</div><div class="stat-label">Revenue</div></div>
         <div class="stat-card"><div class="stat-icon pink"><i class="bi bi-envelope-heart"></i></div><div class="stat-value">${s.totalSubscribers}</div><div class="stat-label">Subscribers</div></div>
       `;
@@ -207,9 +207,9 @@ export function useAdminLogic() {
                 ${s.recentOrders.map(o => `<tr><td><a href="#" onclick="window.__admin.switchView('orders'); return false;">${o.id}</a></td><td>${esc(o.customer.name || o.customer.email)}</td><td class="price-cell">${currency(o.total)}</td><td><span class="status-badge ${esc(o.status)}">${esc(o.status)}</span></td></tr>`).join("")}
               </tbody>
             </table>
-          </div>` : `<div class="panel-empty">No recent orders</div>`;
+          </div>` : `<div class="panel-empty">No recent enquiries</div>`;
       }
-    } catch (err) { showSnack("Failed to load stats", "error"); }
+    } catch { showSnack("Failed to load stats", "error"); }
   }
 
   /* ── VIEW LOGIC: PRODUCTS ── */
@@ -223,7 +223,7 @@ export function useAdminLogic() {
       state.allProducts = await api("/api/products/all");
       renderProductsTable();
       renderKitsTable();
-    } catch (err) { showSnack("Failed to load products", "error"); }
+    } catch { showSnack("Failed to load products", "error"); }
   }
 
   function renderProductsTable() {
@@ -350,7 +350,7 @@ export function useAdminLogic() {
       showSnack(id ? "Product updated" : "Product created");
       $("#productModal").classList.add("hidden");
       loadProducts();
-    } catch (err) { showSnack("Save failed", "error"); }
+    } catch { showSnack("Save failed", "error"); }
   }
 
   /* ── KIT MODAL LOGIC ── */
@@ -461,7 +461,7 @@ export function useAdminLogic() {
       showSnack(id ? "Kit updated" : "Kit created");
       $("#kitModal").classList.add("hidden");
       loadProducts();
-    } catch (err) { showSnack("Save failed", "error"); }
+    } catch { showSnack("Save failed", "error"); }
   }
 
   /* ── VIEW LOGIC: MEDIA ── */
@@ -471,7 +471,7 @@ export function useAdminLogic() {
     try {
       state.media = await api("/api/media");
       renderMediaGrid();
-    } catch (err) { showSnack("Failed to load media", "error"); }
+    } catch { showSnack("Failed to load media", "error"); }
   }
 
   function renderMediaGrid() {
@@ -519,14 +519,14 @@ export function useAdminLogic() {
     }
   }
 
-  /* ── VIEW LOGIC: ORDERS ── */
+  /* ── VIEW LOGIC: ENQUIRIES ── */
   async function loadOrders() {
     const tbody = $("#ordersTable");
     tbody.innerHTML = `<tr><td colspan="6" class="loading-overlay"><span class="spinner"></span> Loading...</td></tr>`;
     try {
       state.orders = await api("/api/orders");
       renderOrdersTable();
-    } catch (err) { showSnack("Failed to load orders", "error"); }
+    } catch { showSnack("Failed to load enquiries", "error"); }
   }
 
   function renderOrdersTable() {
@@ -537,7 +537,7 @@ export function useAdminLogic() {
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     if (!list.length) {
-      tbody.innerHTML = `<tr><td colspan="6"><div class="admin-empty-state"><i class="bi bi-receipt"></i><h4>No orders found</h4><p>There are no orders matching your search.</p></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6"><div class="admin-empty-state"><i class="bi bi-chat-square-text"></i><h4>No enquiries found</h4><p>There are no enquiries matching your search.</p></div></td></tr>`;
       return;
     }
 
@@ -550,7 +550,7 @@ export function useAdminLogic() {
         <td>${formatDate(o.createdAt)}</td>
         <td>
           <div class="row-actions">
-            <button class="icon-action" onclick="window.__admin.editOrder('${esc(o.id)}')" title="View/Edit Order"><i class="bi bi-pencil"></i></button>
+            <button class="icon-action" onclick="window.__admin.editOrder('${esc(o.id)}')" title="View/Edit Enquiry"><i class="bi bi-pencil"></i></button>
           </div>
         </td>
       </tr>`).join("");
@@ -563,7 +563,7 @@ export function useAdminLogic() {
     try {
       state.subscribers = await api("/api/subscribers");
       renderSubscribersTable();
-    } catch (err) { showSnack("Failed to load subscribers", "error"); }
+    } catch { showSnack("Failed to load subscribers", "error"); }
   }
 
   function renderSubscribersTable() {
@@ -623,7 +623,7 @@ export function useAdminLogic() {
         }
       });
       renderMarqueePills();
-    } catch (err) { showSnack("Failed to load settings", "error"); }
+    } catch { showSnack("Failed to load settings", "error"); }
   }
 
   async function saveSettings(e) {
@@ -640,7 +640,7 @@ export function useAdminLogic() {
     try {
       await api("/api/settings", { method: "PUT", body: JSON.stringify(payload) });
       showSnack("Settings saved");
-    } catch (err) { showSnack("Save failed", "error"); }
+    } catch { showSnack("Save failed", "error"); }
   }
 
   /* ── VIEW LOGIC: CATEGORIES ── */
@@ -667,7 +667,7 @@ export function useAdminLogic() {
         `;
         filterSelect.value = val;
       }
-    } catch (err) {
+    } catch {
       showSnack("Failed to load categories", "error");
     }
   }
@@ -897,10 +897,10 @@ export function useAdminLogic() {
       const status = $("#orderStatus").value;
       try {
         await api(`/api/orders/${id}`, { method: "PATCH", body: JSON.stringify({ status }) });
-        showSnack("Order updated");
+        showSnack("Enquiry updated");
         $("#orderModal").classList.add("hidden");
         loadOrders();
-      } catch (err) { showSnack("Update failed", "error"); }
+      } catch { showSnack("Update failed", "error"); }
     });
 
     $("#pickImageBtn").addEventListener("click", () => {

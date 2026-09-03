@@ -43,6 +43,17 @@ class SettingsController {
         supportPhone,
       } = req.body;
 
+      const normalizePhone = (value, fallback) => {
+        if (value === undefined) return fallback;
+        const normalized = String(value).replace(/\D/g, "");
+        if (normalized.length < 10 || normalized.length > 15) {
+          const error = new Error("Enter a valid WhatsApp number with country code.");
+          error.statusCode = 400;
+          throw error;
+        }
+        return normalized;
+      };
+
       if (freeShippingThreshold !== undefined) settings.freeShippingThreshold = freeShippingThreshold;
       if (weekendKitIds !== undefined) settings.weekendKitIds = weekendKitIds;
       if (highlightProductId !== undefined) settings.highlightProductId = highlightProductId;
@@ -50,7 +61,7 @@ class SettingsController {
       if (announcement !== undefined) settings.announcement = announcement;
       if (announcementSub !== undefined) settings.announcementSub = announcementSub;
       if (marqueeKeywords !== undefined) settings.marqueeKeywords = marqueeKeywords;
-      if (whatsappNumber !== undefined) settings.whatsappNumber = whatsappNumber;
+      if (whatsappNumber !== undefined) settings.whatsappNumber = normalizePhone(whatsappNumber, settings.whatsappNumber);
       if (supportPhone !== undefined) settings.supportPhone = supportPhone;
 
       await settings.save();

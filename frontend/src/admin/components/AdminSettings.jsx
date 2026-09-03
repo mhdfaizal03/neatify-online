@@ -38,6 +38,14 @@ export default function AdminSettings() {
               <label>Featured Product ID
                 <input type="number" name="highlightProductId" min="1" />
               </label>
+              <label>Primary WhatsApp Number
+                <input type="tel" name="whatsappNumber" placeholder="918113001959" inputMode="tel" />
+                <small className="settings-help">Digits only, including country code. Used for all enquiry links.</small>
+              </label>
+              <label>Support Phone
+                <input type="tel" name="supportPhone" placeholder="+91 8113001959" inputMode="tel" />
+                <small className="settings-help">Displayed as the support contact.</small>
+              </label>
             </div>
           </form>
         </section>

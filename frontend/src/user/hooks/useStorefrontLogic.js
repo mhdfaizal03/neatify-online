@@ -2,16 +2,12 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   buildWhatsAppUrl,
-  buildProductOrderMessage,
-  buildProductInquiryMessage,
   buildProductShareText,
   buildCartOrderMessage,
-  buildKitOrderMessage,
   shareToWhatsApp,
   DEFAULT_WHATSAPP_NUMBER,
   saveCustomerDeliveryDetails,
   loadCustomerDeliveryDetails,
-  formatDeliveryDetailsBlock,
 } from '../../utils/whatsapp';
 import { getProductPlaceholderSvg } from '../../utils/placeholder';
 
@@ -63,6 +59,26 @@ const money = (v) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(v);
 
 const getProduct = (id) => products.find((p) => String(p.id) === String(id));
+
+function updateWhatsAppLinks(number = DEFAULT_WHATSAPP_NUMBER) {
+  const cleanNumber = String(number).replace(/\D/g, "") || DEFAULT_WHATSAPP_NUMBER;
+  const messages = {
+    primary: "Hello Neatify Car Care, I would like to enquire about your products.",
+    support: "Hello Neatify, I need support with my enquiry.",
+    question: "Hello Neatify, I have a question.",
+  };
+  document.querySelectorAll("[data-whatsapp-link]").forEach(link => {
+    const text = messages[link.dataset.whatsappLink] || messages.primary;
+    link.href = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
+  });
+}
+
+function updateSupportPhone(phone) {
+  const value = phone || "+91 8113001959";
+  document.querySelectorAll("[data-support-phone]").forEach(element => {
+    element.textContent = value;
+  });
+}
 
 const matchesSearch = (p, q) => {
   if (!q) return true;
@@ -119,6 +135,8 @@ async function loadSettings() {
   if (faqT) faqT.textContent = money(settings.freeShippingThreshold);
   const heroS = $("heroShipNote");
   if (heroS) heroS.textContent = money(settings.freeShippingThreshold);
+  updateWhatsAppLinks(settings.whatsappNumber || DEFAULT_WHATSAPP_NUMBER);
+  updateSupportPhone(settings.supportPhone);
   document.title = `${settings.storeName || "Neatify"} — Clean. Shine. Protect.`;
 
   const keywords = settings.marqueeKeywords || ["DEEP DIRT LIFT", "PAINT-SAFE FORMULA", "THICK CLINGING FOAM", "CRYSTAL GLOSS FINISH", "pH-NEUTRAL & WAX-SAFE", "STREAK-FREE EVERY TIME"];
@@ -230,13 +248,6 @@ function renderBundle() {
       restPart = parts.join(" ");
     }
 
-    const pointsHtml = (kit.points || []).slice(0, 3).map(pt => `
-      <li style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: rgba(255,255,255,0.85); margin-bottom: 6px;">
-        <i class="bi bi-check2" style="color: var(--lime); font-size: 1.1rem; flex-shrink: 0;"></i>
-        <span>${esc(pt)}</span>
-      </li>
-    `).join("");
-
     const hasMultiImg = kit.images && kit.images.length > 1;
     const imgSectionHtml = hasMultiImg ? `
       <div class="bundle-img-wrap bundle-multi-grid">
@@ -264,7 +275,7 @@ function renderBundle() {
         <h2 class="bundle-title">${esc(firstPart)}<br /><em>${esc(restPart)}</em></h2>
         <p class="bundle-desc">${esc(kit.description)}</p>
         <div class="bundle-foot mt-4">
-          <button class="btn-lime" data-kit-id="${kit.id}">Add to Cart</button>
+          <button class="btn-lime" data-kit-id="${kit.id}">Add to Enquiry</button>
           <button class="btn-ghost-lime see-more-kits" id="seeMoreKitsBtn" type="button">See more kits <i class="bi bi-arrow-right"></i></button>
           <span class="bundle-price ms-auto">${itemCount} items · ${money(kit.price)}</span>
         </div>
@@ -340,7 +351,7 @@ function renderProducts() {
           <div class="prod-foot">
             <span class="prod-price">${money(p.price)}</span>
             <div class="d-flex align-items-center gap-1 ms-auto">
-              <button class="wa-btn-card" data-wa-order="${p.id}" title="Order on WhatsApp" aria-label="Order ${esc(p.name)} on WhatsApp">
+              <button class="wa-btn-card" data-wa-order="${p.id}" title="Enquire on WhatsApp" aria-label="Enquire about ${esc(p.name)} on WhatsApp">
                 <i class="bi bi-whatsapp"></i>
               </button>
               ${p.stock === 0 ? `
@@ -348,7 +359,7 @@ function renderProducts() {
                 <i class="bi bi-slash-circle"></i>
               </button>
               ` : `
-              <button class="add-btn" data-add="${p.id}" title="Add to cart" aria-label="Add ${esc(p.name)} to cart">
+              <button class="add-btn" data-add="${p.id}" title="Add to enquiry" aria-label="Add ${esc(p.name)} to enquiry">
                 <i class="bi bi-plus-lg"></i>
               </button>
               `}
@@ -406,7 +417,7 @@ function addToCart(id, openDrawer = false) {
   saveCart();
   renderCart();
   bumpBadge();
-  showToast(`${p.name} added`);
+  showToast(`${p.name} added to enquiry`);
   if (openDrawer && cartDrawer) cartDrawer.show();
 }
 
@@ -437,7 +448,7 @@ function addBundle(ids) {
   saveCart();
   renderCart();
   bumpBadge();
-  showToast("Weekend kit added to cart");
+  showToast("Weekend kit added to enquiry");
   if (cartDrawer) cartDrawer.show();
 }
 
@@ -514,7 +525,7 @@ function renderShipProgress(sub) {
   }
 }
 
-/* ── CHECKOUT (WHATSAPP DISPATCH) ─────────────────────── */
+/* ── ENQUIRY (WHATSAPP DISPATCH) ───────────────────────── */
 function openCheckout() {
   if (!state.cart.length) return;
   prefillCheckout();
@@ -594,13 +605,13 @@ function validateCheckout() {
   return valid;
 }
 
-async function placeOrder(e) {
+async function placeEnquiry(e) {
   e.preventDefault();
   if (!validateCheckout() || !state.cart.length) return;
   const btn = $("placeOrderBtn");
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = `<span class="loader-spin" style="width:14px;height:14px;border-width:1.5px;margin-right:0.4rem;"></span>Dispatching to WhatsApp…`;
+    btn.innerHTML = `<span class="loader-spin" style="width:14px;height:14px;border-width:1.5px;margin-right:0.4rem;"></span>Preparing WhatsApp enquiry…`;
   }
 
   const sub  = subtotalValue();
@@ -611,6 +622,7 @@ async function placeOrder(e) {
     phone: $("coPhone")?.value.trim() || "",
     altPhone: $("coAltPhone")?.value.trim() || "",
     email: $("coEmail")?.value.trim() || "",
+    enquiryType: $("coEnquiryType")?.value || "availability",
     house: $("coHouse")?.value.trim() || "",
     street: $("coStreet")?.value.trim() || "",
     locality: $("coLocality")?.value.trim() || "",
@@ -642,26 +654,26 @@ async function placeOrder(e) {
     }),
     total: sub + ship,
     shipping: ship,
-    source: "whatsapp",
+    source: "whatsapp-enquiry",
     customer: customerData,
   };
 
-  let orderId = `ORD-${Date.now().toString().slice(-6)}`;
+  let enquiryId = `ENQ-${Date.now().toString().slice(-6)}`;
   try {
     const order = await api("/api/orders", { method: "POST", body: JSON.stringify(payload) });
-    if (order && order.id) orderId = order.id;
+    if (order && order.id) enquiryId = order.id.replace(/^ORD-/, "ENQ-");
   } catch (err) {
     console.warn("Backend order logging note:", err.message);
   }
 
-  // 2. Build WhatsApp Order message with full delivery details
+  // 2. Build the WhatsApp enquiry message with full delivery details
   const waMsg = buildCartOrderMessage({
     items: payload.items,
     subtotal: sub,
     shipping: ship,
     total: sub + ship,
     customer: customerData,
-    orderId: orderId,
+    orderId: enquiryId,
   });
 
   const targetNumber = settings.whatsappNumber || DEFAULT_WHATSAPP_NUMBER;
@@ -675,14 +687,14 @@ async function placeOrder(e) {
   saveCart();
   renderCart();
 
-  if ($("orderIdChip")) $("orderIdChip").textContent = orderId;
+  if ($("orderIdChip")) $("orderIdChip").textContent = enquiryId;
   const reopenBtn = $("reopenWaBtn");
   if (reopenBtn) reopenBtn.href = waUrl;
   orderSuccModal.show();
 
   if (btn) {
     btn.disabled = false;
-    btn.innerHTML = `<i class="bi bi-whatsapp fs-5"></i><span>Continue to WhatsApp →</span>`;
+    btn.innerHTML = `<i class="bi bi-whatsapp fs-5"></i><span>Open WhatsApp →</span>`;
   }
 }
 
@@ -802,7 +814,7 @@ function getOrderStepper(status) {
       <div class="stepper-progress" style="width: 100%;"></div>
       <div class="step cancelled" style="width: 100%;">
         <div class="step-dot"><i class="bi bi-x-lg"></i></div>
-        <div class="step-label">Order Cancelled</div>
+        <div class="step-label">Enquiry closed</div>
       </div>
     </div>`;
   }
@@ -843,11 +855,11 @@ async function loadAccountOrders() {
   try {
     orders = await api("/api/account/orders");
   } catch {
-    box.innerHTML = `<div class="acc-empty"><p>Could not load orders.</p></div>`;
+    box.innerHTML = `<div class="acc-empty"><p>Could not load enquiries.</p></div>`;
     return;
   }
   if (!orders.length) {
-    box.innerHTML = `<div class="acc-empty"><i class="bi bi-box-seam"></i><p>No orders yet — your purchases will live here.</p></div>`;
+    box.innerHTML = `<div class="acc-empty"><i class="bi bi-chat-square-text"></i><p>No enquiries yet. Your saved requests will live here.</p></div>`;
     return;
   }
   box.innerHTML = orders.map((o) => {
@@ -862,7 +874,7 @@ async function loadAccountOrders() {
       </div>
       <div class="acc-order-items">${lines}</div>
       ${getOrderStepper(status)}
-      <div class="acc-order-total" style="margin-top: 1.2rem;"><span>Total</span><strong>${money(o.total || 0)}</strong></div>
+      <div class="acc-order-total" style="margin-top: 1.2rem;"><span>Estimated total</span><strong>${money(o.total || 0)}</strong></div>
     </div>`;
   }).join("");
 }
@@ -1010,56 +1022,6 @@ function showToast(message, isError = false) {
   }
 }
 
-/* ── PRODUCT QUICK VIEW ─────────────────────────────────── */
-function openProduct(id) {
-  const p = getProduct(id);
-  if (!p) return;
-  const isMultiImg = p.images && p.images.length > 1;
-  const imgHtml = isMultiImg
-    ? `<img src="${getImgUrl(p.images[0], p)}" alt="${esc(p.name)}" class="w-100 h-100" style="object-fit:cover;" onerror="this.src='${getProductPlaceholderSvg(p.name, p.type)}'">`
-    : `<img src="${getImgUrl(p.image, p)}" alt="${esc(p.name)}" class="w-100 h-100" style="object-fit:cover;" onerror="this.src='${getProductPlaceholderSvg(p.name, p.type)}'">`;
-
-  $("productModalContent").innerHTML = `
-    <div class="col-md-6 modal-prod-img">${imgHtml}</div>
-    <div class="col-md-6 modal-prod-copy">
-      <span class="prod-kicker">${esc(p.type)} / Exterior</span>
-      <h2 id="productModalTitle">${esc(p.name)}</h2>
-      <div class="d-flex align-items-baseline gap-2 mb-2">
-        <div class="modal-price">${money(p.price)}</div>
-        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size:0.75rem; font-weight:700;">
-          <i class="bi bi-whatsapp me-1"></i> WhatsApp Order Ready
-        </span>
-      </div>
-      ${p.stock === 0 ? '<span class="badge bg-danger mb-3">Sold Out</span>' : (p.stock < 5 ? `<span class="badge bg-warning text-dark mb-3">Only ${p.stock} remaining!</span>` : '')}
-      <p>${esc(p.description)}</p>
-      <ul class="detail-pts">${(p.points || []).map(x => `<li><i class="bi bi-check2"></i>${esc(x)}</li>`).join("")}</ul>
-      ${p.stock === 0 ? `
-      <button class="btn-lime w-100 disabled" disabled style="background:#444;color:#888;cursor:not-allowed;border:none;">Sold Out <i class="bi bi-slash-circle ms-1"></i></button>
-      ` : `
-      <div class="d-flex flex-column gap-2 mt-3 w-100">
-        <button class="btn-whatsapp-order w-100 d-flex align-items-center justify-content-center gap-2" data-modal-wa="${p.id}" style="height: 48px; border-radius: 8px; font-weight: 800; background: #25D366; color: #FFF; border: none; cursor: pointer;">
-          <i class="bi bi-whatsapp fs-5"></i>
-          <span>Order on WhatsApp · ${money(p.price)}</span>
-        </button>
-        <div class="d-flex gap-2 w-100">
-          <button class="btn-add-cart-secondary flex-grow-1 d-flex align-items-center justify-content-center gap-2" data-modal-add="${p.id}" style="height: 44px; border-radius: 8px; font-weight: 700; background: #f1f5f9; color: #0f172a; border: 1.5px solid #cbd5e1; cursor: pointer;">
-            <i class="bi bi-bag"></i>
-            <span>Add to cart</span>
-          </button>
-          <button class="btn-secondary-action d-flex align-items-center justify-content-center px-3" data-modal-share="${p.id}" title="Share Product" style="height: 44px; border-radius: 8px; background: #FFF; border: 1px solid #e2e8f0; cursor: pointer;">
-            <i class="bi bi-share text-primary"></i>
-          </button>
-          <button class="btn-secondary-action d-flex align-items-center justify-content-center px-3" data-modal-view="${p.id}" title="Full Details" style="height: 44px; border-radius: 8px; background: #FFF; border: 1px solid #e2e8f0; cursor: pointer;">
-            <i class="bi bi-box-arrow-up-right"></i>
-          </button>
-        </div>
-      </div>
-      `}
-    </div>`;
-  $("productModal").setAttribute("aria-labelledby", "productModalTitle");
-  productModal.show();
-}
-
 /* ── SEARCH ─────────────────────────────────────────────── */
 function closeSearch() {
   $("searchPanel").classList.remove("open");
@@ -1099,6 +1061,25 @@ function updateActiveNav() {
   document.querySelectorAll(".drawer-link").forEach(a => a.classList.toggle("active", a.getAttribute("href") === `#${current}`));
 }
 
+function scrollToSection(targetOrId, { updateHash = true } = {}) {
+  const target = typeof targetOrId === "string"
+    ? document.getElementById(targetOrId.replace(/^#/, ""))
+    : targetOrId;
+  if (!target) return false;
+
+  const headerHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-height")) || 0;
+  const absoluteTop = target.getBoundingClientRect().top + window.scrollY;
+  const centeredTop = absoluteTop - (window.innerHeight - target.offsetHeight) / 2;
+  const headerSafeTop = Math.max(0, absoluteTop - headerHeight);
+  const top = Math.max(0, Math.min(centeredTop, headerSafeTop));
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  window.scrollTo({ top, behavior: reducedMotion ? "auto" : "smooth" });
+  if (updateHash && target.id) history.replaceState(null, "", `#${target.id}`);
+  if (target.matches("[tabindex='-1']")) target.focus({ preventScroll: true });
+  return true;
+}
+
 /* ── REVEAL OBSERVER ────────────────────────────────────── */
 function initReveal() {
   const els = document.querySelectorAll(".reveal");
@@ -1114,6 +1095,19 @@ function initReveal() {
 
 /* ── EVENTS ─────────────────────────────────────────────── */
 document.addEventListener("click", e => {
+  const anchor = e.target.closest("a[href]");
+  if (anchor) {
+    const url = new URL(anchor.href, window.location.href);
+    if (url.hash && url.origin === window.location.origin && url.pathname === window.location.pathname) {
+      const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+      if (target) {
+        e.preventDefault();
+        scrollToSection(target);
+        return;
+      }
+    }
+  }
+
   const add = e.target.closest("[data-add]");
   if (add) { addToCart(add.dataset.add); return; }
 
@@ -1205,7 +1199,7 @@ document.addEventListener("click", e => {
     state.filter = "kit";
     renderProducts();
     const shop = document.getElementById("shop");
-    if (shop) shop.scrollIntoView({ behavior: "smooth" });
+    scrollToSection(shop);
     return;
   }
 
@@ -1258,7 +1252,7 @@ if (filterPills) {
 $("sortSelect")?.addEventListener("change", e => { state.sort = e.target.value; renderProducts(); });
 $("cartToggle")?.addEventListener("click", () => cartDrawer.show());
 $("checkoutBtn")?.addEventListener("click", openCheckout);
-$("checkoutForm")?.addEventListener("submit", placeOrder);
+$("checkoutForm")?.addEventListener("submit", placeEnquiry);
 document.addEventListener("click", function(e) {
   const bundleBtn = e.target.closest(".bundleBtn");
   if (bundleBtn) {
@@ -1386,21 +1380,42 @@ function makeStudioEnv(renderer) {
   return env;
 }
 
+const MODEL_CACHE_NAME = "neatify-assets-cache";
+const MODEL_CACHE_KEY = "neatify-3d-model-cache-v1";
+
+function hasCachedModelHint(url) {
+  try {
+    const hint = JSON.parse(localStorage.getItem(MODEL_CACHE_KEY) || "null");
+    return hint?.url === url && hint?.version === 1;
+  } catch {
+    return false;
+  }
+}
+
+function markModelCached(url) {
+  try {
+    localStorage.setItem(MODEL_CACHE_KEY, JSON.stringify({ url, version: 1, cachedAt: Date.now() }));
+  } catch {
+    // CacheStorage still provides persistence when localStorage is unavailable.
+  }
+}
+
 async function getCachedGLB(url) {
   try {
-    const cache = await caches.open("neatify-assets-cache");
+    if (!("caches" in window)) return url;
+    const cache = await caches.open(MODEL_CACHE_NAME);
     let cachedResponse = await cache.match(url);
     if (!cachedResponse) {
-      console.log("GLB not in cache, fetching and caching...");
-      await cache.add(url);
-      cachedResponse = await cache.match(url);
-    } else {
-      console.log("GLB served from browser CacheStorage!");
+      const response = await fetch(url, { cache: "reload" });
+      if (!response.ok) throw new Error(`3D model request failed: ${response.status}`);
+      await cache.put(url, response.clone());
+      cachedResponse = response;
     }
+    markModelCached(url);
     const blob = await cachedResponse.blob();
     return URL.createObjectURL(blob);
   } catch (err) {
-    console.error("Cache API failed, returning original URL", err);
+    console.warn("3D cache unavailable, using the network asset", err);
     return url;
   }
 }
@@ -1480,6 +1495,8 @@ function initHero3D() {
     gltfLoader.setDRACOLoader(dracoLoader);
     const tryLoad = async (attempt) => {
       let modelUrl = "assets/3dimage.glb";
+        const cached = hasCachedModelHint(modelUrl);
+        if (loaderTxt && cached) loaderTxt.textContent = "Loading cached 3D model...";
       try {
         modelUrl = await getCachedGLB("assets/3dimage.glb");
       } catch (e) {
@@ -1726,7 +1743,7 @@ function initHero3D() {
 
     /* ── UI sync ── */
     if (cueEl) cueEl.classList.toggle("hide", p > 0.02);
-    setStage(p < 0.35 ? 0 : p < 0.7 ? 1 : 2);
+    setStage(p < 0.5 ? 0 : 1);
 
     renderer.render(scene, camera);
   }
@@ -1867,7 +1884,7 @@ async function boot() {
       setTimeout(() => {
         try {
           const target = document.querySelector(window.location.hash);
-          if (target) target.scrollIntoView({ behavior: "smooth" });
+          scrollToSection(target, { updateHash: false });
         } catch {}
       }, 200);
     }
@@ -1890,5 +1907,5 @@ async function boot() {
         cleanup();
       }
     };
-  }, []);
+  }, [navigate]);
 }

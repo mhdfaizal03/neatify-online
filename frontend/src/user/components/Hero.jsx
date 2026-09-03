@@ -22,7 +22,6 @@ export default function Hero() {
     <section className="hero" id="heroSection">
       <div className="hero-scroll-space">
         <div className="snap-mark" aria-hidden="true"></div>
-        <div className="snap-mark snap-mark-2" aria-hidden="true"></div>
         <div className="hero-sticky">
           <div className="hero-orb orb-blue"></div>
           <div className="hero-orb orb-lime"></div>
@@ -53,16 +52,6 @@ export default function Hero() {
                   </div>
                 </div>
 
-                <div className="hero-stage stage-center" data-stage="2">
-                  <div className="stage-label"><span className="label-line"></span><span>03 / MIRROR GLOSS</span></div>
-                  <h2 className="hero-h1">Finish with<br /><em>mirror gloss.</em></h2>
-                  <p className="hero-sub">Dry with premium microfiber, step back and admire. Your entire routine, one shelf.</p>
-                  <div className="hero-actions">
-                    <a className="btn-hero-primary" href="#shop">Build your routine <i className="bi bi-stars"></i></a>
-                    <button className="btn-hero-ghost" id="heroKitBtn">Add weekend kit</button>
-                  </div>
-                </div>
-
               </div>
             </div>
           </div>
@@ -74,7 +63,6 @@ export default function Hero() {
           <nav className="hero-rail" aria-label="Hero stages">
             <span className="rail-dash active" data-rail="0"></span>
             <span className="rail-dash" data-rail="1"></span>
-            <span className="rail-dash" data-rail="2"></span>
           </nav>
 
           <div className="model-loader" id="modelLoader" role="status">
@@ -88,7 +76,7 @@ export default function Hero() {
           </div>
         </div>
       </div>
-      <div id="heroStatus" className="sr-only" aria-live="polite" aria-atomic="true">Stage 1 of 3</div>
+      <div id="heroStatus" className="sr-only" aria-live="polite" aria-atomic="true">Stage 1 of 2</div>
     </section>
 
     {/* Seamless full-width benefits ticker strip right under the hero */}
