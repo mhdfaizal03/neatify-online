@@ -24,12 +24,6 @@ export default function AdminLogin() {
       <div className="login-bg-grid" aria-hidden="true"></div>
 
       <div className="login-card">
-        {/* Top security tag */}
-        <div className="login-portal-tag">
-          <span className="portal-status-dot"></span>
-          <span>ADMINISTRATIVE PORTAL</span>
-        </div>
-
         {/* Brand identity */}
         <div className="login-brand">
           <div className="login-mark-wrap">

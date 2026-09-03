@@ -25,14 +25,22 @@ export default function AdminKits() {
             </div>
 
             <div className="table-wrap animate-fade">
-              <table className="data-table">
+              <table className="data-table kits-data-table">
+                <colgroup>
+                  <col style={{ width: '28%' }} />
+                  <col style={{ width: '34%' }} />
+                  <col style={{ width: '12%' }} />
+                  <col style={{ width: '10%' }} />
+                  <col style={{ width: '8%' }} />
+                  <col style={{ width: '8%' }} />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>Kit Bundle</th>
                     <th>Highlights / Inclusions</th>
-                    <th>Price</th>
-                    <th>Badge</th>
-                    <th>Status</th>
+                    <th style={{ textAlign: 'right' }}>Price</th>
+                    <th style={{ textAlign: 'center' }}>Badge</th>
+                    <th style={{ textAlign: 'center' }}>Status</th>
                     <th style={{ textAlign: 'right' }}>Actions</th>
                   </tr>
                 </thead>

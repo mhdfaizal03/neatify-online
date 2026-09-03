@@ -304,33 +304,56 @@ export function useAdminLogic() {
     }
 
     tbody.innerHTML = list.map(p => {
-      const pointsList = (p.points || []).slice(0, 3).map(pt => `<span class="kit-item-chip"><i class="bi bi-check2"></i> ${esc(pt)}</span>`).join("");
+      const pointsList = (p.points || []).slice(0, 3).map(pt => `
+        <div class="kit-item-chip">
+          <i class="bi bi-check2"></i>
+          <span class="kit-chip-text">${esc(pt)}</span>
+        </div>
+      `).join("");
       const remainingCount = (p.points || []).length > 3 ? `<span class="kit-item-more">+${(p.points || []).length - 3} more</span>` : "";
       const hasSecondary = p.images && p.images.length > 1;
+
+      const thumbContent = p.image ? `
+        <img src="${getAdminImgUrl(p.image, p.name, p.type)}" class="product-thumb" alt="${esc(p.name)}" onerror="this.outerHTML='<div class=\\'product-thumb kit-thumb-placeholder\\'><i class=\\'bi bi-box-seam\\'></i></div>';" />
+      ` : `
+        <div class="product-thumb kit-thumb-placeholder"><i class="bi bi-gift"></i></div>
+      `;
 
       return `
       <tr>
         <td>
           <div class="product-cell">
-            <div style="position: relative; display: inline-flex; margin-right: 8px;">
-              <img src="${getAdminImgUrl(p.image, p.name, p.type)}" class="product-thumb" alt="${esc(p.name)}" onerror="this.src='${getProductPlaceholderSvg(p.name, p.type)}'" />
-              ${hasSecondary ? `<img src="${getAdminImgUrl(p.images[1], 'Bonus Item', 'Kit Extra')}" class="product-thumb" style="width: 26px; height: 26px; position: absolute; bottom: -4px; right: -8px; border: 2px solid #fff; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);" alt="Offer" title="Offer Item Included" onerror="this.src='${getProductPlaceholderSvg('Bonus Item', 'Kit Extra')}'" />` : ''}
+            <div class="kit-thumb-wrapper">
+              ${thumbContent}
+              ${hasSecondary ? `<img src="${getAdminImgUrl(p.images[1], 'Bonus Item', 'Kit Extra')}" class="product-thumb-secondary" alt="Offer" title="Offer Item Included" />` : ''}
             </div>
-            <div>
-              <div class="product-name">${esc(p.name)} ${hasSecondary ? '<span class="badge-pill" style="font-size: 0.68rem; padding: 2px 6px; margin-left: 4px;">2 IMAGES / OFFER</span>' : ''}</div>
-              <div class="product-subtext" style="font-size: 0.8rem; color: var(--text-muted); max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${esc(p.description || '')}</div>
+            <div class="product-info-wrap">
+              <div class="product-name">
+                <span>${esc(p.name)}</span>
+                ${hasSecondary ? '<span class="badge-pill mini-badge">2 Items</span>' : ''}
+              </div>
+              <div class="product-subtext">${esc(p.description || '')}</div>
             </div>
           </div>
         </td>
         <td>
           <div class="kit-chips-wrap">
-            ${pointsList || '<span style="color: var(--text-muted); font-size: 0.85rem;">No highlight points</span>'}
+            ${pointsList || '<span style="color: var(--text-muted); font-size: 0.8rem;">No highlight points</span>'}
             ${remainingCount}
           </div>
         </td>
-        <td class="price-cell">${currency(p.price)}</td>
-        <td>${p.badge ? `<span class="badge-pill">${esc(p.badge)}</span>` : `<span style="color: var(--text-muted);">—</span>`}</td>
-        <td><span class="status-badge ${p.active !== false ? 'active' : 'inactive'}">${p.active !== false ? 'Active' : 'Inactive'}</span></td>
+        <td class="price-cell" style="text-align: right;">
+          <strong>${currency(p.price)}</strong>
+        </td>
+        <td style="text-align: center;">
+          ${p.badge ? `<span class="badge-pill">${esc(p.badge)}</span>` : `<span style="color: var(--text-muted);">—</span>`}
+        </td>
+        <td style="text-align: center;">
+          <span class="status-badge ${p.active !== false ? 'active' : 'inactive'}">
+            <span class="status-dot"></span>
+            ${p.active !== false ? 'Active' : 'Inactive'}
+          </span>
+        </td>
         <td style="text-align: right;">
           <div class="row-actions" style="justify-content: flex-end;">
             <button class="icon-action" onclick="window.__admin.editKit(${p.id})" title="Edit Kit"><i class="bi bi-pencil"></i></button>

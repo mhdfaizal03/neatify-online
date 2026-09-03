@@ -283,34 +283,6 @@ label > textarea {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Security portal badge */
-.login-portal-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  background: rgba(200, 245, 60, 0.08);
-  border: 1px solid rgba(200, 245, 60, 0.22);
-  color: var(--lime);
-  font-size: 0.64rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: 999px;
-  margin-bottom: 1.5rem;
-}
-.portal-status-dot {
-  width: 6px;
-  height: 6px;
-  background: var(--lime);
-  border-radius: 50%;
-  box-shadow: 0 0 8px var(--lime);
-  animation: dot-pulse 2s infinite ease-in-out;
-}
-@keyframes dot-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.85); }
-}
 
 /* Brand header */
 .login-brand {
@@ -1690,50 +1662,130 @@ label > textarea {
    KIT MANAGEMENT UI STYLES
    ═══════════════════════════════════════════════ */
 .badge-pill {
-  display: inline-block;
-  padding: 3px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 8px;
   background: rgba(200, 245, 60, 0.15);
   color: #557700;
-  border: 1px solid rgba(200, 245, 60, 0.4);
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
+  border: 1px solid rgba(200, 245, 60, 0.35);
+  border-radius: var(--radius-sm);
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.kits-data-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.kits-data-table th,
+.kits-data-table td {
+  vertical-align: middle;
+  padding: 12px 14px;
+}
+
+.kit-thumb-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.kit-thumb-placeholder {
+  display: grid;
+  place-items: center;
+  background: var(--bg-alt);
+  color: var(--text-muted);
+  font-size: 1.15rem;
+  border: 1px solid var(--border);
+}
+
+.product-thumb-secondary {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  object-fit: cover;
+  position: absolute;
+  bottom: -4px;
+  right: -6px;
+  border: 2px solid var(--bg-surface);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.product-info-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.product-info-wrap .product-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-info-wrap .product-subtext {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
 }
 
 .kit-chips-wrap {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  max-width: 320px;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 100%;
 }
 
 .kit-item-chip {
   display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  align-items: flex-start;
+  gap: 6px;
   background: var(--bg-alt);
   border: 1px solid var(--border);
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 6px;
-  font-size: 0.78rem;
-  color: var(--text-main);
-  white-space: nowrap;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: var(--text);
+  white-space: normal;
+  word-break: break-word;
 }
 
 .kit-item-chip i {
-  color: var(--success);
-  font-size: 0.85rem;
+  color: #10b981;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.kit-chip-text {
+  color: var(--text);
+  font-weight: 500;
 }
 
 .kit-item-more {
   display: inline-block;
+  align-self: flex-start;
   background: var(--bg-alt);
   border: 1px solid var(--border);
   padding: 2px 6px;
-  border-radius: 6px;
-  font-size: 0.75rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
   color: var(--text-muted);
 }
 

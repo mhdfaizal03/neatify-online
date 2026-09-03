@@ -4,12 +4,21 @@ export default function Header() {
   return (
     <>
       <div className="ann-pop" id="annPop" role="dialog" aria-live="polite" aria-label="Store announcement">
-        <span className="ann-dot"></span>
+        <div className="ann-icon-bubble">
+          <span className="ann-radar-ring"></span>
+          <i className="bi bi-stars"></i>
+        </div>
         <div className="ann-pop-copy">
-          <strong id="announceMain">Premium vehicle care, made simple.</strong>
+          <div className="ann-pop-title-row">
+            <strong id="announceMain">Premium vehicle care, made simple.</strong>
+            <span className="ann-pill-badge">FREE DELIVERY</span>
+          </div>
           <span id="announceSub">Free shipping on orders above ₹999.</span>
         </div>
-        <button className="ann-pop-x" id="annPopClose" aria-label="Dismiss announcement"><i className="bi bi-x-lg"></i></button>
+        <button className="ann-pop-x" id="annPopClose" aria-label="Dismiss announcement" title="Dismiss">
+          <i className="bi bi-x"></i>
+        </button>
+        <div className="ann-progress-bar" aria-hidden="true"></div>
       </div>
 
 
