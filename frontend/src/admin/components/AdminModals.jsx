@@ -151,7 +151,7 @@ export default function AdminModals() {
 
   
   <div className="modal-backdrop hidden" id="orderModal" role="dialog" aria-labelledby="orderModalTitle">
-    <div className="modal-card">
+    <div className="modal-card wide">
       <div className="modal-head">
         <h3 id="orderModalTitle">Enquiry Details</h3>
         <button className="icon-btn" id="closeOrderModal" aria-label="Close modal"><i className="bi bi-x-lg"></i></button>
@@ -159,26 +159,27 @@ export default function AdminModals() {
       <form id="orderForm">
         <div className="modal-body">
           <input type="hidden" id="orderId" />
-          <div className="form-grid">
-            <label className="full">Enquiry Info
-              <div id="orderInfoDisplay" style={{ padding: '10px', background: 'var(--bg-alt)', borderRadius: '6px', fontSize: '0.9em' }}>
-                
-              </div>
-            </label>
-            <label>Status
+          <div id="orderInfoDisplay" className="order-details-inspector">
+            
+          </div>
+          <div className="form-grid" style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+            <label className="full">Update Order Status
               <select id="orderStatus">
-                <option value="pending">Pending</option>
-                <option value="processing">Processing</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="Pending">Pending (Awaiting Contact / Confirmation)</option>
+                <option value="Processing">Processing (Order Confirmed & Preparing)</option>
+                <option value="Shipped">Shipped (Out for Delivery)</option>
+                <option value="Delivered">Delivered (Successfully Completed)</option>
+                <option value="Cancelled">Cancelled</option>
               </select>
             </label>
           </div>
         </div>
         <div className="modal-actions">
-          <button type="button" className="btn-secondary" id="cancelOrderModal">Cancel</button>
-          <button type="submit" className="btn-primary">Update Status</button>
+          <button type="button" className="btn-secondary danger" id="deleteOrderBtn" style={{ marginRight: 'auto' }}>
+            <i className="bi bi-trash"></i> Delete Enquiry
+          </button>
+          <button type="button" className="btn-secondary" id="cancelOrderModal">Close</button>
+          <button type="submit" className="btn-primary">Save Status</button>
         </div>
       </form>
     </div>

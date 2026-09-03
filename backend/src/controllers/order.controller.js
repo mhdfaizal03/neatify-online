@@ -95,7 +95,10 @@ class OrderController {
         return res.status(400).json({ error: "Database not connected. Cannot perform write operations." });
       }
 
-      const { status } = req.body;
+      let { status } = req.body;
+      if (status) {
+        status = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+      }
       const order = await Order.findOneAndUpdate(
         { _id: req.params.id, isDeleted: false },
         { status },
@@ -107,6 +110,28 @@ class OrderController {
       }
 
       res.status(200).json(formatOrder(order));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteOrder(req, res, next) {
+    try {
+      if (mongoose.connection.readyState === 0) {
+        return res.status(400).json({ error: "Database not connected. Cannot perform write operations." });
+      }
+
+      const order = await Order.findOneAndUpdate(
+        { _id: req.params.id, isDeleted: false },
+        { isDeleted: true, deletedAt: new Date() },
+        { new: true }
+      );
+
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      res.status(200).json({ success: true, message: "Order deleted successfully" });
     } catch (error) {
       next(error);
     }

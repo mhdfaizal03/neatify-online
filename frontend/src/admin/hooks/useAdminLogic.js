@@ -202,9 +202,28 @@ export function useAdminLogic() {
         recentEl.innerHTML = s.recentOrders.length ? `
           <div class="table-wrap minimal">
             <table class="data-table">
-              <thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
+              <thead><tr><th>Ref ID</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
               <tbody>
-                ${s.recentOrders.map(o => `<tr><td><a href="#" onclick="window.__admin.switchView('orders'); return false;">${o.id}</a></td><td>${esc(o.customer.name || o.customer.email)}</td><td class="price-cell">${currency(o.total)}</td><td><span class="status-badge ${esc(o.status)}">${esc(o.status)}</span></td></tr>`).join("")}
+                ${s.recentOrders.map(o => {
+                  const shortId = o.id.length > 8 ? `#${o.id.slice(-6).toUpperCase()}` : `#${o.id}`;
+                  const stLower = (o.status || "pending").toLowerCase();
+                  return `
+                    <tr>
+                      <td><a href="#" onclick="window.__admin.switchView('orders'); return false;" class="enquiry-ref" style="text-decoration:none;">${shortId}</a></td>
+                      <td>
+                        <strong>${esc(o.customer?.name || "Customer")}</strong>
+                        ${o.customer?.phone ? `<div style="font-size:0.75rem; color:var(--text-muted);">${esc(o.customer.phone)}</div>` : ''}
+                      </td>
+                      <td class="price-cell"><strong>${currency(o.total)}</strong></td>
+                      <td>
+                        <span class="status-badge ${stLower}">
+                          <span class="status-dot"></span>
+                          ${esc(o.status || 'Pending')}
+                        </span>
+                      </td>
+                    </tr>
+                  `;
+                }).join("")}
               </tbody>
             </table>
           </div>` : `<div class="panel-empty">No recent enquiries</div>`;
@@ -532,28 +551,103 @@ export function useAdminLogic() {
   function renderOrdersTable() {
     const tbody = $("#ordersTable");
     const search = $("#globalSearch").value.toLowerCase().trim();
+    const statusFilter = $("#orderStatusFilter")?.value || "all";
+
     const list = state.orders
-      .filter(o => o.id.toLowerCase().includes(search) || (o.customer.name || "").toLowerCase().includes(search) || (o.customer.email || "").toLowerCase().includes(search))
+      .filter(o => {
+        const matchesSearch = o.id.toLowerCase().includes(search) ||
+          (o.customer?.name || "").toLowerCase().includes(search) ||
+          (o.customer?.phone || "").toLowerCase().includes(search) ||
+          (o.customer?.email || "").toLowerCase().includes(search) ||
+          (o.customer?.city || "").toLowerCase().includes(search) ||
+          (o.items || []).some(i => (i.name || "").toLowerCase().includes(search));
+
+        const matchesStatus = statusFilter === "all" ||
+          (o.status || "Pending").toLowerCase() === statusFilter.toLowerCase();
+
+        return matchesSearch && matchesStatus;
+      })
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     if (!list.length) {
-      tbody.innerHTML = `<tr><td colspan="6"><div class="admin-empty-state"><i class="bi bi-chat-square-text"></i><h4>No enquiries found</h4><p>There are no enquiries matching your search.</p></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7"><div class="admin-empty-state"><i class="bi bi-chat-square-text"></i><h4>No enquiries found</h4><p>There are no customer enquiries matching your filter or search.</p></div></td></tr>`;
       return;
     }
 
-    tbody.innerHTML = list.map(o => `
-      <tr>
-        <td>${esc(o.id)}</td>
-        <td>${o.items.length} item(s)</td>
-        <td class="price-cell">${currency(o.total)}</td>
-        <td><span class="status-badge ${esc(o.status)}">${esc(o.status)}</span></td>
-        <td>${formatDate(o.createdAt)}</td>
-        <td>
-          <div class="row-actions">
-            <button class="icon-action" onclick="window.__admin.editOrder('${esc(o.id)}')" title="View/Edit Enquiry"><i class="bi bi-pencil"></i></button>
-          </div>
-        </td>
-      </tr>`).join("");
+    tbody.innerHTML = list.map(o => {
+      const shortId = o.id.length > 8 ? o.id.slice(-6).toUpperCase() : o.id;
+      const cleanPhone = (o.customer?.phone || "").replace(/\D/g, "");
+      const custName = o.customer?.name || "Store Visitor";
+      const custPhone = o.customer?.phone || "";
+      const custEmail = o.customer?.email || "";
+      const custCity = o.customer?.city || o.customer?.district || "";
+      const stLower = (o.status || "pending").toLowerCase();
+      
+      const waUrl = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hi ${custName}, regarding your Neatify enquiry #${shortId}...`)}` : "";
+
+      const itemsTags = (o.items || []).map(it => `
+        <div class="order-item-tag">
+          <span class="order-item-name" title="${esc(it.name)}">${esc(it.name)}</span>
+          <span class="order-item-qty">×${it.qty || it.quantity || 1}</span>
+        </div>
+      `).join("");
+
+      return `
+        <tr>
+          <td>
+            <div class="enquiry-id-cell">
+              <span class="enquiry-ref" title="Full ID: ${esc(o.id)}">#${shortId}</span>
+              <button type="button" class="btn-copy-id" onclick="navigator.clipboard.writeText('${esc(o.id)}'); window.__admin.showSnack('Copied full ID');" title="Copy Full ID">
+                <i class="bi bi-copy"></i>
+              </button>
+            </div>
+          </td>
+          <td>
+            <div class="customer-cell">
+              <div class="customer-name">${esc(custName)}</div>
+              <div class="customer-contact">
+                ${custPhone ? `<a href="tel:${esc(custPhone)}" class="customer-phone" title="Call customer"><i class="bi bi-telephone-fill"></i> ${esc(custPhone)}</a>` : ''}
+                ${custCity ? `<span class="customer-city"><i class="bi bi-geo-alt-fill"></i> ${esc(custCity)}</span>` : ''}
+              </div>
+              ${custEmail ? `<div style="font-size:0.75rem; color:var(--text-muted);">${esc(custEmail)}</div>` : ''}
+            </div>
+          </td>
+          <td>
+            <div class="items-cell">
+              ${itemsTags || '<span style="color:var(--text-muted); font-size:0.8rem;">No items listed</span>'}
+            </div>
+          </td>
+          <td class="price-cell">
+            <div class="order-total-val">${currency(o.total)}</div>
+            <div class="order-subtext">${o.shipping ? `Incl. ₹${o.shipping} delivery` : '<span style="color:var(--success);">Free Delivery</span>'}</div>
+          </td>
+          <td>
+            <span class="status-badge ${stLower}">
+              <span class="status-dot"></span>
+              ${esc(o.status || 'Pending')}
+            </span>
+          </td>
+          <td>
+            <div style="font-size: 0.82rem; font-weight: 500;">${formatDate(o.createdAt)}</div>
+          </td>
+          <td style="text-align: right;">
+            <div class="row-actions" style="justify-content: flex-end;">
+              ${waUrl ? `
+                <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="icon-action whatsapp" title="Chat on WhatsApp with customer">
+                  <i class="bi bi-whatsapp"></i>
+                </a>
+              ` : ''}
+              <button class="icon-action" onclick="window.__admin.editOrder('${esc(o.id)}')" title="View Enquiry Details / Change Status">
+                <i class="bi bi-eye"></i>
+              </button>
+              <button class="icon-action danger" onclick="window.__admin.deleteOrder('${esc(o.id)}')" title="Delete Enquiry">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join("");
   }
 
   /* ── VIEW LOGIC: SUBSCRIBERS ── */
@@ -740,16 +834,111 @@ export function useAdminLogic() {
       const o = state.orders.find(x => x.id === id);
       if (!o) return;
       $("#orderId").value = o.id;
-      $("#orderStatus").value = o.status || "pending";
+      $("#orderStatus").value = o.status || "Pending";
+      
+      const shortId = o.id.length > 8 ? o.id.slice(-6).toUpperCase() : o.id;
+      const cleanPhone = (o.customer?.phone || "").replace(/\D/g, "");
+      const custName = o.customer?.name || "Customer";
+      const waUrl = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hi ${custName}, regarding your Neatify enquiry #${shortId}...`)}` : "";
+
+      const addressParts = [
+        o.customer?.house,
+        o.customer?.street,
+        o.customer?.locality,
+        o.customer?.city,
+        o.customer?.district,
+        o.customer?.state,
+        o.customer?.pin ? `PIN: ${o.customer.pin}` : ""
+      ].filter(Boolean).join(", ") || o.customer?.address || "No address provided";
+
+      const stLower = (o.status || "pending").toLowerCase();
+
       $("#orderInfoDisplay").innerHTML = `
-        <strong>Customer:</strong> ${esc(o.customer?.name || o.customer?.email)}<br>
-        <strong>Email:</strong> ${esc(o.customer?.email)}<br>
-        <strong>Total:</strong> ${currency(o.total)}<br>
-        <strong>Date:</strong> ${formatDate(o.createdAt)}<br>
-        <strong>Items:</strong><br>
-        ${(o.items || []).map(i => `- ${esc(i.name)} (x${i.quantity})`).join('<br>')}
+        <div class="order-inspector-header">
+          <div class="o-ref-group">
+            <span class="o-ref-title">Enquiry Reference</span>
+            <span class="o-ref-num">#ENQ-${shortId}</span>
+            <span class="o-ref-date"><i class="bi bi-clock"></i> ${formatDate(o.createdAt)}</span>
+          </div>
+          <span class="status-badge ${stLower}">
+            <span class="status-dot"></span>
+            ${esc(o.status || 'Pending')}
+          </span>
+        </div>
+
+        <div class="order-inspector-grid">
+          <div class="inspector-card">
+            <h4><i class="bi bi-person-circle"></i> Customer Contact</h4>
+            <div class="inspector-row"><strong>Name:</strong> <span>${esc(o.customer?.name || "Store Customer")}</span></div>
+            <div class="inspector-row"><strong>Phone:</strong> <span>${o.customer?.phone ? `<a href="tel:${esc(o.customer.phone)}">${esc(o.customer.phone)}</a>` : '—'}</span></div>
+            <div class="inspector-row"><strong>Email:</strong> <span>${o.customer?.email ? `<a href="mailto:${esc(o.customer.email)}">${esc(o.customer.email)}</a>` : '—'}</span></div>
+            <div class="inspector-row"><strong>Enquiry Source:</strong> <span class="badge-pill">${esc(o.customer?.enquiryType || o.enquiryType || "Storefront WhatsApp")}</span></div>
+            ${waUrl ? `
+              <div style="margin-top: 12px;">
+                <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-whatsapp-chat">
+                  <i class="bi bi-whatsapp"></i> Chat on WhatsApp
+                </a>
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="inspector-card">
+            <h4><i class="bi bi-geo-alt"></i> Delivery & Address</h4>
+            <p class="delivery-address-text">${esc(addressParts)}</p>
+            ${o.customer?.landmark ? `<div class="inspector-row"><strong>Landmark:</strong> <span>${esc(o.customer.landmark)}</span></div>` : ''}
+            ${o.customer?.instructions ? `<div class="inspector-row"><strong>Instructions:</strong> <span>${esc(o.customer.instructions)}</span></div>` : ''}
+            ${o.customer?.notes ? `<div class="inspector-row"><strong>Customer Notes:</strong> <span>${esc(o.customer.notes)}</span></div>` : ''}
+          </div>
+        </div>
+
+        <div class="inspector-card" style="margin-top: 14px;">
+          <h4><i class="bi bi-bag-check"></i> Enquired Items & Pricing</h4>
+          <div class="order-items-table-wrap">
+            <table class="order-items-mini-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th style="text-align:center;">Qty</th>
+                  <th style="text-align:right;">Unit Price</th>
+                  <th style="text-align:right;">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${(o.items || []).map(it => {
+                  const qty = it.qty || it.quantity || 1;
+                  const itemPrice = it.price || 0;
+                  return `
+                    <tr>
+                      <td><strong>${esc(it.name)}</strong></td>
+                      <td style="text-align:center;"><span class="item-qty-badge">×${qty}</span></td>
+                      <td style="text-align:right;">${currency(itemPrice)}</td>
+                      <td style="text-align:right;"><strong>${currency(itemPrice * qty)}</strong></td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div class="order-pricing-summary">
+            <div class="pricing-row"><span>Shipping / Delivery:</span> <span>${o.shipping ? currency(o.shipping) : '<span style="color:var(--success);">FREE</span>'}</span></div>
+            <div class="pricing-row grand-total"><span>Estimated Total:</span> <span>${currency(o.total)}</span></div>
+          </div>
+        </div>
       `;
       $("#orderModal").classList.remove("hidden");
+    },
+    deleteOrder: async (id) => {
+      if (!confirm("Are you sure you want to delete this enquiry record?")) return;
+      try {
+        await api(`/api/orders/${id}`, { method: "DELETE" });
+        showSnack("Enquiry deleted successfully");
+        if ($("#orderModal") && !$("#orderModal").classList.contains("hidden")) {
+          $("#orderModal").classList.add("hidden");
+        }
+        loadOrders();
+      } catch (err) {
+        showSnack(err.message || "Failed to delete enquiry", "error");
+      }
     },
     editProduct: (id) => {
       const p = state.allProducts.find(x => x.id === id);
@@ -901,6 +1090,13 @@ export function useAdminLogic() {
         $("#orderModal").classList.add("hidden");
         loadOrders();
       } catch { showSnack("Update failed", "error"); }
+    });
+
+    $("#refreshOrders")?.addEventListener("click", loadOrders);
+    $("#orderStatusFilter")?.addEventListener("change", renderOrdersTable);
+    $("#deleteOrderBtn")?.addEventListener("click", () => {
+      const id = $("#orderId").value;
+      if (id) window.__admin.deleteOrder(id);
     });
 
     $("#pickImageBtn").addEventListener("click", () => {
